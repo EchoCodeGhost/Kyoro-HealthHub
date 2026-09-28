@@ -1,0 +1,104 @@
+# pipeline-architecture Specification
+
+## Purpose
+Documents the fixed pipeline order (imports → `import_all.py` →
+`compute_all.py` → `analyse_all.py`) and why each stage depends on the
+previous one, so contributors understand why running compute before
+import — or analysis before compute — silently produces empty output
+instead of a visible error.
+## Requirements
+### Requirement: Three-stage pipeline
+The system SHALL process raw data in three strictly separated,
+sequential stages: import (`imports/` → `import_all.py`), compute
+(`compute_all.py`), and analysis (`analyse_all.py`). Each stage SHALL
+only read data from the preceding stage(s), never the other way around.
+
+#### Scenario: Order followed
+- **WHEN** a user runs `import_all.py`, then `compute_all.py`, then
+  `analyse_all.py`, in that order
+- **THEN** `analyse_all.py` produces complete results based on the
+  previously computed derived tables
+
+#### Scenario: Compute skipped before import
+- **WHEN** a user runs `compute_all.py` without having run
+  `import_all.py` first for new raw data
+- **THEN** the compute scripts only compute based on the already-present
+  (older) raw data — new raw data is not included, but there is no error
+
+#### Scenario: Analysis skipped before compute
+- **WHEN** a user runs `analyse_all.py` without `compute_all.py` having
+  run again since the last `import_all.py` run
+- **THEN** the analysis scripts read from stale or empty derived tables
+  and thereby produce incomplete or empty output **without an error
+  message**
+
+### Requirement: Fixed compute dependency order
+`compute_all.py` SHALL run its compute scripts in a fixed, documented
+order that follows the table dependencies between the scripts (e.g.
+scripts that produce `ppi_raw` run before scripts that read `ppi_raw`).
+The authoritative source for this order SHALL be the `@method` section
+in the header comment of `scripts/compute_all.py` — this spec
+deliberately does not duplicate the list, to avoid drift as new compute
+scripts are added.
+
+#### Scenario: New compute script with a dependency
+- **WHEN** a new compute script reads a table written by another compute
+  script
+- **THEN** the new script MUST be placed in `compute_all.py` after the
+  script that produces the required table, and the dependency MUST be
+  added to the `@method` header comment of `compute_all.py`
+
+#### Scenario: Error in a compute script
+- **WHEN** an individual compute script within `compute_all.py` raises
+  an error
+- **THEN** `compute_all.py` logs the error and continues running the
+  remaining scripts instead of aborting
+
+### Requirement: Silent empty results as known behavior
+Analysis scripts SHALL NOT emit a warning when the derived tables they
+read from are empty or stale — this behavior is known and MUST be
+explicitly documented for contributors, so they don't mistake it for a
+bug.
+
+#### Scenario: Contributor encounters empty analysis output
+- **WHEN** a contributor runs an analysis script against a fresh DB
+  without a prior `compute_all.py` run
+- **THEN** documented knowledge (this spec, CLAUDE.md) should explain
+  that `compute_all.py` must run first, instead of suspecting a bug in
+  the analysis script
+
+### Requirement: Chain of custody for multi-step, expensive pipeline artifacts
+Pipelines with multiple consecutive, costly or long-running steps
+(especially multi-model/multi-round LLM orchestration such as in
+`analyse_synthesis.py`) SHALL immediately persist every successfully
+completed intermediate result as its own immutable file — not just as
+transient in-memory state. After the overall run completes successfully,
+this intermediate state SHALL be archived (renamed into a permanent
+folder), not deleted, even if its content is already fully contained in
+the final result.
+
+A single failed or incomplete step (including a model-caused
+`finish_reason=length` truncation, not only a Python exception) SHALL be
+treated as an error, not silently as success — otherwise an incomplete
+result gets saved as final by mistake and the intermediate state gets
+cleaned up prematurely.
+
+#### Scenario: Crash in the middle of a multi-round process
+- **WHEN** a process crashes or is aborted after several expensive API
+  calls have already completed successfully
+- **THEN** a re-run with an identical input basis MUST resume at the
+  still-missing steps, instead of repeating all already-paid-for/computed
+  steps
+
+#### Scenario: Response truncated by the model
+- **WHEN** an LLM call returns `finish_reason=length` (output cut off by
+  `max_tokens`, not a Python error)
+- **THEN** the calling script SHALL treat this as an error, SHALL NOT
+  clean up the intermediate state, and SHALL allow a retry/resume
+
+#### Scenario: Successful overall completion
+- **WHEN** all sub-steps have completed successfully and been merged
+  into the final result
+- **THEN** the individual intermediate-result files SHALL be archived
+  into a permanent folder tied to the final result (not deleted), so
+  every individual response stays traceable

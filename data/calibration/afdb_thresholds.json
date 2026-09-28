@@ -1,0 +1,38 @@
+{
+  "_comment": "AFib Level-1 Schwellenwerte, kalibriert gegen die oeffentliche MIT-BIH Atrial Fibrillation Database (AFDB) — s. scripts/calibration/calibrate_afib_thresholds.py. Nicht personenbezogen. 'threshold': Metrik-Grenzwert, ab dem ein Fenster als AFib-verdaechtig gilt. 'higher_is_afib': true = Werte OBERHALB des Schwellenwerts sprechen fuer AFib. 'auc': Area-under-Curve der ROC-Kurve auf AFDB (0.5=Zufall, 1.0=perfekte Trennung) — misst, wie gut die Metrik AFib von Sinusrhythmus unterscheidet. 'best_f1': bester F1-Score (Harmonisches Mittel aus Praezision/Recall) am gewaehlten Schwellenwert.",
+  "poincare_ratio": {
+    "description": "Poincare-Plot SD1/SD2-Verhaeltnis: Streuungsverhaeltnis aufeinanderfolgender RR-Intervalle (Kurzzeit- vs. Langzeit-Variabilitaet). AFib erzeugt eine rundere, weniger elliptische Punktwolke -> Verhaeltnis naeher an 1.0.",
+    "threshold": 0.7402,
+    "higher_is_afib": true,
+    "auc": 0.5373,
+    "best_f1": 0.6788
+  },
+  "sampen": {
+    "description": "Sample Entropy: Mass fuer Unregelmaessigkeit/Unvorhersehbarkeit der RR-Serie. AFib erhoeht die Entropie gegenueber regelmaessigem Sinusrhythmus.",
+    "threshold": 1.5873,
+    "higher_is_afib": true,
+    "auc": 0.8532,
+    "best_f1": 0.7928
+  },
+  "turning_pt_ratio": {
+    "description": "Turning Point Ratio: Anteil der RR-Intervalle, die einen lokalen Richtungswechsel (Extremum) markieren. AFib erzeugt mehr Richtungswechsel als Sinusrhythmus. Staerkster Einzelklassifikator in dieser Kalibrierung (AUC 0.88).",
+    "threshold": 0.5743,
+    "higher_is_afib": true,
+    "auc": 0.8824,
+    "best_f1": 0.8163
+  },
+  "cv_drr": {
+    "description": "Variationskoeffizient (CV) der Delta-RR-Serie (Differenzen aufeinanderfolgender RR-Intervalle), nach Tateno & Glass 2001. Schwaechster Einzelklassifikator hier (AUC 0.29, schlechter als Zufall bei dieser Schwellenrichtung) — nur gespeichert, nicht in die Konsens-Abstimmung einbezogen (s. import_ecg_logger.py).",
+    "threshold": 0.6722,
+    "higher_is_afib": true,
+    "auc": 0.2877,
+    "best_f1": 0.6008
+  },
+  "cv_rr": {
+    "description": "Variationskoeffizient (CV) der RR-Serie selbst (Standardabweichung/Mittelwert). Hohe Variabilitaet spricht fuer AFib. Zweitstaerkster Einzelklassifikator (AUC 0.92).",
+    "threshold": 0.1476,
+    "higher_is_afib": true,
+    "auc": 0.916,
+    "best_f1": 0.8344
+  }
+}

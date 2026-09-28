@@ -1,0 +1,18 @@
+datum,parameter,kategorie,wert,einheit,ref_min,ref_max,status,kommentar
+# Aniva Health — Biomarker-Export-Template
+# Exportiere Ergebnisse aus dem Aniva-Dashboard manuell in dieses Format.
+# datum:      Messdatum (YYYY-MM-DD)
+# parameter:  Biomarker-Name exakt wie bei Aniva angezeigt
+# kategorie:  Vitamin | Hormon | Entzündung | Metabolismus | Schilddrüse | Hämatologie | Longevity | Sonstiges
+# wert:       Messwert als Text (z.B. "42.5" oder "<5")
+# einheit:    Einheit (z.B. ng/mL, nmol/L, pg/mL, Jahre, %)
+# ref_min:    Untergrenze Referenzbereich (leer = kein unterer Grenzwert)
+# ref_max:    Obergrenze Referenzbereich (leer = kein oberer Grenzwert)
+# status:     normal | low | high | critical (leer = wird automatisch berechnet)
+# kommentar:  Freitext-Anmerkungen
+#
+# Beispiele:
+# 2026-01-15,Vitamin D (25-OH),Vitamin,45.2,nmol/L,75,200,low,Aniva-Befund Jan 2026
+# 2026-01-15,hsCRP,Entzündung,0.8,mg/L,,5,normal,
+# 2026-01-15,Biologisches Alter,Longevity,34,Jahre,,,normal,Epigenetische Uhr
+# 2026-01-15,Testosteron,Hormon,12.4,nmol/L,8.6,29,,

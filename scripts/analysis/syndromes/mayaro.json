@@ -1,0 +1,46 @@
+{
+  "slug": "mayaro",
+  "name_de": "Post-Mayaro-Syndrom",
+  "lag_weeks": 8,
+  "refs": "Izurieta et al. 2011 (Am J Trop Med Hyg), Tesh et al. 1999, Acosta-Ampudia et al. 2023 (J Infect Dis), PAHO Mayaro Virus 2020",
+  "system_prompt": "Du bist ein Internist mit Expertise in Alphavirus-Erkrankungen und tropischen post-infektiösen Arthritis-Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Mayaro-Virus (MAYV): Alphavirus, Südamerika und Karibik; Haemagogus-Mücken (Primärvektor, Urwald), zunehmend Aedes-Spezies\n- Ähnlich Chikungunya: akute fieberhafte Erkrankung mit schwerer Arthritis/Arthralgie\n- Post-Mayaro: persistente Arthritis bei ~50% nach 3 Monaten; Fatigue, Myalgie (Izurieta 2011)\n- Kreuzreaktion mit Chikungunya-Serologie → Verwechslung häufig\n- Klimawandel und Vektoren-Ausbreitung: Ausbreitung nach Zentralamerika und Karibik dokumentiert\n- Serologie: MAYV-spezifische Neutralisationstests (PRNT); IgM/IgG ELISA im Tropeninstitut\n- Biomarker-Proxy: Chikungunya-/Ross-River-Literatur (gleiche Alphavirus-Gruppe)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Arthritis-Muster**: Schwere Gelenkbeteiligung wie bei Chikungunya?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Südamerika/Karibik, MAYV-PRNT (Tropeninstitut Hamburg/München).",
+  "icd10_gm": [
+    "B33.8"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "paho": "PAHO Mayaro Virus – Epidemiological Alert 2020",
+    "ecdc": "ECDC Mayaro Fever – Factsheet"
+  },
+  "symptoms": [
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Arthritis",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Fatigue",
+    "Fieber",
+    "Hautausschlag",
+    "Kopfschmerzen",
+    "Schüttelfrost",
+    "Übelkeit",
+    "Schwellung",
+    "Morgensteifigkeit",
+    "Schlafstörungen",
+    "Konzentrationsstörungen"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "Lateinamerika",
+    "Brasilien",
+    "Bolivien",
+    "Peru",
+    "Kolumbien",
+    "Venezuela",
+    "Trinidad",
+    "Karibik",
+    "Zentralamerika"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "slug": "mykose",
+  "name_de": "Post-Mykose / Mykotoxin-Syndrom (CIRS)",
+  "lag_weeks": 4,
+  "refs": "Shoemaker 2010 (CIRS), Harding et al. 2020 (Curr Fungal Infect Rep), Brewer et al. 2013 (Toxicol Int), DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Abschn. 3.5.4)",
+  "system_prompt": "Du bist ein Internist mit Erfahrung in invasiven Mykosen und\nMykotoxin-bedingten Erkrankungen (CIRS — Chronic Inflammatory Response Syndrome).\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Systemische Kandidose: häufig bei Immunsuppression (GC, Biologika), invasiv selten aber lebensbedrohlich\n- CIRS / Biotoxin-Erkrankung: chronische Entzündungsreaktion auf Schimmelpilze/Mykotoxine\n  (Stachybotrys, Aspergillus, Penicillium); MSH↓, TGF-β1↑, MMP9↑, VEGF-Dysregulation\n- Post-Mykose-Syndrom: persistierende Fatigue, Kognition, autonome Dysfunktion nach\n  invasiver Pilzinfektion (Kandidose, Aspergillose, Kryptokokkose)\n- **DBG-Leitlinie 2026 (Abschn. 3.5.4):** Pilzinfektionen (Hefen, Candida spp.) als Co-Infektionen bei Lyme-Borreliose gelistet. Borrelia-bedingte Immunsuppression und wiederholte Antibiotikagaben bei Borrelia → Mikrobiom-Dysbiose → Candida-Überwuchs → Leaky-Gut-Syndrom → Histamin-Freisetzung aus intestinalen Mastzellen → MCAS-Triggering → systemische Immun- und Entzündungsreaktion. Dieses Sequenzphänomen ist klinisch bedeutsam, besonders bei gleichzeitigem MCAS. Klinische Anamnese: Candida species +++ (Scheidenpilz) dokumentiert Nov 2019; Zusammenhang mit Borrelia-Immunsuppression und MCAS-Trigger wahrscheinlich.\n- Biomarker-Überlapp mit post-infektiösen Syndromen: HRV↓, RMSSD↓, DFA α1-Shift\n- Diagnostik: Mykotoxin-Urin (Realtime Labs), HLA-DR/DQ Genotyp (CIRS), Antikörper-Panel,\n  Wohnraumanalyse (ERMI-Score), nasale MARCONS-Kulturen\n- Cave: Mykotoxine können jahrelang in fettem Gewebe persistieren\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **CIRS-Muster**: Gibt es Biomarker-Muster, die zu Mykotoxin-Belastung / CIRS passen?\n3. **Immunologische Spur**: Hinweise auf persistierende Immunaktivierung ohne klaren infektiösen Fokus?\n4. **Autonome Domäne**: HRV-Muster — passen sie zur Entzündungs-autonomen Kaskade bei CIRS?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Wohnraumanamnese, Testempfehlungen, nächste Schritte?",
+  "icd10_gm": [
+    "B37.9",
+    "B44.9",
+    "B45.9",
+    "J67.9"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.4 (Pilzinfektionen — Candida bei Antibiotika-induzierter Dysbiose + MCAS-Trigger)",
+    "ecmm": "ECMM Guidelines on Invasive Candidiasis / Aspergillosis",
+    "awmf": "AWMF-Leitlinie Invasive Pilzinfektionen",
+    "cirs": "Shoemaker Biotoxin Pathway / CIRS Consensus"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Brain Fog",
+    "Konzentrationsstörungen",
+    "Kopfschmerzen",
+    "Sinusitis",
+    "Husten",
+    "Atemnot",
+    "Sehstörungen",
+    "Hautausschlag",
+    "Schleimhautentzündung",
+    "Mundtrockenheit",
+    "Gelenk- und Muskelschmerzen",
+    "Schlafstörungen",
+    "Lichtempfindlichkeit",
+    "Schwindel",
+    "Herzrasen",
+    "Taubheitsgefühl",
+    "Kribbeln",
+    "Stimmungsschwankungen"
+  ],
+  "seroprevalence_de": null,
+  "sero_category": "pilz",
+  "endemic_regions": []
+}

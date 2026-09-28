@@ -1,0 +1,61 @@
+{
+  "slug": "leptospirose",
+  "name_de": "Post-Leptospirose-Syndrom",
+  "lag_weeks": 8,
+  "refs": "Bharti et al. 2003 (Lancet Infect Dis), Griffith et al. 2006 (Clin Infect Dis), Tubiana et al. 2013 (PLoS Negl Trop Dis), RKI Leptospirose 2024, WHO Leptospirosis 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in Zoonosen und post-infektiöser Nieren- und Lebererkrankung.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Leptospirose: Spirochäten (Leptospira spp.); Übertragung via Nagerkontakt, Süßwasser, feuchte Erde\n- Schwere Form: Weil-Krankheit (Ikterus, Nierenversagen, Hämorrhagien)\n- Post-Leptospirose: Tubiana 2013 dokumentiert persistente Fatigue, Myalgie, kognitive Störungen und Uveitis als Spätfolgen\n- Uveitis post-Leptospirose: bei ~10%, bis Jahre nach Akutinfektion\n- Renale Beteiligung: Nierenfunktionsstörung, persistierende Proteinurie möglich\n- Exposition: Überschwemmungsgebiete, Kanufahren/Schwimmen in Flüssen, Wald- und Feldarbeit, Nager\n- In DE endemisch: v.a. Bayern, Baden-Württemberg, Bayern; Altmühltal, Fränkische Alb, Regentäler\n- Serologie: MAT (Mikroskopische Agglutinationstests, Goldstandard), ELISA (IgM, IgG)\n- Biomarker: Kreatinin-Anstieg, Bilirubinerhöhung, Thrombopenie, CK-Erhöhung (Myositis)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Renale/hepatische Komponente**: Kreatinin-Trend, eGFR, Bilirubin?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Expositionsanamnese (Wasser, Nager, Feld), MAT-Serologie, Nieren- und Leberwerte.",
+  "icd10_gm": [
+    "A27.0",
+    "A27.9"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Leptospirose (§ 7 IfSG meldepflichtig)",
+    "who": "WHO Leptospirosis – Guidance 2023",
+    "idsa": "IDSA Practice Guidelines for Leptospirosis"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Augenschmerzen",
+    "Sehstörungen",
+    "Lichtempfindlichkeit",
+    "Ikterus",
+    "Rückenschmerzen",
+    "Flankenschmerzen",
+    "Schwindel",
+    "Schlafstörungen",
+    "Konzentrationsstörungen"
+  ],
+  "seroprevalence_de": 0.005,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Altmühltal-Panoramaweg (Treuchtlingen–Kelheim)",
+    "Altmühltal-Panoramaweg Teil 2 (Gunzenhausen–Treuchtlingen)",
+    "Kelheim und Kloster Weltenburg",
+    "Ramsau bei Berchtesgaden",
+    "Bayern",
+    "Baden-Württemberg",
+    "Eifel (bei Demerath)",
+    "Kroatien",
+    "Istrien",
+    "Kvarner",
+    "Slavonien",
+    "Ostslawonien / Republika Srpska",
+    "Bulgarien",
+    "tropisch",
+    "subtropisch",
+    "Südostasien",
+    "Karibik",
+    "Lateinamerika",
+    "Spanien"
+  ]
+}

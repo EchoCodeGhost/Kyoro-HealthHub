@@ -1,0 +1,62 @@
+{
+  "slug": "fsme",
+  "name_de": "Post-FSME-Syndrom (Post-TBE)",
+  "lag_weeks": 4,
+  "refs": "Kaiser 2012 (Wien Klin Wochenschr), Bogovic & Strle 2015 (World J Clin Cases), Gronwald 2023, Davis 2023, Gray et al. 2009 (Interdiscip Perspect Infect Dis, Klimawandel und Zeckenerkrankungen Europa), Medlock et al. 2013 (Parasit Vectors, Ausbreitungstreiber Ixodes ricinus Europa)",
+  "system_prompt": "Du bist ein Internist / Neurologe mit Expertise in Post-FSME-Syndrom (Post-TBE) und post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Post-TBE: persistente neurologische Symptome nach FSME (Frühsommer-Meningoenzephalitis)\n- Häufig: Fatigue, kognitive Störungen, Schlafstörungen, Kopfschmerzen, Depression\n- Neurologische Dominanz unterscheidet Post-FSME von anderen Post-Infektionssyndromen\n- Risiko-Regionen Deutschland (RKI, 185 Landkreise bundesweit, Stand Epid. Bull. 9/2026): Bayern, Baden-Württemberg, Hessen, Thüringen, Sachsen, Brandenburg, Sachsen-Anhalt, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland (je einzelne Landkreise, nicht flächendeckend)\n- KLIMAWANDEL-BEZUG: mildere Winter und eine verlängerte Zecken-Aktivitätssaison (zunehmend ganzjährig statt nur März–Oktober) sowie die Ausbreitung von Ixodes ricinus in höhere Lagen und weiter nach Norden gelten als wesentliche Treiber der jährlich wachsenden Zahl neu ausgewiesener FSME-Risikogebiete; dieselbe Klimadynamik betrifft alle über Ixodes ricinus übertragenen Erreger (s. `borreliose.json`, `babesiose.json`, `anaplasmose.json`, `tick_coinfections.json`)\n- Serologie: FSME-spezifische IgG/-IgM (Kreuzreaktion mit anderen Flaviviren beachten)\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy; neurologische Marker (NfL, GFAP) besonders relevant\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Neurologische Domänen**: Kognition, Schlaf und autonome Funktion im Vordergrund?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Differenzialdiagnostischer Hinweis**: Muster für Post-FSME vs. andere Post-Infektionssyndrome?\n5. **Trend**: Persistenz oder Erholung — was zeigt der Quartalsverlauf?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A84.1"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber FSME (§ 7 IfSG meldepflichtig)",
+    "stiko": "STIKO-Impfempfehlung FSME",
+    "awmf": "AWMF S1-Leitlinie FSME"
+  },
+  "symptoms": [
+    "Kopfschmerzen",
+    "Konzentrationsstörungen",
+    "Gedächtnisprobleme",
+    "Fatigue",
+    "Schwindel",
+    "Zittern",
+    "Tinnitus",
+    "Schlafstörungen",
+    "Depression",
+    "Reizbarkeit",
+    "Muskelschmerzen",
+    "Gangstörungen"
+  ],
+  "seroprevalence_de": 0.02,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Bayern",
+    "Baden-Württemberg",
+    "Thüringen",
+    "Hessen",
+    "Sachsen",
+    "Brandenburg",
+    "Sachsen-Anhalt",
+    "Niedersachsen",
+    "Nordrhein-Westfalen",
+    "Rheinland-Pfalz",
+    "Saarland",
+    "Schwarzwald",
+    "Österreich",
+    "Schweiz",
+    "Skandinavien",
+    "Osteuropa",
+    "Baltikum",
+    "Tschechien",
+    "Slowenien",
+    "Belgien",
+    "Bosnien-Herzegowina",
+    "Bulgarien",
+    "Italien",
+    "Kroatien",
+    "Niederlande",
+    "Polen",
+    "Schweden",
+    "Serbien"
+  ]
+}

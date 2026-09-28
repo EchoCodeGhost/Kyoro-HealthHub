@@ -1,0 +1,35 @@
+{
+  "slug": "sibo",
+  "name_de": "Post-infektiöse Dysbiose / SIBO",
+  "lag_weeks": 8,
+  "refs": "Pimentel et al. 2006 (Dig Dis Sci), Ghoshal et al. 2017 (J Neurogastroenterol), Gronwald 2023",
+  "system_prompt": "Du bist ein Internist / Gastroenterologe mit Expertise in SIBO und post-infektiöser Dysbiose.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- SIBO (Small Intestinal Bacterial Overgrowth): häufige Folge post-infektiöser Motilitätsstörung\n- Systemische Auswirkungen über Darm-Hirn-Achse: Fatigue, Brain Fog, autonome Dysfunktion\n- Verbindung zu MCAS: Mastzell-Aktivierung durch bakterielle Produkte → Histaminfreisetzung\n- Direkte Verbindung zu Giardiose, Post-COVID-Dysbiose, Post-Borrelia-Dysbiose\n- Diagnose: H2/CH4/H2S-Atemtest (Glukose oder Lactulose); Stuhl-Mikrobiom-Analyse\n- HRV-Effekte durch vagale Dysregulation (Darm-Vagus-Achse) erklärbar\n- Infektionsdatum: ggf. Datum des auslösenden GI-Infekts oder Symptombeginn verwenden\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Autonome Domäne**: HRV-Muster im Kontext Vagus-Darm-Dysregulation interpretieren\n3. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n4. **MCAS-Verbindung**: Muster die auf Mastzell-getriggerte systemische Reaktion hindeuten?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "K63.8",
+    "K59.8"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "awmf": "AWMF-Leitlinie Reizdarmsyndrom (IBS) — Post-infektiöse Form",
+    "acg": "ACG Clinical Guideline: SIBO (2020)"
+  },
+  "symptoms": [
+    "Bauchschmerzen",
+    "Blähungen",
+    "Durchfall",
+    "Verstopfung",
+    "Übelkeit",
+    "Brain Fog",
+    "Konzentrationsstörungen",
+    "Fatigue",
+    "Histaminintoleranz",
+    "Nahrungsmittelunverträglichkeit",
+    "Hautausschlag",
+    "Flush",
+    "Herzrasen",
+    "Mastzell-Symptome"
+  ],
+  "seroprevalence_de": null,
+  "sero_category": "dysbiose",
+  "endemic_regions": []
+}

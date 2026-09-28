@@ -1,0 +1,375 @@
+title: "Kyoro-HealthHub"
+description: "Persönliche Gesundheitsdaten — lokal & privat"
+
+databases:
+  kyoro_health:
+    queries:
+      hrv-letzte-90-tage:
+        title: "HRV letzte 90 Tage (Polar)"
+        sql: >
+          SELECT date, rmssd_ms, ans_status, recovery_indicator,
+                 baseline_rmssd_ms AS baseline
+          FROM polar_nightly_hrv
+          WHERE date >= date('now', '-90 days')
+            AND rmssd_ms IS NOT NULL
+          ORDER BY date
+      ruhepuls-monatstrend:
+        title: "Ruhepuls Monatstrend"
+        sql: >
+          SELECT strftime('%Y-%m', date) AS monat,
+                 ROUND(AVG(resting_hr), 1) AS rhr_avg,
+                 ROUND(MIN(resting_hr), 1) AS rhr_min,
+                 ROUND(MAX(resting_hr), 1) AS rhr_max,
+                 COUNT(*) AS n
+          FROM daily_stress
+          WHERE resting_hr > 0
+          GROUP BY monat ORDER BY monat
+      spo2-kritisch:
+        title: "SpO₂ < 90% — alle Ereignisse"
+        sql: >
+          SELECT date(ts) AS datum, time(ts) AS uhrzeit,
+                 value AS spo2_pct, metric, device_id
+          FROM measurements
+          WHERE metric = 'spo2' AND value < 90
+          ORDER BY ts DESC
+      afib-episoden:
+        title: "AFib-Episoden (alle Quellen)"
+        sql: >
+          SELECT episode_start, dauer_min, confidence, source,
+                 tpr_mean, cv_max, hr_mean, time_of_day
+          FROM arrhythmie_episoden
+          ORDER BY episode_start DESC
+      schlaf-qualitaet-30-tage:
+        title: "Schlafqualität letzte 30 Tage"
+        sql: >
+          SELECT date,
+                 ROUND(sleep_quality * 100, 1) AS qualitaet_pct,
+                 ROUND(sleep_hours, 1) AS stunden,
+                 stress_score, resting_hr
+          FROM daily_stress
+          WHERE date >= date('now', '-30 days')
+            AND sleep_hours > 0
+          ORDER BY date
+
+plugins:
+  datasette-dashboards:
+
+    hrv-erholung:
+      title: "HRV & Erholung"
+      description: "Nächtliche HRV, ANS-Status und Ruhepuls im Verlauf"
+      filters:
+        date_start:
+          name: Von
+          type: date
+          default: "2025-01-01"
+        date_end:
+          name: Bis
+          type: date
+          default: "2026-12-31"
+      layout:
+        - [rmssd-verlauf, rmssd-verlauf, rmssd-verlauf]
+        - [ruhepuls, ruhepuls, ans-status]
+        - [erholung-verteilung, erholung-verteilung, baseline-vergleich]
+      charts:
+        rmssd-verlauf:
+          title: "Nächtliche HRV (RMSSD) — Polar"
+          db: kyoro_health
+          query: >
+            SELECT date, rmssd_ms,
+                   baseline_rmssd_ms AS baseline,
+                   baseline_rmssd_ms + baseline_rmssd_sd AS baseline_hi,
+                   baseline_rmssd_ms - baseline_rmssd_sd AS baseline_lo
+            FROM polar_nightly_hrv
+            WHERE date BETWEEN :date_start AND :date_end
+              AND rmssd_ms IS NOT NULL
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: line, point: true, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: rmssd_ms, type: quantitative, title: "RMSSD (ms)", scale: {zero: false}}
+            color: {value: "#4C78A8"}
+
+        ruhepuls:
+          title: "Ruhepuls (bpm)"
+          db: kyoro_health
+          query: >
+            SELECT date, resting_hr, stress_score
+            FROM daily_stress
+            WHERE date BETWEEN :date_start AND :date_end
+              AND resting_hr IS NOT NULL AND resting_hr > 0
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: line, point: true, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: resting_hr, type: quantitative, title: "RHR (bpm)", scale: {zero: false}}
+            color: {value: "#E45756"}
+
+        ans-status:
+          title: "ANS-Status (Polar)"
+          db: kyoro_health
+          query: >
+            SELECT date, ans_status, recovery_indicator
+            FROM polar_nightly_hrv
+            WHERE date BETWEEN :date_start AND :date_end
+              AND ans_status IS NOT NULL
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: ans_status, type: quantitative, title: ANS-Status}
+              color:
+                condition: {test: "datum.ans_status < 0", value: "#E45756"}
+                value: "#54A24B"
+
+        erholung-verteilung:
+          title: "Erholungs-Indikator Verteilung"
+          db: kyoro_health
+          query: >
+            SELECT recovery_indicator, COUNT(*) AS n
+            FROM polar_nightly_hrv
+            WHERE date BETWEEN :date_start AND :date_end
+              AND recovery_indicator IS NOT NULL
+            GROUP BY recovery_indicator ORDER BY recovery_indicator
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: recovery_indicator, type: ordinal, title: "Erholungs-Indikator (1-5)"}
+              y: {field: n, type: quantitative, title: Anzahl Nächte}
+
+        baseline-vergleich:
+          title: "RMSSD vs. Baseline"
+          db: kyoro_health
+          query: >
+            SELECT date,
+                   ROUND(rmssd_ms - baseline_rmssd_ms, 1) AS delta_rmssd
+            FROM polar_nightly_hrv
+            WHERE date BETWEEN :date_start AND :date_end
+              AND rmssd_ms IS NOT NULL AND baseline_rmssd_ms IS NOT NULL
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: delta_rmssd, type: quantitative, title: "RMSSD − Baseline (ms)"}
+              color:
+                condition: {test: "datum.delta_rmssd < 0", value: "#E45756"}
+                value: "#54A24B"
+
+    schlaf:
+      title: "Schlaf"
+      description: "Schlafqualität, -dauer und Phasen aus allen Quellen"
+      filters:
+        date_start:
+          name: Von
+          type: date
+          default: "2025-01-01"
+        date_end:
+          name: Bis
+          type: date
+          default: "2026-12-31"
+      layout:
+        - [schlaf-qualitaet, schlaf-qualitaet, schlaf-qualitaet]
+        - [phasen-verteilung, phasen-verteilung, schlaf-stress]
+      charts:
+        schlaf-qualitaet:
+          title: "Schlafqualität & -dauer (Polar)"
+          db: kyoro_health
+          query: >
+            SELECT date,
+                   ROUND(sleep_quality * 100, 1) AS qualitaet_pct,
+                   ROUND(sleep_hours, 1) AS stunden
+            FROM daily_stress
+            WHERE date BETWEEN :date_start AND :date_end
+              AND sleep_hours IS NOT NULL AND sleep_hours > 0
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: qualitaet_pct, type: quantitative, title: "Qualität (%)"}
+
+        phasen-verteilung:
+          title: "Schlafphasen (Stunden je Nacht, 90 Tage)"
+          db: kyoro_health
+          query: >
+            SELECT date, stage,
+                   ROUND(SUM(duration_s) / 3600.0, 2) AS stunden
+            FROM sleep_hypnogram
+            WHERE date BETWEEN :date_start AND :date_end
+              AND stage IN ('DEEP','REM','LIGHT','WAKE')
+              AND source LIKE '%polar%'
+            GROUP BY date, stage
+            ORDER BY date, stage
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: stunden, type: quantitative, title: Stunden}
+              color:
+                field: stage
+                scale:
+                  domain: [DEEP, REM, LIGHT, WAKE]
+                  range: ["#1f77b4", "#9467bd", "#aec7e8", "#d62728"]
+
+        schlaf-stress:
+          title: "Schlafdauer vs. Stressscore"
+          db: kyoro_health
+          query: >
+            SELECT date, sleep_hours AS stunden, stress_score
+            FROM daily_stress
+            WHERE date BETWEEN :date_start AND :date_end
+              AND sleep_hours > 0 AND stress_score IS NOT NULL
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: point, tooltip: true}
+            encoding:
+              x: {field: stunden, type: quantitative, title: "Schlafdauer (h)"}
+              y: {field: stress_score, type: quantitative, title: Stress-Score}
+
+    afib:
+      title: "AFib-Evidenz"
+      description: "Täglicher AF-Evidenz-Score und Komponenten"
+      filters:
+        date_start:
+          name: Von
+          type: date
+          default: "2024-01-01"
+        date_end:
+          name: Bis
+          type: date
+          default: "2026-12-31"
+      layout:
+        - [score-verlauf, score-verlauf, score-verlauf]
+        - [level-verteilung, score-monat, score-monat]
+      charts:
+        score-verlauf:
+          title: "AF-Evidenz-Score (täglich)"
+          db: kyoro_health
+          query: >
+            SELECT date, score, level
+            FROM af_evidence_scores
+            WHERE date BETWEEN :date_start AND :date_end
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: score, type: quantitative, title: Score}
+              color:
+                field: level
+                scale:
+                  domain: [none, low, moderate, high]
+                  range: ["#54A24B", "#F58518", "#E45756", "#7B2D8B"]
+
+        level-verteilung:
+          title: "Score-Level Verteilung"
+          db: kyoro_health
+          query: >
+            SELECT level, COUNT(*) AS tage
+            FROM af_evidence_scores
+            WHERE date BETWEEN :date_start AND :date_end
+            GROUP BY level ORDER BY tage DESC
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: level, type: ordinal, title: Level}
+              y: {field: tage, type: quantitative, title: Tage}
+
+        score-monat:
+          title: "Ø AF-Score je Monat"
+          db: kyoro_health
+          query: >
+            SELECT strftime('%Y-%m', date) AS monat,
+                   ROUND(AVG(score), 1) AS avg_score,
+                   MAX(score) AS max_score
+            FROM af_evidence_scores
+            WHERE date BETWEEN :date_start AND :date_end
+            GROUP BY monat ORDER BY monat
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: monat, type: ordinal, title: Monat}
+              y: {field: avg_score, type: quantitative, title: "Ø Score"}
+
+    aktivitaet:
+      title: "Aktivität & Training"
+      description: "Schritte, Trainingsbelastung und Kalorienverbrauch"
+      filters:
+        date_start:
+          name: Von
+          type: date
+          default: "2025-01-01"
+        date_end:
+          name: Bis
+          type: date
+          default: "2026-12-31"
+      layout:
+        - [schritte, schritte, schritte]
+        - [training-load, training-load, sportarten]
+      charts:
+        schritte:
+          title: "Schritte pro Tag"
+          db: kyoro_health
+          query: >
+            SELECT date, steps
+            FROM daily_stress
+            WHERE date BETWEEN :date_start AND :date_end
+              AND steps IS NOT NULL AND steps > 0
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: steps, type: quantitative, title: Schritte}
+              color:
+                condition: {test: "datum.steps < 5000", value: "#E45756"}
+                value: "#4C78A8"
+
+        training-load:
+          title: "Trainingsbelastung"
+          db: kyoro_health
+          query: >
+            SELECT date, training_load
+            FROM daily_stress
+            WHERE date BETWEEN :date_start AND :date_end
+              AND training_load IS NOT NULL AND training_load > 0
+            ORDER BY date
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: date, type: temporal, title: Datum}
+              y: {field: training_load, type: quantitative, title: "Training Load"}
+
+        sportarten:
+          title: "Trainings nach Sportart"
+          db: kyoro_health
+          query: >
+            SELECT sport, COUNT(*) AS n
+            FROM sessions
+            WHERE type = 'training'
+              AND date BETWEEN :date_start AND :date_end
+              AND sport IS NOT NULL
+            GROUP BY sport ORDER BY n DESC
+            LIMIT 15
+          library: vega-lite
+          display:
+            mark: {type: bar, tooltip: true}
+            encoding:
+              x: {field: n, type: quantitative, title: Anzahl}
+              y: {field: sport, type: ordinal, sort: "-x", title: Sportart}

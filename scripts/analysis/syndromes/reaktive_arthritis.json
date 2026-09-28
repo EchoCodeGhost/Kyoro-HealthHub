@@ -1,0 +1,50 @@
+{
+  "slug": "reaktive_arthritis",
+  "name_de": "Reaktive Arthritis / Post-enterales Syndrom",
+  "lag_weeks": 4,
+  "refs": "Carter et al. 1995 (Arthritis Rheum), Leirisalo-Repo 1998 (APMIS), Hannu 2011 (Best Pract Res Clin Rheumatol), Selmi & Gershwin 2014, Townes 2010 (Curr Rheumatol Rep)",
+  "system_prompt": "Du bist ein Internist und Rheumatologe mit Expertise in post-infektiösen Gelenk- und Darmerkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Reaktive Arthritis (ReA): sterile Arthritis nach urogenitaler oder enteraler Infektion; klassisch Reiter-Trias (Arthritis, Urethritis, Konjunktivitis)\n- Auslöser: Campylobacter jejuni (häufigste enterale Ursache in DE), Salmonella, Shigella, Yersinia (eigenes Profil), Chlamydia trachomatis\n- Verlauf: akut (meist selbstlimitierend 3–6 Monate), chronisch bei ~15–20% (>6 Monate)\n- HLA-B27 assoziiert — erhöhtes Risiko für chronische Verläufe und ankylosierende Spondylitis\n- Post-enterale Dysbiose: IBS-ähnliche Symptome häufig nach Campylobacter-Infektion (Post-Infective IBS)\n- Persistente Fatigue und Myalgie auch ohne aktive Gelenkentzündung\n- Serologie: Campylobacter-IgA/-IgG, Salmonella-Widal, Yersinia (eigenes Syndrom), ASL (Anti-Streptolysin als Ausschluss)\n- HLA-B27 als Risikofaktor (schon in DB: `HLA-B27`)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Rheumatologische Komponente**: Gelenkschmerz-Muster, HLA-B27-Status?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Campylobacter/Salmonella-Serologie, HLA-B27, rheumatologische Mitbeurteilung.",
+  "icd10_gm": [
+    "M02.1",
+    "M02.2",
+    "M02.3",
+    "M02.8"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "awmf": "AWMF-Leitlinie Reaktive Arthritis",
+    "eular": "EULAR Recommendations for Reactive Arthritis 2010"
+  },
+  "symptoms": [
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Arthritis",
+    "Rückenschmerzen",
+    "Fatigue",
+    "Durchfall",
+    "Bauchschmerzen",
+    "Reizdarm",
+    "Augenentzündung",
+    "Konjunktivitis",
+    "Urethritis",
+    "Hautausschlag",
+    "Schleimhautentzündung",
+    "Fersensporn",
+    "Schwellung",
+    "Muskelschmerzen",
+    "Fieber"
+  ],
+  "seroprevalence_de": 0.02,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Europa",
+    "Spanien",
+    "Mittelmeer",
+    "mediterran",
+    "Kroatien",
+    "Bulgarien",
+    "subtropisch",
+    "tropisch"
+  ]
+}

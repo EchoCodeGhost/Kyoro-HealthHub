@@ -1,0 +1,12 @@
+{
+  "name": "ent",
+  "description": "Datenpaket für HNO: Audio-Exposition, Halsschmerzen, Schwindel, Schnarchen",
+  "description_en": "Data package for ENT: audio exposure, sore throat, dizziness, snoring",
+  "queries": {
+    "ent_symptoms": "SELECT date, symptom, value_num, value_text FROM symptoms WHERE person = :person AND (symptom LIKE '%runny_nose%' OR symptom LIKE '%sinus%' OR symptom LIKE '%sore_throat%' OR symptom LIKE '%hals%' OR symptom LIKE '%loss_of_smell%' OR symptom LIKE '%loss_of_taste%' OR symptom LIKE '%dizziness%' OR symptom LIKE '%Schwindel%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "audio_exposure": "SELECT ts, date, value, unit, metric, source_app FROM measurements WHERE metric IN ('audio_exposure_env','audio_exposure_headphone') AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "body_temperature": "SELECT ts, date, value FROM measurements WHERE metric='body_temperature' AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "snoring": "SELECT date, source_app, snore_s, body_temp_dev FROM sleep WHERE person = :person AND date BETWEEN :date_from AND :date_to AND snore_s IS NOT NULL ORDER BY date",
+    "migraine": "SELECT date, severity, duration_h, aura, photophobia FROM migraine WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "slug": "trypanosomiasis",
+  "name_de": "Post-Schlafkrankheit-Syndrom (HAT / Afrikanische Trypanosomiasis)",
+  "lag_weeks": 24,
+  "refs": "Kennedy 2013 (Lancet Neurol), Blum et al. 2006 (Clin Infect Dis), WHO HAT 2023, Buscher et al. 2017 (NEJM)",
+  "system_prompt": "Du bist ein Neurologe und Infektiologe mit Expertise in protozooären ZNS-Erkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Afrikanische Trypanosomiasis (HAT / Schlafkrankheit): Trypanosoma brucei gambiense (Westafrika, chronisch) oder rhodesiense (Ostafrika, akut)\n- Überträger: Tsetsefliege (Glossina spp.); nur in Subsahara-Afrika\n- Stadien: Stadium 1 (hämolymphatisch: Fieber, Lymphadenopathie) → Stadium 2 (meningoenzephalitisch: Schlafstörungen, Persönlichkeitsveränderungen, Koma)\n- Post-HAT nach Behandlung: persistente kognitive Störungen, Schlafstörungen, neuropsychiatrische Sequelen (Kennedy 2013)\n- Für Europa: Importfälle bei Safari-Reisenden, Entwicklungshelfer; sehr selten\n- Serologie: CATT (Card Agglutination Test, für gambiense), IFAT; Liquor-Untersuchung für Stadium 2\n- Biomarker: Schlaf-Wach-Rhythmus-Störung als Leitsymptom, IgM-Erhöhung\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neurologisches Muster**: Schlaf-Wach-Störung, kognitive Defizite, Persönlichkeitsveränderungen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Subsahara-Afrika/Safari, HAT-Serologie, Tropeninstitut, Liquordiagnostik.",
+  "icd10_gm": [
+    "B56.0",
+    "B56.1"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Human African Trypanosomiasis – Fact Sheet 2023",
+    "dtg": "DTG-Leitlinie Importierte Parasitosen"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Schlafstörungen",
+    "Tagesschläfrigkeit",
+    "Schlaf-Wach-Umkehr",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Gedächtnisprobleme",
+    "Persönlichkeitsveränderungen",
+    "Stimmungsschwankungen",
+    "Angst",
+    "Kopfschmerzen",
+    "Muskelschmerzen",
+    "Lymphknotenschwellung",
+    "Gewichtsverlust",
+    "Juckreiz",
+    "Schwindel"
+  ],
+  "seroprevalence_de": 1e-06,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Subsahara-Afrika",
+    "Demokratische Republik Kongo",
+    "Angola",
+    "Tansania",
+    "Uganda",
+    "Sambia",
+    "Zimbabwe",
+    "Kamerun",
+    "Guinea",
+    "Zentralafrika",
+    "Westafrika",
+    "Afrika",
+    "tropisch"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "clinical_full",
+  "description": "Vollständiges klinisches Datenpaket: alle Domänen inklusive Zeitreihen",
+  "description_en": "Full clinical data package: all domains including time series",
+  "queries": {
+    "daily_summary": "SELECT * FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "sleep_sessions": "SELECT * FROM sleep WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "training_sessions": "SELECT * FROM training WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts_start",
+    "orthostatic_tests": "SELECT * FROM orthostatic_test WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "fitness_tests": "SELECT * FROM polar_fitness WHERE person = :person AND date(datetime) BETWEEN :date_from AND :date_to ORDER BY datetime",
+    "migraine": "SELECT * FROM migraine_live WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "ecg_sessions": "SELECT * FROM ecg_sessions WHERE person = :person AND date(datetime) BETWEEN :date_from AND :date_to ORDER BY datetime",
+    "blood_pressure": "SELECT * FROM blood_pressure WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "blood_glucose": "SELECT * FROM blood_glucose WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "body_composition": "SELECT * FROM body_composition WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "symptoms": "SELECT * FROM symptoms WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "reproductive_health": "SELECT * FROM reproductive_health WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "medications": "SELECT * FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "lab_results": "SELECT * FROM lab_all WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "assessments": "SELECT * FROM assessments WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "nutrition_daily": "SELECT * FROM nutrition_daily WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "clinical_findings": "SELECT * FROM clinical_findings WHERE finding_date BETWEEN :date_from AND :date_to ORDER BY finding_date",
+    "pem_correlation": "SELECT * FROM pem_correlation WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "arrhythmia_episodes": "SELECT * FROM arrhythmie_episoden WHERE date(episode_start) BETWEEN :date_from AND :date_to ORDER BY episode_start",
+    "daily_stress": "SELECT * FROM daily_stress WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "health_canonical": "SELECT * FROM health_canonical WHERE date BETWEEN :date_from AND :date_to ORDER BY date, metric"
+  }
+}

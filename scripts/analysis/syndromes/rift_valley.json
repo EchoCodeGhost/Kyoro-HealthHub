@@ -1,0 +1,52 @@
+{
+  "slug": "rift_valley",
+  "name_de": "Post-Rift-Valley-Fieber-Syndrom",
+  "lag_weeks": 8,
+  "refs": "LaBeaud et al. 2010 (PLoS Negl Trop Dis), Bird et al. 2009 (Emerg Infect Dis), WHO Rift Valley Fever 2018, ECDC RVF Risk Assessment 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in Arbovirus-Erkrankungen und post-viraler Enzephalitis.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Rift-Valley-Fieber (RVF): Phlebovirus (Phenuiviridae); Vektor Aedes/Culex-Mücken; Reservoir Tiere (Rinder, Schafe)\n- Endemisch: Ostafrika (Kenia, Tansania, Somalia), Ägypten, Arabische Halbinsel; Ausbrüche nach Regenzyklus\n- Klinik: Fieber, Hepatitis, hämorrhagisches Fieber (selten), Uveitis, Enzephalitis\n- Post-RVF: Uveitis (Erblindungsrisiko, Monate nach Akutinfektion), persistente Fatigue, Enzephalopathie\n- Für Europa: Importfälle durch Reisende; Vektoren (Aedes albopictus) potenziell expansiv durch Klimawandel\n- Serologie: RVF-IgM/-IgG (BSL-3-Labor); PCR in Akutphase\n- WHO Blueprint Priority Pathogen\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Ophthalmologische/neurologische Komponente**: Sehstörungen, Uveitis-Zeichen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Ostafrika/Naher Osten/Tierkontakt, RVF-Serologie, Augenheilkunde.",
+  "icd10_gm": [
+    "A92.4"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Rift Valley Fever – Fact Sheet 2018",
+    "ecdc": "ECDC Rift Valley Fever – Risk Assessment 2023"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Kopfschmerzen",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Gelenkschmerzen",
+    "Sehstörungen",
+    "Augenschmerzen",
+    "Lichtempfindlichkeit",
+    "Übelkeit",
+    "Erbrechen",
+    "Bauchschmerzen",
+    "Schwindel",
+    "Tinnitus",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Abgeschlagenheit",
+    "Blutungsneigung"
+  ],
+  "seroprevalence_de": 1e-06,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Ostafrika",
+    "Kenia",
+    "Tansania",
+    "Somalia",
+    "Sudan",
+    "Äthiopien",
+    "Ägypten",
+    "Naher Osten",
+    "Saudi-Arabien",
+    "Jemen",
+    "Subsahara-Afrika",
+    "Afrika",
+    "tropisch"
+  ]
+}

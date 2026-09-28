@@ -1,0 +1,15 @@
+{
+  "name": "long_covid",
+  "description": "Datenpaket für Ambulanzen mit Fokus auf Belastungsintoleranz: PEM-Korrelation, HRV, SpO2, Fatigue, Schlaf, klinische Befunde",
+  "description_en": "Data package for exertion intolerance clinics: PEM correlation, HRV, SpO2, fatigue, sleep, clinical findings",
+  "queries": {
+    "pem_correlation": "SELECT date, training_load, steps, active_energy, belastungs_score, hrv_heute, rhr_heute, hrv_morgen, rhr_morgen, hrv_delta_pct, rhr_delta, pem_signal, pem_staerke, had_sport, sport_prior_3d FROM pem_correlation WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "clinical_findings": "SELECT finding_date, period_end, category, finding_type, value, unit, threshold, status, severity, description FROM clinical_findings WHERE finding_date BETWEEN :date_from AND :date_to ORDER BY severity, finding_date",
+    "daily_overview": "SELECT date, person, sleep_score, sleep_duration_min AS total_sleep_min, hrv_rmssd_ms, resting_hr_bpm AS hr_resting, sleep_hr_avg AS hr_avg, spo2_avg_pct AS spo2_avg, resp_rate_avg AS respiration_avg, steps, active_energy_kcal AS active_calories, ROUND(stress_high_s/60.0,1) AS stress_high_min FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "fatigue_symptoms": "SELECT date, symptom, value_num, value_text, category FROM symptoms WHERE person = :person AND (symptom LIKE '%Fatigue%' OR symptom LIKE '%Erschöpfung%' OR symptom LIKE '%Energie%' OR symptom LIKE '%PEM%' OR symptom LIKE '%Crash%' OR symptom LIKE '%fatigue%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "orthostatic_tests": "SELECT date, hr_supine, hr_stand, hr_delta, rmssd_supine, rmssd_stand, rmssd_delta, source_app FROM orthostatic_test WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "nightly_hrv_trend": "SELECT date, rmssd_ms, rri_ms, recovery_indicator FROM polar_nightly_hrv WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "arrhythmia_summary": "SELECT episode_start, episode_end, dauer_min, hr_mean, time_of_day FROM arrhythmie_episoden WHERE date(episode_start) BETWEEN :date_from AND :date_to ORDER BY episode_start",
+    "pem_daily_score": "SELECT date, pem_score, pem_level, pem_trig_score, pem_react_score, steps, active_energy_kcal FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date"
+  }
+}

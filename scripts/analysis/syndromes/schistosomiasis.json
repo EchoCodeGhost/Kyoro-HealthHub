@@ -1,0 +1,56 @@
+{
+  "slug": "schistosomiasis",
+  "name_de": "Post-Schistosomiasis-Syndrom (Bilharziose)",
+  "lag_weeks": 24,
+  "refs": "Colley et al. 2014 (Lancet), Gray et al. 2011 (Lancet Infect Dis), WHO Schistosomiasis 2023, Barsoum et al. 2013 (Kidney Int)",
+  "system_prompt": "Du bist ein Internist mit Expertise in tropischen Wurmerkrankungen und chronischer Lebererkrankung.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Schistosomiasis (Bilharziose): Schistosoma spp. (mansoni, haematobium, japonicum); Zerkarien im Süßwasser\n- In Europa: autochthone Transmission in Korsika (S. haematobium × bovis-Hybrid, seit 2013); Nordafrika\n- S. haematobium: urogenitale Form (Hämaturie, Blasenkrebs-Risiko), Nordafrika, Subsahara\n- S. mansoni: intestinale/hepatische Form, Leberfibrose, portale Hypertension\n- Post-Schistosomiasis: chronische Fatigue, Hepatosplenomegalie, portale Hypertension, Anämie\n- Katayama-Fieber (akut): Fieber, Urtikaria, Eosinophilie, Husten 4–6 Wochen nach Exposition\n- Serologie: Schistosoma-ELISA/-IFAT, Antigen-Nachweis (Urin/Stuhl), Eosinophilie als indirekter Marker\n- Biomarker: Eosinophilie, Leberenzyme, Albumin, Thrombopenie (Hypersplenismus)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Hepatische Komponente**: Leberenzyme, Albumin, Thrombopenie — Fibrose-Muster?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Expositionsanamnese Süßwasser Afrika/Korsika, Schistosoma-Serologie, Eosinophilien-Differenzialdiagnose.",
+  "icd10_gm": [
+    "B65.0",
+    "B65.1",
+    "B65.2",
+    "B65.9"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Schistosomiasis Fact Sheet 2023",
+    "ecdc": "ECDC Schistosomiasis in Europe – Update 2022",
+    "dtg": "DTG-Leitlinie Importierte Parasitosen"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Bauchschmerzen",
+    "Durchfall",
+    "Blut im Urin",
+    "Hämaturie",
+    "Übelkeit",
+    "Gewichtsverlust",
+    "Urtikaria",
+    "Juckreiz",
+    "Husten",
+    "Lymphknotenschwellung",
+    "Milzvergrößerung",
+    "Anämie",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Gelenkschmerzen"
+  ],
+  "seroprevalence_de": 0.0002,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Subsahara-Afrika",
+    "Nordafrika",
+    "Ägypten",
+    "Brasilien",
+    "Karibik",
+    "Naher Osten",
+    "Südostasien",
+    "Korsika",
+    "Frankreich",
+    "Mittelmeer"
+  ]
+}

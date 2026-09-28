@@ -1,0 +1,12 @@
+{
+  "name": "pulmonology",
+  "description": "Datenpaket für Pneumologen: SpO2 (24/7+Schlaf), Atemfrequenz, Husten/Atemnot",
+  "description_en": "Data package for pulmonology: SpO2 (24/7+sleep), respiration rate, cough/dyspnea",
+  "queries": {
+    "spo2_all": "SELECT ts, date, value, unit, device_id, source_app FROM measurements WHERE metric IN ('spo2','oxygen_saturation') AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "respiration_rate": "SELECT ts, date, value, source_app FROM measurements WHERE metric IN ('respiration_rate','respiration','respiratory_rate') AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "sleep_breathing": "SELECT date, source_app, spo2_avg, respiration_avg, snore_s, body_temp_dev FROM sleep WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "breathing_symptoms": "SELECT date, symptom, value_num, value_text FROM symptoms WHERE person = :person AND (symptom LIKE '%cough%' OR symptom LIKE '%Husten%' OR symptom LIKE '%shortness%' OR symptom LIKE '%Atemnot%' OR symptom LIKE '%wheez%' OR symptom LIKE '%breath%' OR symptom LIKE '%runny_nose%' OR symptom LIKE '%sinus%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "air_quality": "SELECT date, aqi, pm25, pm10, temp_out_c, humidity_out_pct, pollen_grass, pollen_birch, pollen_mugwort, pollen_ragweed FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to AND (aqi IS NOT NULL OR pm25 IS NOT NULL) ORDER BY date"
+  }
+}

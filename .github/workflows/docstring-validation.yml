@@ -1,0 +1,56 @@
+name: Docstring Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docstring-check:
+    name: Docstring Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Run docstring validation
+        id: docstring-check
+        run: |
+          echo "Running docstring validation..."
+          python scripts/check_docstrings.py --path scripts/ || {
+            echo "::error::Docstring validation failed!"
+            exit 1
+          }
+      
+      - name: Run compliance check
+        id: compliance-check
+        run: |
+          echo "Running compliance check..."
+          python scripts/check_compliance.py --path scripts/ || {
+            echo "::error::Compliance check failed!"
+            exit 1
+          }
+
+      - name: Run import logging check
+        id: import-logging-check
+        run: |
+          echo "Running import logging compliance check..."
+          python scripts/check_import_logging.py || {
+            echo "::error::Import logging check failed — a DB-writing importer is missing log_import()!"
+            exit 1
+          }
+
+      - name: Upload validation report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: docstring-validation-report
+          path: |
+            *.md
+            *.txt
+          retention-days: 7

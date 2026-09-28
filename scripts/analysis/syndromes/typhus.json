@@ -1,0 +1,52 @@
+{
+  "slug": "typhus",
+  "name_de": "Post-Typhus-Syndrom (Typhoides Fieber)",
+  "lag_weeks": 8,
+  "refs": "Bhutta 2006 (NEJM), Crump & Mintz 2010 (Clin Infect Dis), RKI-Ratgeber Typhus 2024, WHO Typhoid Fever 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in enterischen Fiebererkrankungen und post-infektiösen Darmsyndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Typhoides Fieber: Salmonella typhi (Typhus) und S. paratyphi (Paratyphus); fäkal-orale Übertragung\n- Endemisch: Südasien (Indien, Pakistan, Nepal, Bangladesch), Südostasien, Afrika, Lateinamerika\n- Dauerausscheider: bis 3% nach Typhus; chronische biliäre Kolonisierung möglich\n- Post-Typhus: persistente Fatigue, Darmdysfunktion, Gallenblasen-Komplikationen, reaktive Arthritis\n- Neurologische Komplikationen (Typhusenzephalopathie): kognitive Störungen, Psychose möglich\n- Serologie: Widal-Test (niedrige Sensitivität/Spezifität), Vi-Kapselagglutination; Blutkultur im Akutfall\n- Vakzination: Vi-Polysaccharid-Impfstoff (kein vollständiger Schutz)\n- Biomarker: relative Bradykardie (Faget-Zeichen), Leuko-/Thrombopenie, Leberenzyme\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Gastrointestinale/hepatische Komponente**: Darmfunktion, Gallenblasen-Hinweise?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Südasien, Widal-Test, Dauerausscheider-Abklärung, Impfstatus.",
+  "icd10_gm": [
+    "A01.0",
+    "A01.1",
+    "A01.2"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Typhus und Paratyphus (§ 7 IfSG meldepflichtig)",
+    "who": "WHO Typhoid Fever – Fact Sheet 2023"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Bauchschmerzen",
+    "Durchfall",
+    "Verstopfung",
+    "Kopfschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Appetitlosigkeit",
+    "Gewichtsverlust",
+    "Nachtschweiß",
+    "Muskelschmerzen",
+    "Schüttelfrost",
+    "Reizdarm",
+    "Konzentrationsstörungen",
+    "Stimmungsschwankungen",
+    "Gelenkschmerzen",
+    "Schlafstörungen"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Südasien",
+    "Indien",
+    "Pakistan",
+    "Nepal",
+    "Bangladesch",
+    "Südostasien",
+    "Afrika",
+    "Lateinamerika",
+    "Nordafrika"
+  ]
+}

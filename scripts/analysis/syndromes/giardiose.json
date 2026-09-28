@@ -1,0 +1,49 @@
+{
+  "slug": "giardiose",
+  "name_de": "Post-Giardia-Syndrom / Post-infektiöses Reizdarmsyndrom",
+  "lag_weeks": 6,
+  "refs": "Wensaas et al. 2012 (Gut), Halvorsen et al. 2019 (PLoS ONE), Gronwald 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Abschn. 3.5.3)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Post-Giardia-Syndrom und post-infektiösen GI-Erkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Giardia lamblia: häufige Ursache für Reisedurchfall; Post-Giardia-IBS gut dokumentiert\n- Post-Giardia: persistente GI-Symptome, Fatigue, Dysbiose, Histaminintoleranz, Brain Fog\n- Verbindung zu MCAS über Mastzell-Aktivierung im Darm (Mastzellen-Histamin-Achse)\n- Diagnostik: Giardia-Antigen im Stuhl (ELISA), PCR, Stuhlmikroskopie\n- **DBG-Leitlinie 2026 (Abschn. 3.5.3):** Giardia als parasitäre Co-Infektion bei Lyme-Borreliose gelistet. Übertragungsweg unabhängig (Lebensmittel/Wasser, kein Zeckenvektor) — aber parallele Infektion möglich. Borrelia + Giardia → additive intestinale Dysfunktion; Darm-Hirn-Achse kompromittiert durch beide; MCAS-Triggering durch Giardia (Mastzell-Histamin) + Borrelia (TLR2-Zytokin-Freisetzung) → potenzierte Histaminlast. Metronidazol (Giardia-Therapie): bei kardialer Vorerkrankung besondere Vorsicht (DBG 2026 CAVE kardiotoxisch).\n- Systemische Auswirkungen: autonome Dysfunktion durch Darm-Hirn-Achse, HRV beeinflussbar\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Autonome Domäne**: HRV-Muster im Kontext Darm-Hirn-Achse-Dysregulation\n3. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n4. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A07.1"
+  ],
+  "meldepflicht_de": true,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.3 (Parasiten — Metronidazol-CAVE bei kardialer Komorbidität)",
+    "rki": "RKI-Ratgeber Giardiasis (§ 7 IfSG meldepflichtig)",
+    "who": "WHO Giardiasis Factsheet",
+    "cdc": "CDC Giardia Clinical Information"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Bauchschmerzen",
+    "Blähungen",
+    "Durchfall",
+    "Übelkeit",
+    "Appetitverlust",
+    "Gewichtsverlust",
+    "Brain Fog",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Histaminintoleranz",
+    "Nahrungsmittelunverträglichkeit"
+  ],
+  "seroprevalence_de": 0.15,
+  "sero_category": "mittel",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Südostasien",
+    "südostasiatisch",
+    "Lateinamerika",
+    "afrikanisch",
+    "Osteuropa",
+    "nordafrikanisch",
+    "Türkei",
+    "Mexiko",
+    "Thailand"
+  ]
+}

@@ -1,0 +1,271 @@
+Kyoro-HealthHub
+===============
+
+Copyright (C) 2026 EchoCodeGhost <269301710+EchoCodeGhost@users.noreply.github.com>
+
+German version: NOTICE_DE
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See the LICENSE file for the full license text.
+
+
+────────────────────────────────────────────────────────────────────────────
+ETHICAL PRINCIPLES
+────────────────────────────────────────────────────────────────────────────
+
+Every person has the right to understand their own body and their own health
+data — regardless of disability, chronic illness, gender identity, age,
+educational background, income, or digital literacy. This right belongs to
+everyone, not only to those with medical or technical training.
+
+This project exists to make that right real: through self-determination,
+informed agency, and full ownership of one's own data — without surveillance,
+lock-in, or extractive design.
+
+See docs/ETHICS.md (English) and docs/ETHICS_DE.md (Deutsch) for the full
+ethical principles, including prohibited uses, security requirements, and
+guidelines for research with human subjects.
+
+
+────────────────────────────────────────────────────────────────────────────
+MEDICAL DISCLAIMER (READ FIRST)
+────────────────────────────────────────────────────────────────────────────
+
+This software is NOT a medical device.
+
+It is provided strictly as a personal-research and data-management tool. It
+does not diagnose, treat, cure, mitigate, or prevent any disease or medical
+condition. None of its computed metrics, scores, classifications, plots, or
+LLM-generated text constitute medical advice.
+
+Do not use this software to make medical decisions. Always consult a qualified
+healthcare professional. The authors disclaim all liability for any direct or
+indirect harm resulting from use of, or reliance on, this software or its
+outputs. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION THE WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+In particular: arrhythmia detection, POTS criterion, PEM correlation,
+SpO2 burden, ANS status, HRV change-points, VLM-based image analysis (e.g. of
+a skin lesion or fundus photo), and any other clinical-sounding output is
+heuristic, derived from consumer-grade sensors, and unsuitable for diagnosis.
+Consumer wearables are not regulated medical devices; their measurements have
+substantial error margins.
+
+This software CAN produce incorrect results in both directions. A false
+positive can suggest a problem where none exists. A false negative can fail
+to flag a real problem. Neither outcome is bounded or quantified for any
+given output of this software; treat every result, positive or negative, as
+provisional and unverified until reviewed by a qualified healthcare
+professional.
+
+A qualified healthcare professional, not this software or any AI/LLM
+component within it, holds sole diagnostic and decision-making authority.
+Nothing produced by this software substitutes for that professional's
+judgment, and no output should ever be the basis for a medical decision on
+its own. The user is solely responsible for the consequences of any action,
+or inaction, taken on the basis of this software's output.
+
+Findings surfaced by this software, especially by VLM-based image analysis
+(for example, a skin lesion flagged as high-risk), can be distressing and can
+require tolerating real uncertainty until a clinician resolves the question.
+This is an inherent psychological cost of using this software, not a defect
+to be engineered away. Users should consider their own emotional readiness
+before running an analysis they suspect may surface an unsettling finding,
+and should involve a trusted person or professional support if needed.
+
+The guided anamnesis interview (`scripts/query/anamnese_interview.py`,
+LLM-driven, multi-session) is not rock-solid. It has not yet been validated
+under real-conditions dogfooding for whether its associative follow-up
+questions actually surface leads a careful manual review would have found,
+whether its memory-anchor prompting works as intended, or whether it stays
+consistent in one language over a long session. Its output can be
+incomplete, can miss something relevant, or can misrepresent what you said.
+Treat everything it produces as a draft for you to review, not a finished
+or reliable anamnesis.
+
+REVIEW OF THE UNDERLYING LITERATURE IS STILL PENDING. Scientific citations
+embedded throughout this codebase (see the "Evidence tier" annotations in
+docs/, and the citations listed per compute/analysis script) were added
+ad hoc as each script was written. There has been no dedicated pass to
+verify that every citation is current, correctly represents the cited
+study's findings, or that no more relevant or more recent literature was
+missed. This review had been the main thing blocking release for the past
+weeks. The decision was to release now with this gap open rather than
+delay further, so as many people as possible can benefit from Kyoro as
+soon as possible — even with citations that may still be imprecise or
+wrong. It is on the project's TODO list and is the next thing being
+tackled. Treat every such citation as unverified until that review is
+done.
+
+This software has NOT been evaluated under EU MDR (2017/745), FDA 21 CFR 820,
+or any other medical-device regulatory framework.
+
+
+────────────────────────────────────────────────────────────────────────────
+DATA SOVEREIGNTY
+────────────────────────────────────────────────────────────────────────────
+
+This software is designed for fully local operation. By default:
+
+  - The databases live on your local filesystem (default: ~/Kyoro-HealthHub/data/health.db
+    for wearable/sensor time series and raw genetics, ~/Kyoro-HealthHub/data/medicine.db
+    for clinical values a doctor measures or orders)
+  - Raw data exports (CSV, XML, JSON, PDF) live on your local filesystem
+  - Configuration (API tokens, personal data) lives in ~/.config/kyoro/ — outside the repository
+  - No telemetry, analytics, or background uploads are performed by this software
+
+External network traffic ONLY happens when:
+
+  - You configure an importer that pulls from a manufacturer API (currently,
+    for example: Garmin Connect, Polar AccessLink, Oura, Home Assistant —
+    see `docs/DEVICES.md` for the full and current list). These calls are
+    authenticated against YOUR account and use YOUR personal access tokens.
+    No third party sees the data.
+  - You explicitly invoke an LLM-assisted script (e.g. `scripts/medical/tables_llm.py`,
+    `scripts/query/health_query.py`) configured to use a remote model. The
+    default configuration uses a LOCAL inference provider (OpenVINO by
+    default; MLX, Ollama, llama.cpp, LM Studio, OVMS, and exo are also
+    supported, see `scripts/utils/llm_provider.py`). Switching to a remote
+    provider (OpenRouter, Anthropic, Mistral, Azure, and others — see
+    `scripts/utils/llm_provider.py` for the full list) is opt-in and
+    transmits the data you select to that provider.
+
+You are responsible for:
+  - Securing your local database file (it contains highly sensitive personal data)
+  - Managing API tokens and access credentials
+  - Choosing whether to enable remote LLM providers, and accepting their privacy terms
+  - Backups (this software performs none)
+
+This software contains no automatic or background mechanism to share data
+outside your machine. Explicit, user-initiated exports — for example, generating
+a summary for a cardiologist or rheumatologist via `export_health.py` — are an
+intentional feature. All such exports are fully under your control: you decide
+what to export, in what format, and to whom you hand it.
+
+
+────────────────────────────────────────────────────────────────────────────
+TRADEMARK NOTICE
+────────────────────────────────────────────────────────────────────────────
+
+This project integrates with data formats and APIs from third-party hardware,
+software, and service providers. The following are trademarks of their
+respective owners. Their mention here is descriptive only; the authors of this
+project are NOT affiliated with, endorsed by, or sponsored by any of them:
+
+  Apple, Apple Watch, Apple Health, HealthKit, iPhone — Apple Inc.
+  Polar, Polar Flow, AccessLink — Polar Electro Oy
+  Oura, Oura Ring — Ōura Health Oy
+  Garmin, Garmin Connect — Garmin Ltd.
+  Beurer — Beurer GmbH
+  Omron, Omron Connect — Omron Healthcare Co., Ltd.
+  Withings, Withings BPM Core, Health Mate — Withings SA
+  KubiosHRV — Kubios Oy
+  Freestyle Libre, LibreView — Abbott Laboratories
+  Sleep Cycle — Sleep Cycle AB
+  WomanLog — Pro Active App SIA
+  Flo — Flo Health Inc. *(planned, not yet implemented)*
+  FDDB — FDDB Internetportale GmbH
+  HRV4Training, HRV4Workout — A.S.M.A. B.V. / Marco Altini
+  Headspace — Headspace Inc. *(planned, not yet implemented)*
+  Strava — Strava, Inc. *(planned, not yet implemented)*
+  Komoot — Komoot GmbH *(planned, not yet implemented)*
+  Freeletics — Freeletics GmbH *(planned, not yet implemented)*
+  Gymondo — Gymondo GmbH *(planned, not yet implemented)*
+  Home Assistant — Open Home Foundation
+  EcoWitt — Shenzhen Fine Offset Electronics Co., Ltd.
+  Wellue, Wellue O2Ring — Shenzhen Viatom Technology Co., Ltd.
+  RENPHO — Renpho Health
+  Bearable — Guava Health, Inc.
+  Migraine Buddy (referred to generically as "Migraine app" in this project) — Healint Pte Ltd
+  Hilo, Hilo Band — Aktiia SA
+  CameraHRV, Medical Motion, Shotsy, Symptom Diary (Adam C.) — respective app publishers
+  23andMe — 23andMe, Inc.
+  Dante Labs — Dante Labs S.r.l.
+  Nebula Genomics — Nebula Genomics, Inc.
+  Sequencing.com — Sequencing.com, LLC
+  Aniva Health — brand name of its respective publisher
+  Google Maps Platform Pollen API — Google LLC
+  AEMET — Agencia Estatal de Meteorología (Spain)
+  Deutscher Wetterdienst (DWD), Brightsky — Deutscher Wetterdienst
+  Open-Meteo — Open-Meteo
+  Qwen — Alibaba Cloud
+  OpenVINO — Intel Corporation
+  Anthropic, Claude — Anthropic, PBC *(optional remote LLM provider)*
+  Mistral AI — Mistral AI *(optional remote LLM provider)*
+  OpenRouter — OpenRouter, Inc. *(optional remote LLM provider)*
+  Microsoft Azure — Microsoft Corporation *(optional remote LLM provider)*
+  Hugging Face — Hugging Face, Inc. *(optional remote LLM provider)*
+  NVIDIA — NVIDIA Corporation *(optional remote LLM provider)*
+  Perplexity — Perplexity AI, Inc. *(optional remote LLM provider)*
+  Ollama, LM Studio — respective publishers *(optional local LLM runtimes)*
+  SQLite — D. Richard Hipp (public domain)
+
+All other product names, logos, brands, and trademarks are property of their
+respective owners. Use of these names does not imply endorsement of, or by,
+this project. This project relies exclusively on documented export formats and
+publicly accessible APIs provided by these vendors; no proprietary SDKs are
+embedded.
+
+
+────────────────────────────────────────────────────────────────────────────
+THIRD-PARTY SOFTWARE
+────────────────────────────────────────────────────────────────────────────
+
+This project depends on (but does not redistribute) the following libraries.
+Each is used under its own license, which remains intact and applies to that
+library independently of this project's GPL-3.0 license:
+
+  requests              Apache 2.0    HTTP client
+  numpy                 BSD-3-Clause  numerical computing
+  scipy                 BSD-3-Clause  scientific computing
+  matplotlib            PSF/BSD-like  plotting
+  pandas                BSD-3-Clause  data analysis
+  statsmodels           BSD-3-Clause  statistical models
+  neurokit2             MIT           HRV/ECG signal processing
+  wfdb                  MIT           PhysioNet WFDB format
+  garminconnect         MIT           Garmin Connect API client
+  fitparse              MIT           Garmin .fit file parsing
+  beautifulsoup4        MIT           HTML parsing
+  python-dateutil       Apache 2.0 / BSD  date parsing
+  sqlite3 (stdlib)      Public Domain  D. Richard Hipp
+
+For medical imaging / image and PDF handling (optional, only invoked when
+explicitly used):
+
+  pdf2image             MIT           PDF → image conversion
+  Pillow                MIT-CMU       image handling
+  pillow-heif           BSD-3-Clause  HEIC/HEIF (iPhone photo) decoding
+  opencv-contrib-python Apache 2.0    video frame extraction, image processing
+  pydicom               MIT           DICOM medical imaging (fundus, ECG waveforms)
+  pikepdf               MPL-2.0       PDF metadata scrubbing (Info/XMP, embedded images)
+  lxml                  BSD-3-Clause  XML processing (pikepdf dependency)
+  paddlepaddle          Apache 2.0    PaddleOCR runtime engine
+  paddleocr             Apache 2.0    OCR engine
+
+For FHIR export (optional, only invoked when explicitly used):
+
+  fhir.resources        BSD-3-Clause  HL7 FHIR resource models/validation
+  jsonschema            MIT           JSON Schema validation
+
+For local LLM inference (optional, only invoked when explicitly used):
+
+  openvino              Apache 2.0    Intel inference runtime
+  openvino-genai        Apache 2.0    GenAI pipeline for OpenVINO
+
+For Datasette data explorer (optional):
+
+  datasette             Apache 2.0    data exploration UI
+  datasette-dashboards  Apache 2.0    dashboard plugin
+  datasette-leaflet     Apache 2.0    map plugin
+  datasette-render-markdown  Apache 2.0  Markdown rendering plugin
+
+Run `pip show <package>` for the current versions installed in your
+environment. No third-party source code is bundled in this repository.
+
+
+────────────────────────────────────────────────────────────────────────────
+END OF NOTICE
+────────────────────────────────────────────────────────────────────────────

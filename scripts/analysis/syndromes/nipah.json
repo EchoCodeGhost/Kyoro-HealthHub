@@ -1,0 +1,47 @@
+{
+  "slug": "nipah",
+  "name_de": "Post-Nipah-Syndrom",
+  "lag_weeks": 16,
+  "refs": "Tan et al. 2002 (Ann Neurol), Goh et al. 2000 (Ann Neurol), Sejvar et al. 2007 (Brain), WHO Nipah Virus 2023, ECDC Nipah Virus Risk Assessment 2023",
+  "system_prompt": "Du bist ein Internist und Neurologe mit Expertise in hochpathogenen Virusenzephalitiden.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Nipah-Virus (NiV): Paramyxovirus (Henipavirus); Fledermäuse als Reservoir (Pteropus spp.)\n- Übertragung: Fledermaus → Mensch (direkt, kontaminierte Früchte/Palmwein); begrenzte Mensch-zu-Mensch-Übertragung\n- Endemisch: Bangladesch, Indien (Kerala); Ausbrüche sporadisch in Südostasien\n- Letalität: 40–75%; Post-Nipah nur bei Überlebenden neurologisch schwerer Verläufe\n- Post-Nipah (Tan 2002, Sejvar 2007): persistente Enzephalopathie, Persönlichkeitsveränderungen, Krampfanfälle, kognitive Defizite\n- Latente Reaktivierung beschrieben (Monate bis Jahre nach Akutinfektion)\n- Serologie: Nipah-Neutralisationstest, ELISA (Spezial-Labor BSL-4); nur in Hochsicherheitslabors\n- Relevanz für Europa: Importfälle möglich; Bioterrorismus-Potenzial; WHO Blueprint Priority Pathogen\n- Wearable-Proxy: Post-Enzephalitis-Literatur\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neurologische Komponente**: Kognitive Defizite, Persönlichkeitsveränderungen, Krampfmuster?\n5. **Trend**: Persistenz oder Reaktivierungsmuster?\n6. **Klinische Empfehlung**: Reiseanamnese Bangladesch/Indien/Malaysia, BSL-4-Diagnostik, sofortige Meldung bei Verdacht.",
+  "icd10_gm": [
+    "B33.8"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI: Nipah-Virus — Steckbrief Erreger",
+    "who": "WHO Nipah Virus – Priority Pathogen Fact Sheet 2023",
+    "ecdc": "ECDC Nipah Virus – Risk Assessment 2023"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Kopfschmerzen",
+    "Fieber",
+    "Konzentrationsstörungen",
+    "Gedächtnisprobleme",
+    "Brain Fog",
+    "Persönlichkeitsveränderungen",
+    "Stimmungsschwankungen",
+    "Angst",
+    "Schlafstörungen",
+    "Schwindel",
+    "Übelkeit",
+    "Erbrechen",
+    "Sehstörungen",
+    "Sprachprobleme",
+    "Schwäche",
+    "Krampfanfälle",
+    "Bewusstseinsstörungen"
+  ],
+  "seroprevalence_de": 1e-06,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Bangladesch",
+    "Indien",
+    "Kerala",
+    "Malaysia",
+    "Singapur",
+    "Südostasien",
+    "tropisch"
+  ]
+}

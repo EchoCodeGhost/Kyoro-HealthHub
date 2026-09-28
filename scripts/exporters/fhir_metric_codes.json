@@ -1,0 +1,47 @@
+{
+  "mappings": {
+    "heart_rate": {
+      "system": "http://loinc.org",
+      "code": "8867-4",
+      "display": "Heart rate",
+      "verified_by": "Claude (Sonnet, WebSearch cross-check against loinc.org)",
+      "source_url_or_reference": "https://loinc.org/8867-4 (search result title exactly matches 'Heart rate'; this code is also used in HL7's own published FHIR R4/R5 Observation vital-signs examples, e.g. observation-example-heart-rate)"
+    },
+    "oxygen_saturation": {
+      "system": "http://loinc.org",
+      "code": "59408-5",
+      "display": "Oxygen saturation in Arterial blood by Pulse oximetry",
+      "verified_by": "Claude (Sonnet, WebSearch cross-check against loinc.org)",
+      "source_url_or_reference": "https://loinc.org/59408-5 (search result title exactly matches; code is used in HL7's own hl7.org/fhir/observation-example-satO2 example). NOTE: display text corrected from a prior draft ('...in Blood...') to the exact LOINC long common name ('...in Arterial blood...')."
+    },
+    "hrv_sdnn": {
+      "system": "http://loinc.org",
+      "code": "80404-7",
+      "display": "R-R interval.standard deviation (Heart rate variability)",
+      "verified_by": "Claude (Sonnet, WebSearch cross-check against loinc.org)",
+      "source_url_or_reference": "https://loinc.org/80404-7 — search result title 'LOINC 80404-7 R-R interval.standard deviation (Heart rate variability)' confirms this is SDNN (standard deviation of NN intervals). CORRECTION: an earlier draft of this file had this code (80314-6) assigned incorrectly — that code could not be confirmed to exist at all in searches (a nearby real code, 80314-8, is 'Neurological assessment [Interpretation]', unrelated to HRV). 80404-7 is the code actually confirmed to mean R-R/NN interval SDNN."
+    },
+    "total_sleep_min": {
+      "system": "http://loinc.org",
+      "code": "93832-4",
+      "display": "Sleep duration",
+      "verified_by": "Claude (Sonnet, WebSearch cross-check against loinc.org)",
+      "source_url_or_reference": "https://loinc.org/93832-4 — search result title 'LOINC 93832-4 Sleep duration' confirms code and display text. CORRECTION: an earlier draft of this file used 80362-3, which could not be confirmed to exist as a LOINC code at all (searches only surfaced an unrelated CPT drug-testing code with a similar-looking number); 93832-4 is the code actually confirmed as 'Sleep duration'."
+    }
+  },
+  "_pending_verification": {
+    "hrv_rmssd": {
+      "note": "No LOINC code specifically for RMSSD (root mean square of successive NN-interval differences) could be confirmed via available tools in this session. A prior draft of this file claimed code 80315-3 under 'verified_by: Mistral Vibe' — that claim is unconfirmed and could not be reproduced by an independent check (searches for '80315-3' return unrelated LOINC entries, not an HRV/RMSSD code). The nearest confirmed HRV-family code found, 80404-7, is explicitly the *standard deviation* (SDNN) measure, not RMSSD, and reassigning it to hrv_rmssd would misrepresent the metric. Per design.md D2 ('if a code cannot be verified, leave that metric unmapped for this iteration rather than guessing'), hrv_rmssd is intentionally left OUT of the mappings table for this export until a human with real loinc.org/UMLS access confirms a correct code (or confirms that no precise RMSSD-specific LOINC code exists, in which case it should stay permanently unmapped with that caveat documented).",
+      "status": "UNVERIFIED - needs human check against loinc.org before production use",
+      "checked_by": "Claude (Sonnet)"
+    }
+  },
+  "_unmapped_for_now": [
+    "hrv_rmssd",
+    "blood_pressure_systolic",
+    "blood_pressure_diastolic",
+    "body_weight",
+    "body_temperature",
+    "respiratory_rate"
+  ]
+}

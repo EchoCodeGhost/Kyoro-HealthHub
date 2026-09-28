@@ -1,0 +1,59 @@
+{
+  "slug": "cchf",
+  "name_de": "Post-Krim-Kongo-Fieber-Syndrom (CCHF)",
+  "lag_weeks": 8,
+  "refs": "Ergönül 2006 (Lancet Infect Dis), Swanepoel et al. 1987, Leblebicioglu et al. 2012 (Int J Infect Dis), ECDC CCHF Factsheet 2023, RKI CCHF 2024",
+  "system_prompt": "Du bist ein Internist mit Expertise in hämorrhagischen Fiebersyndromen und post-infektiöser Thrombopathie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Krim-Kongo-Fieber (CCHF): Nairovirus; Zeckenstich (Hyalomma marginatum) oder Tierkontakt\n- In Europa ENDEMISCH: Bulgarien, Kosovo, Albanien, Griechenland, Türkei, Russland, Spanien (Extremadura)\n- Bulgarien hat wiederkehrende Ausbrüche (Sonnenstrand-Region, ländliche Gebiete, Zeckensaison April–Oktober)\n- Klinik: Fieber, Hämorrhagien (Petechien, Epistaxis, GI-Blutung), schwere Thrombopenie, Hepatitis\n- Letalität: 10–40% in Hochrisiko-Regionen; Post-CCHF bei Überlebenden wenig untersucht\n- Post-CCHF: Fatigue, Myalgie, Anämie-Residuen, Thrombopenie-Nachfolge, hepatische Beteiligung\n- Serologie: CCHF-IgM (bis 4 Monate), IgG (Jahre); nur in BSL-3/4-Labors\n- Biomarker: Thrombopenie, Leukopenie, erhöhte Leberenzyme, D-Dimer, LDH; Blutungszeit verlängert\n- WICHTIG: Zeckenexposition in Bulgarien, Kroatien, Türkei, Spanien ernsthaft erfragen\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Hämatologisches Muster**: Thrombopenie, Leukopenie, Gerinnungsstörungen — Residuen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Zeckenexposition Bulgarien/Balkan ernsthaft evaluieren; BSL-3-Serologie.",
+  "icd10_gm": [
+    "A98.0"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI CCHF — Steckbrief Erreger (§ 7 IfSG meldepflichtig)",
+    "ecdc": "ECDC Crimean-Congo Haemorrhagic Fever – Factsheet 2023",
+    "who": "WHO CCHF Fact Sheet 2024"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Rückenschmerzen",
+    "Blutungsneigung",
+    "Petechien",
+    "Nasenbluten",
+    "Übelkeit",
+    "Erbrechen",
+    "Bauchschmerzen",
+    "Gelenkschmerzen",
+    "Lichtempfindlichkeit",
+    "Schüttelfrost",
+    "Schwindel",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Abgeschlagenheit"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Bulgarien",
+    "Sonnenstrand",
+    "osteuropaeisch",
+    "Kroatien",
+    "Ostslawonien / Republika Srpska",
+    "Slavonien",
+    "Kosovo",
+    "Albanien",
+    "Serbien",
+    "Rumänien",
+    "Griechenland",
+    "Türkei",
+    "Russland",
+    "Zentralasien",
+    "Spanien",
+    "Naher Osten",
+    "Afrika",
+    "Subsahara-Afrika"
+  ]
+}

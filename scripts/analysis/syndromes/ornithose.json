@@ -1,0 +1,46 @@
+{
+  "slug": "ornithose",
+  "name_de": "Post-Ornithose-Syndrom (Chlamydia psittaci)",
+  "lag_weeks": 3,
+  "refs": "Harkinezhad et al. 2009 (Vet Microbiol), Greub & Raoult 2002 (Clin Microbiol Infect), RKI-Ratgeber Ornithose, Hammerschlag 2000",
+  "system_prompt": "Du bist ein Internist / Infektiologe mit Expertise in Ornithose (Psittakose) und post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Chlamydia psittaci: obligat intrazellulärer Erreger, Übertragung über eingetrocknetes Vogelkot-Aerosol\n- Reservoir: Psittaziden (Papageien, Sittiche), aber auch Zugvögel, Flamingos, Tauben, Wasservögel\n- Typische Exposition: Vogelschutzgebiete, Feuchtgebiete (Flamingo-Kolonien!), Zoohandlungen, Geflügelbetriebe\n- Post-Ornithose: persistente Fatigue, kognitive Störungen, Myalgie nach atypischer Pneumonie — häufig undiagnostiziert\n- Kreuzreaktion mit Chlamydia pneumoniae in der Serologie beachten (MIF-Test spezifischer als ELISA)\n- Serologie: Chlamydia psittaci IgG/-IgM (Mikro-Immunofluoreszenz, MIF); PCR aus Sputum/BAL bei Akutstadium\n- Meldepflichtig nach § 7 IfSG\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy (keine spezifischen WB-Werte verfügbar)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Respiratorische Domäne**: SpO2 und Atemfrequenz im Kontext möglicher atypischer Pneumonie\n3. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n4. **Expositionsabgleich**: Passt der Zeitverlauf zu einer Vogel-Exposition?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A70"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Ornithose/Psittakose (§ 7 IfSG meldepflichtig)",
+    "cdc": "CDC Psittacosis (Chlamydia psittaci Infection)",
+    "awmf": "AWMF-Leitlinie atypische Pneumonie (inkl. C. psittaci)"
+  },
+  "symptoms": [
+    "Fieber",
+    "Husten",
+    "Kurzatmigkeit",
+    "Kopfschmerzen",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Fatigue",
+    "Schüttelfrost",
+    "Nachtschweiß",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Brustschmerzen",
+    "Sinusitis"
+  ],
+  "seroprevalence_de": 0.05,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Ziervögel-Haushalt",
+    "Geflügelbetriebe",
+    "S'Albufera",
+    "Delta de l'Ebre",
+    "Feuchtgebiet",
+    "Vogelschutzgebiet",
+    "mediterran",
+    "Mittelmeer",
+    "Spanien",
+    "Flamingos"
+  ]
+}

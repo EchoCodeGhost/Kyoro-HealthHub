@@ -1,0 +1,50 @@
+{
+  "slug": "lassa",
+  "name_de": "Post-Lassa-Syndrom",
+  "lag_weeks": 8,
+  "refs": "McCormick et al. 1987 (NEJM), Andersen et al. 2015 (Science), Bausch et al. 2010 (PLoS Negl Trop Dis), WHO Lassa Fever 2023, ECDC Lassa Fever Factsheet 2022",
+  "system_prompt": "Du bist ein Internist mit Expertise in arenaviralem hämorrhagischen Fieber und post-infektiöser Taubheit.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Lassa-Fieber: Lassa-Arenavirus; endemisch Westafrika (Nigeria, Sierra Leone, Guinea, Liberia)\n- Reservoir: Mastomys-Ratte; Übertragung durch Kontakt mit Nagetier-Ausscheidungen oder Körpersekrete Infizierter\n- Letalität: 1% (leichte Verläufe) bis 15–20% (Hospitalisierte); Überlebende haben Sequelen\n- Post-Lassa: Hörminderung/Taubheit (bis 30% der Genesenden — häufigste Lassa-Spätfolge!), Fatigue, Tinnitus\n- Neurologische Sequelen: Ataxie, Tremor, kognitive Störungen\n- Für Europa: Importfälle aus Westafrika; Übertragungscluster in Krankenhäusern dokumentiert\n- Serologie: Lassa-IgM/-IgG (BSL-3-Labor), PCR in Akutphase\n- WHO Blueprint Priority Pathogen\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Audiologische Komponente**: Hörverlust, Tinnitus — Lassa-typische Spätfolge?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Westafrika/Nagetier-Kontakt, BSL-3-Serologie, Audiometrie.",
+  "icd10_gm": [
+    "A96.2"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI Lassa-Fieber — Steckbrief (§ 7 IfSG meldepflichtig)",
+    "ecdc": "ECDC Lassa Fever – Factsheet 2022",
+    "who": "WHO Lassa Fever – Fact Sheet 2023"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Hörminderung",
+    "Taubheit",
+    "Tinnitus",
+    "Kopfschmerzen",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Halsschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Bauchschmerzen",
+    "Blutungsneigung",
+    "Konzentrationsstörungen",
+    "Schwindel",
+    "Gleichgewichtsstörungen",
+    "Schlafstörungen",
+    "Abgeschlagenheit"
+  ],
+  "seroprevalence_de": 1e-06,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Westafrika",
+    "Nigeria",
+    "Sierra Leone",
+    "Guinea",
+    "Liberia",
+    "Ghana",
+    "Côte d'Ivoire",
+    "Subsahara-Afrika",
+    "tropisch",
+    "Afrika"
+  ]
+}

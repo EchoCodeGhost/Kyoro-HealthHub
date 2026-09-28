@@ -1,0 +1,13 @@
+{
+  "name": "rheumatology",
+  "description": "Datenpaket für Rheumatologen: Schmerz-/Gelenk-Symptome, Entzündungswerte, Aktivität, Schlaf",
+  "description_en": "Data package for rheumatologists: pain/joint symptoms, inflammation labs, activity, sleep",
+  "queries": {
+    "joint_pain_symptoms": "SELECT date, symptom, value_num, value_text, category FROM symptoms WHERE person = :person AND (symptom LIKE '%pain%' OR symptom LIKE '%Schmerz%' OR symptom LIKE '%Gelenk%' OR symptom LIKE '%joint%' OR symptom LIKE '%back%' OR symptom LIKE '%Rücken%' OR symptom LIKE '%body_ache%' OR symptom LIKE '%muscle_soreness%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "fatigue_symptoms": "SELECT date, symptom, value_num, value_text FROM symptoms WHERE person = :person AND (symptom LIKE '%Fatigue%' OR symptom LIKE '%Erschöpfung%' OR symptom='fatigue') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "lab_results": "SELECT date, parameter, wert AS value, einheit AS unit, ref_min AS range_min, ref_max AS range_max, status, labor AS lab FROM lab_all WHERE person = :person AND parameter IN ('CRP','Blutsenkung 1. Std','BSG 1h','Leukozyten','Thrombozyten','Harnsäure','Rheumafaktor','ANA','cyklisches citrulliniertes Peptid (CCP)','Hämoglobin','Eisen','Ferritin','BSG','BSG_1h','RF','Anti-CCP','Hb') AND date BETWEEN :date_from AND :date_to ORDER BY date, parameter",
+    "daily_activity": "SELECT date, person, steps, active_energy_kcal AS active_calories, sleep_hr_avg AS hr_avg, resting_hr_bpm AS hr_resting, sleep_score, sleep_duration_min AS total_sleep_min FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "medications": "SELECT ts, date, drug_name, dose_value, dose_unit, route, notes FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "weather_context": "SELECT date, temp_out_c, pressure_hpa, humidity_out_pct, rain_mm, pollen_grass, pollen_birch, pollen_mugwort, pollen_alder, pollen_ragweed FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to AND pressure_hpa IS NOT NULL ORDER BY date"
+  }
+}

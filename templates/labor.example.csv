@@ -1,0 +1,103 @@
+# Beispiel-Laborbefunde für Max Mustermann (Jg. 1967) — SYNTHETISCHE DATEN
+# Messzeitpunkte:
+#   2018-06-12  STI-Screening
+#   2019-05-12  Vorsorge-Labor (PSA + Basislabor)
+#   2019-09-18  Zöliakie-Workup
+#   2020-09-28  Zöliakie-Verlaufskontrolle (12 Monate GF-Diät)
+#   2022-04-05  Post-COVID-Workup (akute Entzündungsphase)
+#   2023-03-22  Follow-up nach stationärer Herzrhythmusabklärung
+#   2023-05-20  STI-Screening (erweitert)
+#   2024-09-10  Verlaufskontrolle (partielle Remission)
+#
+# Format: datum,parameter,kategorie,wert,einheit,ref_min,ref_max,labor,status,kommentar
+datum,parameter,kategorie,wert,einheit,ref_min,ref_max,labor,status,kommentar
+# ── 2018-06-12: STI-Screening ────────────────────────────────────────────────
+2018-06-12,HIV-Antikörper,Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2018-06-12,HCV-Antikörper,Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2018-06-12,Syphilis (TPPA),Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2018-06-12,HBsAg,Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,Hepatitis-B-Impfschutz vorhanden
+# ── 2019-09-18: Zöliakie-Workup ─────────────────────────────────────────────
+2019-09-18,tTG-IgA (Gewebstransglutaminase),Autoimmundiagnostik,87,U/ml,0,10,Labor Muster GmbH,H,Zöliakie-Diagnosekriterium erfüllt
+2019-09-18,Endomysium-AK (EMA),Autoimmundiagnostik,positiv,,,,Labor Muster GmbH,H,Titerkontrolle nach 6 Monaten GF-Diät
+2019-09-18,Gesamt-IgA,Autoimmundiagnostik,2.1,g/l,0.7,4.0,Labor Muster GmbH,,IgA-Mangel ausgeschlossen
+2019-09-18,Hämoglobin,Blutbild,12.8,g/dl,13.5,17.5,Labor Muster GmbH,L,Malabsorptions-Anämie
+2019-09-18,Ferritin,Eisen/Entzündung,14,µg/l,30,400,Labor Muster GmbH,L,Eisenmangel durch Malabsorption
+2019-09-18,Vitamin D (25-OH),Vitamine,14,ng/ml,30,60,Labor Muster GmbH,L,Malabsorption; vor Supplementierung
+2019-09-18,Folsäure,Vitamine,3.1,µg/l,5.4,20.0,Labor Muster GmbH,L,Malabsorption
+# ── 2019-05-12: Vorsorge-Labor ───────────────────────────────────────────────
+2019-05-12,PSA (Prostata-spezifisches Antigen),Tumormarker,1.8,ng/ml,0,4.0,Labor Muster GmbH,,altersgerecht; Kontrolle in 2 Jahren
+2019-05-12,Kreatinin,Niere/Leber,0.94,mg/dl,0.70,1.20,Labor Muster GmbH,,
+2019-05-12,Cholesterin gesamt,Metabolismus,224,mg/dl,0,200,Labor Muster GmbH,H,
+2019-05-12,LDL-Cholesterin,Metabolismus,148,mg/dl,0,130,Labor Muster GmbH,H,
+2019-05-12,HbA1c,Metabolismus,6.0,%,0,5.6,Labor Muster GmbH,H,
+# ── 2020-09-28: Zöliakie-Verlaufskontrolle (12 Monate GF-Diät) ──────────────
+2020-09-28,tTG-IgA (Gewebstransglutaminase),Autoimmundiagnostik,6,U/ml,0,10,Labor Muster GmbH,,normalisiert unter GF-Diät (war 87 U/ml)
+2020-09-28,Hämoglobin,Blutbild,14.1,g/dl,13.5,17.5,Labor Muster GmbH,,erholt (war 12.8)
+2020-09-28,Ferritin,Eisen/Entzündung,52,µg/l,30,400,Labor Muster GmbH,,erholt (war 14)
+2020-09-28,Vitamin D (25-OH),Vitamine,44,ng/ml,30,60,Labor Muster GmbH,,normalisiert nach Supplementierung
+2020-09-28,Folsäure,Vitamine,9.8,µg/l,5.4,20.0,Labor Muster GmbH,,normalisiert
+# ── 2022-04-05: Post-COVID-Workup ────────────────────────────────────────────
+2022-04-05,Leukozyten,Blutbild,7.4,G/l,4.0,10.0,Labor Muster GmbH,,
+2022-04-05,Lymphozyten,Blutbild,1.4,G/l,1.5,3.5,Labor Muster GmbH,L,Post-COVID Lymphopenie
+2022-04-05,Hämoglobin,Blutbild,14.8,g/dl,13.5,17.5,Labor Muster GmbH,,
+2022-04-05,Thrombozyten,Blutbild,312,G/l,150,400,Labor Muster GmbH,,
+2022-04-05,CRP,Entzündung,12.4,mg/l,0,5.0,Labor Muster GmbH,H,
+2022-04-05,Ferritin,Eisen/Entzündung,248,µg/l,30,400,Labor Muster GmbH,,erhöht im Normbereich
+2022-04-05,D-Dimer,Gerinnung,0.82,mg/l FEU,0,0.50,Labor Muster GmbH,H,Mikrothrombosierung?
+2022-04-05,NT-proBNP,Herzmarker,168,pg/ml,0,125,Labor Muster GmbH,H,
+2022-04-05,Homocystein,Metabolismus,18.4,µmol/l,0,15.0,Labor Muster GmbH,H,
+2022-04-05,HbA1c,Metabolismus,6.1,%,0,5.6,Labor Muster GmbH,H,Prä-Diabetes-Bereich
+2022-04-05,Kreatinin,Niere/Leber,0.98,mg/dl,0.70,1.20,Labor Muster GmbH,,
+2022-04-05,GFR (CKD-EPI),Niere/Leber,76,ml/min,60,120,Labor Muster GmbH,,
+2022-04-05,TSH,Schilddrüse,2.14,mU/l,0.27,4.20,Labor Muster GmbH,,unter Levothyroxin 100 µg/d
+2022-04-05,TPO-AK,Schilddrüse,389,U/ml,0,34,Labor Muster GmbH,H,Hashimoto aktiv
+2022-04-05,Vitamin D (25-OH),Vitamine,19,ng/ml,30,60,Labor Muster GmbH,L,Mangel
+2022-04-05,Vitamin B12,Vitamine,298,pg/ml,200,900,Labor Muster GmbH,,
+# ── 2023-03-22: Follow-up nach Herzrhythmusabklärung ─────────────────────────
+2023-03-22,Leukozyten,Blutbild,5.8,G/l,4.0,10.0,Labor Muster GmbH,,
+2023-03-22,Lymphozyten,Blutbild,1.8,G/l,1.5,3.5,Labor Muster GmbH,,normalisiert
+2023-03-22,Hämoglobin,Blutbild,14.2,g/dl,13.5,17.5,Labor Muster GmbH,,
+2023-03-22,Thrombozyten,Blutbild,198,G/l,150,400,Labor Muster GmbH,,
+2023-03-22,CRP,Entzündung,3.8,mg/l,0,5.0,Labor Muster GmbH,,deutlich rückläufig
+2023-03-22,Ferritin,Eisen/Entzündung,89,µg/l,30,400,Labor Muster GmbH,,
+2023-03-22,D-Dimer,Gerinnung,0.31,mg/l FEU,0,0.50,Labor Muster GmbH,,normalisiert
+2023-03-22,NT-proBNP,Herzmarker,98,pg/ml,0,125,Labor Muster GmbH,,normalisiert
+2023-03-22,Homocystein,Metabolismus,14.2,µmol/l,0,15.0,Labor Muster GmbH,,normalisiert
+2023-03-22,HbA1c,Metabolismus,5.9,%,0,5.6,Labor Muster GmbH,H,
+2023-03-22,Cholesterin gesamt,Metabolismus,218,mg/dl,0,200,Labor Muster GmbH,H,
+2023-03-22,LDL-Cholesterin,Metabolismus,142,mg/dl,0,130,Labor Muster GmbH,H,relevant bei Hypertonie
+2023-03-22,HDL-Cholesterin,Metabolismus,48,mg/dl,40,999,Labor Muster GmbH,,
+2023-03-22,Triglyceride,Metabolismus,156,mg/dl,0,150,Labor Muster GmbH,H,
+2023-03-22,Kreatinin,Niere/Leber,0.92,mg/dl,0.70,1.20,Labor Muster GmbH,,
+2023-03-22,GFR (CKD-EPI),Niere/Leber,82,ml/min,60,120,Labor Muster GmbH,,
+2023-03-22,GOT (AST),Niere/Leber,28,U/l,0,50,Labor Muster GmbH,,
+2023-03-22,GPT (ALT),Niere/Leber,34,U/l,0,50,Labor Muster GmbH,,
+2023-03-22,Gamma-GT,Niere/Leber,29,U/l,0,60,Labor Muster GmbH,,
+2023-03-22,Natrium,Elektrolyte,141,mmol/l,136,145,Labor Muster GmbH,,
+2023-03-22,Kalium,Elektrolyte,4.2,mmol/l,3.5,5.0,Labor Muster GmbH,,
+2023-03-22,TSH,Schilddrüse,1.82,mU/l,0.27,4.20,Labor Muster GmbH,,
+2023-03-22,fT3,Schilddrüse,3.4,pmol/l,3.1,6.8,Labor Muster GmbH,,
+2023-03-22,fT4,Schilddrüse,15.2,pmol/l,12.0,22.0,Labor Muster GmbH,,
+2023-03-22,TPO-AK,Schilddrüse,312,U/ml,0,34,Labor Muster GmbH,H,
+2023-03-22,Vitamin D (25-OH),Vitamine,28,ng/ml,30,60,Labor Muster GmbH,L,Insuffizienz; Supplementierung empfohlen
+2023-03-22,Vitamin B12,Vitamine,342,pg/ml,200,900,Labor Muster GmbH,,
+2023-03-22,Folsäure,Vitamine,8.2,µg/l,5.4,20.0,Labor Muster GmbH,,
+# ── 2023-05-20: STI-Screening (erweitert) ────────────────────────────────────
+2023-05-20,HIV-Ak/p24-Antigen,Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,4. Generation Kombtest
+2023-05-20,HCV-Antikörper,Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2023-05-20,Syphilis (TPPA),Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2023-05-20,Gonorrhoe (PCR Urin),Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+2023-05-20,Chlamydien (PCR Urin),Infektionsdiagnostik,negativ,,,,Labor Muster GmbH,,
+# ── 2024-09-10: Verlaufskontrolle (partielle Remission) ──────────────────────
+2024-09-10,CRP,Entzündung,2.1,mg/l,0,5.0,Labor Muster GmbH,,stabil niedrig
+2024-09-10,Ferritin,Eisen/Entzündung,74,µg/l,30,400,Labor Muster GmbH,,
+2024-09-10,HbA1c,Metabolismus,5.7,%,0,5.6,Labor Muster GmbH,H,Grenzwertig; Lebensstilinterventionen wirken
+2024-09-10,Cholesterin gesamt,Metabolismus,204,mg/dl,0,200,Labor Muster GmbH,H,rückläufig
+2024-09-10,LDL-Cholesterin,Metabolismus,131,mg/dl,0,130,Labor Muster GmbH,H,Grenzwertig
+2024-09-10,Triglyceride,Metabolismus,138,mg/dl,0,150,Labor Muster GmbH,,normalisiert
+2024-09-10,Kreatinin,Niere/Leber,0.89,mg/dl,0.70,1.20,Labor Muster GmbH,,stabil unter Ramipril
+2024-09-10,GFR (CKD-EPI),Niere/Leber,86,ml/min,60,120,Labor Muster GmbH,,
+2024-09-10,TSH,Schilddrüse,1.65,mU/l,0.27,4.20,Labor Muster GmbH,,stabil
+2024-09-10,TPO-AK,Schilddrüse,278,U/ml,0,34,Labor Muster GmbH,H,leicht rückläufig
+2024-09-10,Vitamin D (25-OH),Vitamine,42,ng/ml,30,60,Labor Muster GmbH,,normalisiert nach Supplementierung
+2024-09-10,Vitamin B12,Vitamine,398,pg/ml,200,900,Labor Muster GmbH,,

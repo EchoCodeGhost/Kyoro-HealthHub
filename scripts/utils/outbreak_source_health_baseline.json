@@ -1,0 +1,140 @@
+{
+  "are_konsultation": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "cdc_travel": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "crm": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "ecdc": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "efsa": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "eurosurveillance": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "fli_avian_influenza": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "fli_wnv": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "grippeweb": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "healthmap": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "lgl": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "promedmail": {
+    "detail": "ProMED: kein RSS erreichbar",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "broken"
+  },
+  "reliefweb": {
+    "detail": "ReliefWeb: nicht erreichbar",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "broken"
+  },
+  "rki": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "wahis": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "wahis_wild": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who_afro": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who_emro": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-28",
+    "status": "ok"
+  },
+  "who_euro": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who_paho": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who_searo": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  },
+  "who_wpro": {
+    "detail": "",
+    "last_checked": "2026-09-28",
+    "since": "2026-09-23",
+    "status": "ok"
+  }
+}

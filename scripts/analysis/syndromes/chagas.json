@@ -1,0 +1,55 @@
+{
+  "slug": "chagas",
+  "name_de": "Chronische Chagas-Kardiomyopathie / Post-Chagas-Syndrom",
+  "lag_weeks": 52,
+  "refs": "Rassi et al. 2010 (Lancet), Bern 2015 (NEJM), Marin-Neto et al. 2007 (Circulation), WHO Chagas Disease 2023",
+  "system_prompt": "Du bist ein Kardiologe und Infektiologe mit Expertise in Parasitosen und post-infektiöser Kardiomyopathie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Chagas-Krankheit: Trypanosoma cruzi; Übertragung durch Raubwanzen (Triatominae) in Lateinamerika\n- In Europa und Deutschland: Immigranten aus Lateinamerika; sexuelle/vertikale Übertragung; Bluttransfusion\n- Chronische Phase (10–30 Jahre nach Akutinfektion): Chagas-Kardiomyopathie (30% der Infizierten)\n- Kardiale Manifestationen: dilatatve Kardiomyopathie, AV-Block, Rechtsschenkelblock, ventrikuläre Arrhythmien, Apoplex\n- Megakolon / Megaösophagus (digestive Form): autonome Neuropathie des ENS\n- Post-Chagas-Fatigue: chronische Erschöpfung, autonome Dysregulation\n- Serologie: ELISA + IFAT (zwei verschiedene Tests für Diagnose); PCR im Akutfall\n- Biomarker: EKG (Rechtsschenkelblock, QT-Verlängerung), NT-proBNP, Echokardiographie\n- AFES: ventrikuläre Arrhythmien, AV-Block — direkte Relevanz\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Kardiales Muster**: AFES-Score — Arrhythmie-Muster passend zu Chagas-Kardiomyopathie?\n5. **Trend**: Progression oder stabil?\n6. **Klinische Empfehlung**: Herkunftsanamnese Lateinamerika, Chagas-Serologie (ELISA+IFAT), Kardiologie, EKG.",
+  "icd10_gm": [
+    "B57.0",
+    "B57.1",
+    "B57.2",
+    "B57.3"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Chagas Disease Fact Sheet 2023",
+    "esc": "ESC Guidelines Heart Failure 2021 (Chagas-Kardiomyopathie)",
+    "aha": "AHA Scientific Statement: Chagas Cardiomyopathy 2018"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Herzrasen",
+    "Herzstolpern",
+    "Palpitationen",
+    "Dyspnoe",
+    "Kurzatmigkeit",
+    "Schwäche",
+    "Schwindel",
+    "Synkope",
+    "Ödeme",
+    "Bauchschmerzen",
+    "Schluckbeschwerden",
+    "Verstopfung",
+    "Übelkeit",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Brustschmerzen",
+    "Post-Exertionelle Malaise"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Lateinamerika",
+    "Brasilien",
+    "Argentinien",
+    "Bolivien",
+    "Kolumbien",
+    "Venezuela",
+    "Peru",
+    "Chile",
+    "Paraguay",
+    "Zentralamerika",
+    "Mexiko",
+    "tropisch"
+  ]
+}

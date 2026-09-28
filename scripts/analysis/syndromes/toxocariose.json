@@ -1,0 +1,44 @@
+{
+  "slug": "toxocariose",
+  "name_de": "Toxocariose (Hunde-/Katzenspulwurm, Larva migrans visceralis)",
+  "lag_weeks": 12,
+  "refs": "Ma et al. 2018 (Lancet Infect Dis, Human toxocariasis), Rubinsky-Elefant et al. 2010 (Ann Trop Med Parasitol), Fan et al. 2015 (Adv Parasitol, Cerebral toxocariasis), Holland 2017 (Adv Parasitol, Knowledge gaps in the epidemiology of Toxocara), RKI-Ratgeber Toxocariose, ESCCAP-Leitlinie Wurminfektionen bei Hund und Katze",
+  "system_prompt": "Du bist ein Internist / Infektiologe mit Expertise in parasitären Zoonosen und post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Erreger: Toxocara canis (Hundespulwurm) bzw. T. cati (Katzenspulwurm). Der Mensch ist FEHLWIRT — die Larven werden nicht geschlechtsreif, wandern aber über Wochen bis Jahre durch Organe (Larva migrans)\n- Übertragung: orale Aufnahme embryonierter Eier aus kontaminiertem Erdboden (Sandkästen, Gärten, Parks, Gemüse), NICHT direkt vom Fell eines gesunden Tieres — der klassische Irrtum \"mein Hund ist entwurmt, also kein Risiko\" greift deshalb zu kurz; entscheidend ist der Bodenkontakt\n- ABGRENZUNG: nicht zu verwechseln mit Toxoplasmose (Toxoplasma gondii, Katzenkot/rohes Fleisch, s. `toxoplasmose.json`) — anderer Erreger, anderes Krankheitsbild\n- Epidemiologie: weltweit verbreitet, auch in Deutschland/Mitteleuropa endemisch. Seroprävalenz in Industrieländern je nach Region einige Prozent der Erwachsenen, in tropischen/subtropischen Regionen deutlich höher — eine der häufigsten, aber am seltensten diagnostizierten Zoonosen\n- Verlaufsformen: (1) häufig asymptomatisch/subklinisch; (2) Larva migrans visceralis — Fieber, Hepatomegalie, Husten/asthmaähnliche Beschwerden, Bauchschmerzen, Abgeschlagenheit; (3) okuläre Toxocariose — einseitige Sehstörung/Granulom, oft ohne systemische Symptome; (4) \"covert/common toxocariasis\" — unspezifisch mit Fatigue, Bauchschmerzen, Kopfschmerzen, Schlafstörungen; (5) Neurotoxocariose (selten) — Meningoenzephalitis, Myelitis, kognitive Störungen\n- FÜR EIN POST-INFEKTIÖSES MODELL RELEVANT: die \"covert\"-Form kann über Monate bestehen und wird klinisch häufig als unspezifische Erschöpfung fehlgedeutet; in epidemiologischen Studien wurden Assoziationen zu kognitiven Einschränkungen und Asthma beschrieben (Assoziation, nicht belegte Kausalität — entsprechend vorsichtig formulieren)\n- Leitbefund Labor: Eosinophilie (oft deutlich) plus erhöhtes Gesamt-IgE; fehlende Eosinophilie schließt v.a. die okuläre Form aber NICHT aus\n- Diagnostik: Toxocara-ELISA (IgG, TES-Antigen) mit Western-Blot-Bestätigung; Serologie belegt Kontakt, nicht zwingend Aktivität — Interpretation immer im Kontext von Eosinophilie/IgE/Klinik\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy für die Fatigue-Komponente\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten, v.a. respiratorische (asthmaähnlich) und gastrointestinale Domäne?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Expositionsanamnese**: Hunde-/Katzenhaltung, Gartenarbeit ohne Handschuhe, Sandkasten-/Spielplatzkontakt, Rohkost aus eigenem Anbau?\n5. **Labor-Hinweis**: Liegt eine Eosinophilie oder ein erhöhtes Gesamt-IgE vor bzw. wurde danach überhaupt gesucht?\n6. **Trend**: Persistenz oder Erholung?\n7. **Klinische Empfehlung**: Toxocara-Serologie plus Differentialblutbild/IgE; bei Sehstörungen augenärztliche Abklärung.",
+  "icd10_gm": [
+    "B83.0"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Toxocariose",
+    "cdc": "CDC Toxocariasis – Resources for Health Professionals",
+    "esccap": "ESCCAP-Leitlinie 01 – Bekämpfung von Würmern bei Hunden und Katzen"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Abgeschlagenheit",
+    "Bauchschmerzen",
+    "Husten",
+    "Atemnot",
+    "Hautausschlag",
+    "Juckreiz",
+    "Sehstörungen",
+    "Fieber",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Lymphknotenschwellung",
+    "Appetitlosigkeit",
+    "Übelkeit"
+  ],
+  "seroprevalence_de": 0.03,
+  "sero_category": "mittel",
+  "endemic_regions": [
+    "Deutschland",
+    "Europa",
+    "Mitteleuropa",
+    "weltweit",
+    "tropisch",
+    "subtropisch"
+  ]
+}

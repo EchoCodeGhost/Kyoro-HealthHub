@@ -1,0 +1,58 @@
+{
+  "slug": "filariose",
+  "name_de": "Post-lymphatische Filariose (Elephantiasis-Residuen)",
+  "lag_weeks": 52,
+  "refs": "Ottesen et al. 1997 (J Infect Dis), Dreyer et al. 2000 (Am J Trop Med Hyg), Ramaiah & Ottesen 2014 (PLoS Negl Trop Dis), WHO Lymphatic Filariasis 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in tropischer Lymphologie und post-parasitärer Immunpathologie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Lymphatische Filariose: Wuchereria bancrofti, Brugia malayi, B. timori; Überträger: Culex/Aedes/Mansonia-Mücken\n- Endemisch: Süd-/Südostasien, Subsahara-Afrika, Pazifik, Karibik (1,3 Mrd. Menschen in Risikogebieten)\n- Chronische Phase: Elephantiasis (Lymphödem Extremitäten, Skrotum), Hydrozele, tropische pulmonale Eosinophilie\n- POST-Filariose nach Parasitenfreiheit (MDA/Behandlung): persistierendes Lymphödem bleibt auch ohne aktive Infektion bestehen — typisches Post-Infektions-Syndrom\n- Lymphödem-assoziierte Fatigue: Mobilitätseinschränkung, chronische Entzündung, rezidivierende bakterielle Superinfektionen\n- Psychosoziale Belastung: soziale Stigmatisierung, Depression\n- Tropische pulmonale Eosinophilie: Reaktivität auf Filarienlarvene → Asthma-ähnliches Bild, nächtliche Dyspnoe\n- Serologie: Og4C3-Antigen (W. bancrofti, am sensitivsten), Wb123-ELISA, Eosinophilie\n- Biomarker: persistierende Eosinophilie, Lymphszintigraphie-Muster\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Respiratorische/lymphatische Komponente**: SpO2, Dyspnoe (tropische pulmonale Eosinophilie?)?\n5. **Trend**: Persistenz der Lymphödeme oder Rückbildung?\n6. **Klinische Empfehlung**: Reiseanamnese Tropen, Og4C3-Antigen, Eosinophilien-Differenzialdiagnose, Lymphologie.",
+  "icd10_gm": [
+    "B74.0",
+    "B74.1",
+    "B74.2"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Lymphatic Filariasis – Fact Sheet 2023",
+    "dtg": "DTG-Leitlinie Importierte Parasitosen"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Schwellung",
+    "Ödeme",
+    "Lymphödem",
+    "Dyspnoe",
+    "Husten",
+    "Kurzatmigkeit",
+    "Fieber",
+    "Muskelschmerzen",
+    "Gelenkschmerzen",
+    "Juckreiz",
+    "Hautveränderungen",
+    "Schlafstörungen",
+    "Konzentrationsstörungen",
+    "Abgeschlagenheit",
+    "Stimmungsschwankungen",
+    "Angst"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Südostasien",
+    "Indien",
+    "Bangladesh",
+    "Indonesien",
+    "Myanmar",
+    "Thailand",
+    "Subsahara-Afrika",
+    "Nigeria",
+    "Demokratische Republik Kongo",
+    "Tansania",
+    "Mosambik",
+    "Ghana",
+    "Karibik",
+    "Haiti",
+    "Pazifik",
+    "Papua-Neuguinea"
+  ]
+}

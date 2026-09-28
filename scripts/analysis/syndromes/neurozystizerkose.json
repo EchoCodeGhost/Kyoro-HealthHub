@@ -1,0 +1,59 @@
+{
+  "slug": "neurozystizerkose",
+  "name_de": "Neurozystizerkose / Post-Taeniasis-Syndrom",
+  "lag_weeks": 52,
+  "refs": "Ndimubanzi et al. 2010 (PLoS Negl Trop Dis), Garcia et al. 2014 (NEJM), Carpio et al. 2016 (Lancet Neurol), WHO Taeniasis/Cysticercosis 2023, Bhatt et al. 2021 (Epilepsia)",
+  "system_prompt": "Du bist ein Neurologe und Infektiologe mit Expertise in ZNS-Parasitosen und post-infektiöser Epilepsie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Neurozystizerkose (NCC): Taenia solium-Larven (Zystizerken) im ZNS; häufigste helminthische ZNS-Erkrankung weltweit\n- Häufigste vermeidbare Ursache von Epilepsie in Entwicklungsländern (bis 30% aller Epilepsien in Endemiegebieten)\n- Übertragung: orale Aufnahme von T.-solium-Eiern (kontaminiertes Wasser/Gemüse); NICHT durch Schweinefleisch (das ist Zystizerkose im Schwein)\n- Endemisch: Lateinamerika, Subsahara-Afrika, Süd- und Südostasien; Importfälle in Europa durch Migration und Reisen\n- Klinik: Epilepsie, Kopfschmerzen, Hydrozephalus, Demenz (je nach Lokalisation und Stadium)\n- Post-NCC nach Therapie: Epilepsie-Residuen (häufig bleibend), kognitive Störungen, Persönlichkeitsveränderungen, Fatigue\n- Degenerierte Zysten hinterlassen Kalzifikationen → Epilepsie-Fokus dauerhaft möglich\n- Serologie: Enzyme-linked immunoelectrotransfer blot (EITB, Western Blot) — hohe Spezifität; ELISA weniger spezifisch\n- Biomarker: Kalzifikationen im Schädel-CT/-MRT; Eosinophilie (variabel)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neurologisches Muster**: Kognitive Störungen, Anfallsleiden, Kopfschmerz-Charakter?\n5. **Trend**: Persistenz oder Erholung — passend zu kalzifizierten Residuen?\n6. **Klinische Empfehlung**: Reiseanamnese (Lateinamerika, Südasien, Afrika), EITB-Serologie, Schädel-MRT, Neurologie.",
+  "icd10_gm": [
+    "B69.0",
+    "B69.9"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Taeniasis/Cysticercosis – Fact Sheet 2023",
+    "awmf": "AWMF: Neurozystizerkose — Empfehlungen der DTG",
+    "idsa": "IDSA Guidelines for Treatment of Human Cysticercosis 2013"
+  },
+  "symptoms": [
+    "Kopfschmerzen",
+    "Krampfanfälle",
+    "Epilepsie",
+    "Konzentrationsstörungen",
+    "Gedächtnisprobleme",
+    "Brain Fog",
+    "Persönlichkeitsveränderungen",
+    "Stimmungsschwankungen",
+    "Fatigue",
+    "Schwindel",
+    "Übelkeit",
+    "Sehstörungen",
+    "Schlafstörungen",
+    "Angst",
+    "Reizbarkeit",
+    "Verlangsamtes Denken",
+    "Wortfindungsstörungen"
+  ],
+  "seroprevalence_de": 0.0005,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Lateinamerika",
+    "Mexiko",
+    "Peru",
+    "Bolivien",
+    "Brasilien",
+    "Kolumbien",
+    "Zentralamerika",
+    "Subsahara-Afrika",
+    "Tansania",
+    "Mosambik",
+    "Äthiopien",
+    "Indien",
+    "Nepal",
+    "Sri Lanka",
+    "Südostasien",
+    "China",
+    "Papua-Neuguinea",
+    "tropisch",
+    "subtropisch"
+  ]
+}

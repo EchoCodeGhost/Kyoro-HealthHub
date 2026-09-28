@@ -1,0 +1,309 @@
+{
+  "_comment": "Maps syndrome slug → lab marker list. parameter = LIKE-Substring gegen lab_manual.parameter.",
+  "_types": {
+    "IgM":    {"elevated": 2.5,  "negative": -0.5},
+    "IgG":    {"elevated": 1.0,  "negative": -0.3},
+    "IgA":    {"elevated": 1.0,  "negative": -0.3},
+    "PCR":    {"elevated": 3.0,  "negative": -1.5},
+    "Antigen":{"elevated": 2.0,  "negative": -1.0},
+    "Kultur": {"elevated": 2.0,  "negative": -0.5}
+  },
+
+  "post_covid": [
+    {"parameter": "SARS-CoV-2 Ak", "type": "IgG", "label": "SARS-CoV-2 IgG"}
+  ],
+
+  "borreliose": [
+    {"parameter": "Borrelien IgG",        "type": "IgG", "label": "Borrelia IgG (ELISA)"},
+    {"parameter": "Borrelien IgM",        "type": "IgM", "label": "Borrelia IgM (ELISA)"},
+    {"parameter": "Borrelia Western Blot","type": "IgG", "label": "Borrelia Western Blot (IgG)"},
+    {"parameter": "Borrelia Westernblot", "type": "IgG", "label": "Borrelia Westernblot (IgG)"},
+    {"parameter": "Borrelien Westernblot","type": "IgG", "label": "Borrelia Westernblot (IgG)"}
+  ],
+
+  "cmv": [
+    {"parameter": "CMV IgG",       "type": "IgG", "label": "CMV IgG"},
+    {"parameter": "CMV IgM",       "type": "IgM", "label": "CMV IgM"}
+  ],
+
+  "q_fieber": [
+    {"parameter": "Coxiella burnetii-DNA", "type": "PCR", "label": "Coxiella-PCR"},
+    {"parameter": "Coxiella burnetii IgG", "type": "IgG", "label": "Coxiella IgG (Phase I/II)"}
+  ],
+
+  "rickettsia": [
+    {"parameter": "Rickettsia conorii", "type": "IgG", "label": "Rickettsia conorii AK"},
+    {"parameter": "Rickettsia typhi",   "type": "IgG", "label": "Rickettsia typhi AK"}
+  ],
+
+  "toxoplasmose": [
+    {"parameter": "Toxoplasma gondii-IgM", "type": "IgM", "label": "Toxoplasma IgM"},
+    {"parameter": "Toxoplasma",            "type": "IgG", "label": "Toxoplasma IgG"}
+  ],
+
+  "mykose": [
+    {"parameter": "Candida",          "type": "Kultur",  "label": "Candida (Kultur/Abstrich)"},
+    {"parameter": "Galactomannan",    "type": "Antigen", "label": "Aspergillus-Galactomannan"},
+    {"parameter": "1,3-beta-D-Glucan","type": "Antigen", "label": "Beta-D-Glucan"}
+  ],
+
+  "ebv": [
+    {"parameter": "EBV-VCA-IgM",         "type": "IgM", "label": "EBV-VCA-IgM"},
+    {"parameter": "VCA-IgM",             "type": "IgM", "label": "EBV-VCA-IgM"},
+    {"parameter": "EBV-VCA-IgG",         "type": "IgG", "label": "EBV-VCA-IgG"},
+    {"parameter": "VCA-IgG",             "type": "IgG", "label": "EBV-VCA-IgG"},
+    {"parameter": "EBV-EA",              "type": "IgG", "label": "EBV-EA-IgG (Reaktivierung)"},
+    {"parameter": "EBNA",                "type": "IgG", "label": "EBNA-IgG"}
+  ],
+
+  "hhv6": [
+    {"parameter": "HHV-6",     "type": "IgG", "label": "HHV-6 IgG"},
+    {"parameter": "HHV-6-DNA", "type": "PCR", "label": "HHV-6 DNA (PCR)"}
+  ],
+
+  "mycoplasma": [
+    {"parameter": "Mycoplasma pneumoniae IgG", "type": "IgG", "label": "Mycoplasma pneumoniae IgG"},
+    {"parameter": "Mycoplasma pneumoniae IgM", "type": "IgM", "label": "Mycoplasma pneumoniae IgM"},
+    {"parameter": "Mycoplasma",               "type": "IgG", "label": "Mycoplasma IgG"}
+  ],
+
+  "parvovirus": [
+    {"parameter": "Parvovirus B19 IgG", "type": "IgG", "label": "Parvovirus B19 IgG"},
+    {"parameter": "Parvovirus B19 IgM", "type": "IgM", "label": "Parvovirus B19 IgM"},
+    {"parameter": "Parvovirus",         "type": "IgG", "label": "Parvovirus IgG"}
+  ],
+
+  "fsme": [
+    {"parameter": "FSME",    "type": "IgG", "label": "FSME-IgG"},
+    {"parameter": "TBE IgG", "type": "IgG", "label": "FSME-IgG (TBE)"},
+    {"parameter": "FSME",    "type": "IgM", "label": "FSME-IgM"}
+  ],
+
+  "bartonellose": [
+    {"parameter": "Bartonella henselae", "type": "IgG", "label": "Bartonella henselae IgG"},
+    {"parameter": "Bartonella",          "type": "IgG", "label": "Bartonella IgG"}
+  ],
+
+  "influenza": [
+    {"parameter": "Influenza A", "type": "PCR", "label": "Influenza A PCR"},
+    {"parameter": "Influenza B", "type": "PCR", "label": "Influenza B PCR"},
+    {"parameter": "Influenza",   "type": "IgG", "label": "Influenza IgG"}
+  ],
+
+  "ornithose": [
+    {"parameter": "Chlamydia psittaci",    "type": "IgG", "label": "Chlamydia psittaci IgG"},
+    {"parameter": "Chlamydophila psittaci","type": "IgG", "label": "Chlamydophila psittaci IgG"},
+    {"parameter": "Ornithose",             "type": "IgG", "label": "Ornithose-AK"}
+  ],
+
+  "chlamydia_pneumoniae": [
+    {"parameter": "Chlamydia trachomatis IgGA", "type": "IgG", "label": "Chlamydia IgGA (EIA)"},
+    {"parameter": "Chlamydophila pneumoniae",   "type": "IgG", "label": "Chlamydophila pneumoniae IgG"},
+    {"parameter": "Chlamydia pneumoniae",       "type": "IgG", "label": "Chlamydia pneumoniae IgG"}
+  ],
+
+  "dengue": [
+    {"parameter": "Dengue",     "type": "IgG",    "label": "Dengue IgG"},
+    {"parameter": "Dengue",     "type": "IgM",    "label": "Dengue IgM"},
+    {"parameter": "Dengue NS1", "type": "Antigen","label": "Dengue NS1-Antigen"}
+  ],
+
+  "chikungunya": [
+    {"parameter": "Chikungunya", "type": "IgG", "label": "Chikungunya IgG"},
+    {"parameter": "Chikungunya", "type": "IgM", "label": "Chikungunya IgM"}
+  ],
+
+  "yersiniose": [
+    {"parameter": "Yersinia IgG", "type": "IgG", "label": "Yersinia IgG"},
+    {"parameter": "Yersinia IgA", "type": "IgA", "label": "Yersinia IgA"},
+    {"parameter": "Yersinia",     "type": "IgG", "label": "Yersinia IgG"}
+  ],
+
+  "brucellose": [
+    {"parameter": "Brucella", "type": "IgG", "label": "Brucella IgG"}
+  ],
+
+  "anaplasmose": [
+    {"parameter": "Anaplasma", "type": "IgG", "label": "Anaplasma IgG"},
+    {"parameter": "Anaplasma", "type": "PCR", "label": "Anaplasma-PCR"}
+  ],
+
+  "babesiose": [
+    {"parameter": "Babesia", "type": "IgG", "label": "Babesia IgG"},
+    {"parameter": "Babesia", "type": "PCR", "label": "Babesia-PCR"}
+  ],
+
+  "giardiose": [
+    {"parameter": "Giardia",  "type": "Antigen", "label": "Giardia-Antigen (Stuhl)"},
+    {"parameter": "Lamblia",  "type": "Antigen", "label": "Giardia lamblia Antigen"}
+  ],
+
+  "west_nile": [
+    {"parameter": "West-Nil",      "type": "IgM", "label": "West-Nil-Virus IgM"},
+    {"parameter": "West Nile",     "type": "IgM", "label": "West-Nil-Virus IgM"},
+    {"parameter": "WNV",           "type": "IgG", "label": "West-Nil-Virus IgG"}
+  ],
+
+  "hantavirus": [
+    {"parameter": "Hantavirus",    "type": "IgG", "label": "Hantavirus IgG"},
+    {"parameter": "Puumala",       "type": "IgG", "label": "Puumala-IgG (Hanta)"},
+    {"parameter": "Hanta",         "type": "IgG", "label": "Hantavirus IgG"}
+  ],
+
+  "leishmaniose": [
+    {"parameter": "Leishmania",    "type": "IgG", "label": "Leishmania IgG (IFAT)"},
+    {"parameter": "rK39",          "type": "Antigen", "label": "rK39-Dipstick (Kala-Azar)"}
+  ],
+
+  "legionellose": [
+    {"parameter": "Legionella",    "type": "Antigen", "label": "Legionella-Urin-Antigen (sg1)"},
+    {"parameter": "Legionella IgG","type": "IgG",     "label": "Legionella IgG"}
+  ],
+
+  "vzv": [
+    {"parameter": "VZV-IgM",       "type": "IgM", "label": "VZV IgM (Reaktivierung)"},
+    {"parameter": "VZV IgM",       "type": "IgM", "label": "VZV IgM"},
+    {"parameter": "VZV-IgG",       "type": "IgG", "label": "VZV IgG"},
+    {"parameter": "VZV IgG",       "type": "IgG", "label": "VZV IgG"},
+    {"parameter": "Varizella",     "type": "IgG", "label": "VZV IgG (Varizellen-AK)"},
+    {"parameter": "Zoster",        "type": "IgG", "label": "Zoster IgG"}
+  ],
+
+  "leptospirose": [
+    {"parameter": "Leptospira",    "type": "IgM", "label": "Leptospira IgM"},
+    {"parameter": "Leptospirose",  "type": "IgG", "label": "Leptospirose IgG"}
+  ],
+
+  "reaktive_arthritis": [
+    {"parameter": "Campylobacter IgA",  "type": "IgA", "label": "Campylobacter IgA"},
+    {"parameter": "Campylobacter IgG",  "type": "IgG", "label": "Campylobacter IgG"},
+    {"parameter": "Salmonella",         "type": "IgG", "label": "Salmonella-Widal"},
+    {"parameter": "HLA-B27",            "type": "IgG", "label": "HLA-B27 (Risikofaktor)"}
+  ],
+
+  "post_strep": [
+    {"parameter": "Anti-Streptolysin", "type": "IgG", "label": "ASL (Anti-Streptolysin O)"},
+    {"parameter": "Streptolysin",      "type": "IgG", "label": "ASL"},
+    {"parameter": "Anti DNase B",      "type": "IgG", "label": "Anti-DNase B"},
+    {"parameter": "Anti-DNase",        "type": "IgG", "label": "Anti-DNase B"}
+  ],
+
+  "tularaemie": [
+    {"parameter": "Tularämie",         "type": "IgG", "label": "Tularämie-AK (SAT/ELISA)"},
+    {"parameter": "Francisella",       "type": "IgG", "label": "Francisella tularensis IgG"}
+  ],
+
+  "zika": [
+    {"parameter": "Zika",              "type": "IgM", "label": "Zika-IgM"},
+    {"parameter": "Zika",              "type": "IgG", "label": "Zika-IgG (PRNT)"}
+  ],
+
+  "ross_river": [
+    {"parameter": "Ross River",        "type": "IgM", "label": "Ross-River-IgM"},
+    {"parameter": "Ross River",        "type": "IgG", "label": "Ross-River-IgG"}
+  ],
+
+  "mayaro": [
+    {"parameter": "Mayaro",            "type": "IgM", "label": "Mayaro-IgM"},
+    {"parameter": "Mayaro",            "type": "IgG", "label": "Mayaro-IgG (PRNT)"}
+  ],
+
+  "rsv": [
+    {"parameter": "RSV IgG",           "type": "IgG", "label": "RSV IgG"},
+    {"parameter": "RSV-IgM",           "type": "IgM", "label": "RSV IgM"}
+  ],
+
+  "adenovirus": [
+    {"parameter": "Adenovirus",        "type": "IgG", "label": "Adenovirus IgG"},
+    {"parameter": "Adeno",             "type": "PCR", "label": "Adenovirus-PCR"}
+  ],
+
+  "post_mumps": [
+    {"parameter": "Mumps IgG",         "type": "IgG", "label": "Mumps IgG"},
+    {"parameter": "Mumps-IgM",         "type": "IgM", "label": "Mumps IgM"}
+  ],
+
+  "masern": [
+    {"parameter": "Masern IgG",        "type": "IgG", "label": "Masern IgG"},
+    {"parameter": "Masern-IgM",        "type": "IgM", "label": "Masern IgM"},
+    {"parameter": "Morbilli",          "type": "IgG", "label": "Morbilli IgG"}
+  ],
+
+  "ehec_hus": [
+    {"parameter": "EHEC",              "type": "PCR",    "label": "EHEC/STEC-PCR (Stuhl)"},
+    {"parameter": "Shigatoxin",        "type": "Antigen","label": "Shigatoxin-Nachweis"},
+    {"parameter": "eGFR",             "type": "IgG",    "label": "eGFR (Nierenfunktion)"}
+  ],
+
+  "melioidose": [
+    {"parameter": "Burkholderia",      "type": "IgG", "label": "Burkholderia pseudomallei IgG (IHA)"},
+    {"parameter": "Melioidose",        "type": "IgG", "label": "Melioidose-AK"}
+  ],
+
+  "typhus": [
+    {"parameter": "Typhus",            "type": "IgG", "label": "Salmonella typhi IgG (Widal)"},
+    {"parameter": "Salmonella typhi",  "type": "IgG", "label": "S. typhi Widal-Test"},
+    {"parameter": "Vi-Antigen",        "type": "IgG", "label": "Vi-Kapselagglutination"}
+  ],
+
+  "mers": [
+    {"parameter": "MERS",              "type": "IgG", "label": "MERS-CoV IgG (Neutralisationstest)"},
+    {"parameter": "MERS-CoV",          "type": "PCR", "label": "MERS-CoV PCR"}
+  ],
+
+  "nipah": [
+    {"parameter": "Nipah",             "type": "IgG", "label": "Nipah-IgG (BSL-4-Labor)"},
+    {"parameter": "NiV",               "type": "PCR", "label": "Nipah-PCR (BSL-4)"}
+  ],
+
+  "cchf": [
+    {"parameter": "Krim-Kongo",        "type": "IgG", "label": "CCHF IgG (BSL-3)"},
+    {"parameter": "CCHF",              "type": "IgM", "label": "CCHF IgM"},
+    {"parameter": "Krimfieber",        "type": "PCR", "label": "CCHF-PCR"}
+  ],
+
+  "chagas": [
+    {"parameter": "Trypanosoma cruzi", "type": "IgG", "label": "T. cruzi IgG (ELISA)"},
+    {"parameter": "Chagas",            "type": "IgG", "label": "Chagas-ELISA"}
+  ],
+
+  "schistosomiasis": [
+    {"parameter": "Schistosoma",       "type": "IgG", "label": "Schistosoma IgG (ELISA)"},
+    {"parameter": "Bilharzia",         "type": "IgG", "label": "Bilharziose IgG"}
+  ],
+
+  "ebola_marburg": [
+    {"parameter": "Ebola",             "type": "IgG", "label": "Ebola IgG (BSL-4)"},
+    {"parameter": "Marburg",           "type": "IgG", "label": "Marburg IgG (BSL-4)"}
+  ],
+
+  "lassa": [
+    {"parameter": "Lassa",             "type": "IgG", "label": "Lassa IgG (BSL-3)"},
+    {"parameter": "Lassa",             "type": "IgM", "label": "Lassa IgM"}
+  ],
+
+  "rift_valley": [
+    {"parameter": "Rift Valley",       "type": "IgG", "label": "Rift-Valley-Fieber IgG"},
+    {"parameter": "RVF",               "type": "IgM", "label": "RVF IgM"}
+  ],
+
+  "trypanosomiasis": [
+    {"parameter": "Trypanosoma brucei","type": "IgG", "label": "T. brucei IgG (CATT/IFAT)"},
+    {"parameter": "Schlafkrankheit",   "type": "IgG", "label": "HAT-Serologie"}
+  ],
+
+  "neurozystizerkose": [
+    {"parameter": "Zystizerkose",      "type": "IgG", "label": "Zystizerkose EITB (Western Blot)"},
+    {"parameter": "Taenia",            "type": "IgG", "label": "Taenia solium IgG"}
+  ],
+
+  "onchozerkose": [
+    {"parameter": "Onchocerca",        "type": "IgG", "label": "Onchocerca IgG4 (ELISA)"},
+    {"parameter": "Ov16",              "type": "Antigen", "label": "Ov16-Antigen-Test"}
+  ],
+
+  "filariose": [
+    {"parameter": "Filaria",           "type": "IgG",    "label": "Filaria IgG"},
+    {"parameter": "Og4C3",             "type": "Antigen","label": "Og4C3-Antigen (W. bancrofti)"}
+  ]
+}

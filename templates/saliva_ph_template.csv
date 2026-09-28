@@ -1,0 +1,22 @@
+Datum,Uhrzeit,Kontext,pH,Messmethode,Symptome,Kommentar
+# Kontext-Schlüssel (aus ~/.config/kyoro/saliva_ph_ranges.json):
+#   fasting_morning     — Nüchtern morgens (nach Mundspülung, vor Medikamenten)
+#   post_meal_1h        — 1 Stunde nach Mahlzeit
+#   post_meal_2h        — 2 Stunden nach Mahlzeit
+#   post_antihistamine  — 1–2h nach H1/H2-Blocker-Einnahme
+#   suspected_flare     — Symptom-getriggerte Messung (MCAS-Schub-Verdacht)
+#   evening_baseline    — Abend (2h nach letzter Mahlzeit)
+#
+# Messmethode: Streifen_4.5-9.0 | Streifen_4.5-8.5 | pH-Meter | Lackmuspapier
+#
+# pH: numerisch, z.B. 6.5 oder 7.0
+#   Streifen: Ablesung auf 0,5 genau (z.B. 6.0, 6.5, 7.0, 7.5 …)
+#   pH-Meter: auf 0,01 genau (z.B. 6.83)
+#
+# Symptome (optional, Freitext): z.B. "Zungenbrennen,Flushing" oder leer lassen
+#
+# Beispiele:
+2026-07-09,07:30,fasting_morning,7.0,Streifen_4.5-9.0,,Beispiel – bitte ersetzen
+# 2026-07-09,14:30,post_meal_1h,6.5,Streifen_4.5-9.0,Zungenbrennen,Triggermahlzeit (Tomaten)
+# 2026-07-09,09:00,post_antihistamine,7.0,Streifen_4.5-9.0,,Cetirizin 10mg um 08:00
+# 2026-07-09,18:45,suspected_flare,5.5,Streifen_4.5-9.0,"Flushing,Tachykardie",Schub nach Sport

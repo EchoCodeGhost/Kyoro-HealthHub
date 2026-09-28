@@ -1,0 +1,49 @@
+{
+  "slug": "mers",
+  "name_de": "Post-MERS-Syndrom (Middle East Respiratory Syndrome)",
+  "lag_weeks": 12,
+  "refs": "Lee et al. 2018 (J Korean Med Sci), Das et al. 2023 (Front Med), Batawi et al. 2019 (Infect Dis Ther), ECDC MERS-CoV Risk Assessment 2023, WHO MERS Situation Update 2024",
+  "system_prompt": "Du bist ein Internist mit Expertise in Coronavirus-Erkrankungen und post-viraler Lungenerkrankung.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- MERS-CoV (Middle East Respiratory Syndrome Coronavirus): Beta-Coronavirus; Zoonose (Dromedar → Mensch)\n- Endemisch: Arabische Halbinsel (Saudi-Arabien, UAE, Oman, Jordanien, Kuwait); Importfälle weltweit\n- Letalität ~35% — post-MERS nur bei Überlebenden schwerer Verläufe relevant\n- Post-MERS (Lee 2018): persistente Fatigue (44%), Dyspnoe (24%), PTSD-Symptome, Angststörung; Lungenfibrose-Residuen\n- Analogie zu Long COVID: gleiche Coronavirus-Familie; ähnliche Post-Infektions-Pathophysiologie\n- Serologie: MERS-CoV-Neutralisationstest, MERS-IgG (Spezial-Labor); PCR in Akutphase\n- Biomarker: persistierende Lungenfunktionseinschränkung, D-Dimer, LDH-Erhöhung\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Respiratorische Komponente**: SpO2-Muster, Dyspnoe, Lungenfibrose-Zeichen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Naher Osten/Dromedar-Kontakt, MERS-Serologie (Konsiliarlabor), Lungenfunktion.",
+  "icd10_gm": [
+    "J12.8"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI MERS-CoV — Informationen und Falldefinition (§ 7 IfSG)",
+    "ecdc": "ECDC MERS-CoV Risk Assessment 2023",
+    "who": "WHO MERS-CoV – Situation Update 2024"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Husten",
+    "Dyspnoe",
+    "Kurzatmigkeit",
+    "Fieber",
+    "Brustschmerzen",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Angst",
+    "Schlafstörungen",
+    "Appetitlosigkeit",
+    "Übelkeit",
+    "Post-Exertionelle Malaise",
+    "PEM",
+    "Abgeschlagenheit"
+  ],
+  "seroprevalence_de": 1e-05,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Naher Osten",
+    "Saudi-Arabien",
+    "UAE",
+    "Oman",
+    "Jordanien",
+    "Kuwait",
+    "Katar",
+    "Bahrain",
+    "Jemen",
+    "Irak"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "slug": "leishmaniose",
+  "name_de": "Post-Leishmaniose-Syndrom",
+  "lag_weeks": 12,
+  "refs": "Ready 2010 (Parasit Vectors), WHO Leishmaniasis 2023, Aronson & Herwaldt 2022 (UpToDate), Alvar et al. 2012 (PLoS ONE), ECDC Leishmaniasis in Europe 2021",
+  "system_prompt": "Du bist ein Internist mit Expertise in tropischen und subtropischen Infektionskrankheiten.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Leishmaniose: Protozoen-Infektion, Übertragung durch Sandmücken (Phlebotomus); bisher in Europa v.a. Mittelmeerraum, aber Klimaeignungsmodellierungen zeigen zunehmende Eignung Bayerns für mehrere europäische Sandmückenarten (P. perniciosus, P. mascittii, P. ariasi, P. neglectus, P. perfiliewi, P. tobbi — alle Vektoren der viszeralen Leishmaniose), sowohl aktuell als auch mit weiter zunehmender Tendenz. Diagnostischer blinder Fleck: Leishmaniose sollte perspektivisch auch ohne Mittelmeer-Reiseanamnese in Betracht gezogen werden, sobald sich diese Vektoren in Bayern etablieren — Stand heute primär noch reiseassoziiert, aber keine rein hypothetische Zukunftsfrage mehr\n- Dieselbe Klimaeignungs-Modellierung bestätigt auch die Tigermücke (Aedes albopictus) als Vektor für Chikungunya, Dengue UND West-Nil-Virus (zusätzlich zu den dort primär genannten Culex-Mücken, s. `west_nile.json`) — konsistent mit der bereits in `dengue.json`/`chikungunya.json` dokumentierten Ausbreitung\n- Formen: viszerale (Kala-Azar, L. infantum in EU), kutane, mukokutane\n- Viszerale Leishmaniose: Hepatosplenomegalie, Panzytopenie, Gewichtsverlust; Post-Kala-Azar Dermal Leishmanioid (PKDL) als Spätfolge\n- Post-Behandlung: persistente Fatigue, Immunsuppression, reaktiviertes Bone-Marrow-Bild\n- Endemisch Mittelmeer: Spanien, Mallorca, Kroatien, Griechenland, Italien, Balkan\n- Serologie: rK39-Dipstick, DAT (direkte Agglutination), IFAT; Leishmanin-Hauttest (Montenegro)\n- Biomarker: Panzytopenie, erhöhtes CRP, Ferritin oft extrem erhöht (Makrophagenaktivierung)\n- Wearable-Proxy: Long-COVID-/ME-CFS-Literatur (Fatigue-Domäne)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Hämatologisches Muster**: Gibt es Panzytopenie-Hinweise (Thrombozyten, Leukozyten, Hämoglobin)?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Mittelmeer, Serologie (rK39, IFAT), Ferritin, Knochenmark-Bild.",
+  "icd10_gm": [
+    "B55.0",
+    "B55.1",
+    "B55.2"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Leishmaniasis – Fact Sheet 2023",
+    "ecdc": "ECDC Leishmaniasis in Europe – Epidemiological Report 2021",
+    "rki": "RKI-Ratgeber Leishmaniose"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Gewichtsverlust",
+    "Nachtschweiß",
+    "Appetitlosigkeit",
+    "Milzvergrößerung",
+    "Blutungsneigung",
+    "Anämie",
+    "Lymphknotenschwellung",
+    "Hautveränderungen",
+    "Abgeschlagenheit",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Immunschwäche"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Mallorca (Can Picafort)",
+    "Can Picafort",
+    "Balearen",
+    "Spanien",
+    "Fuerteventura",
+    "Kanarische Inseln",
+    "Teneriffa",
+    "Mittelmeer",
+    "mediterran",
+    "Kroatien",
+    "Istrien",
+    "Kvarner",
+    "Dalmatien",
+    "Bulgarien",
+    "Griechenland",
+    "Italien",
+    "Südfrankreich",
+    "Portugal",
+    "Türkei",
+    "Naher Osten",
+    "Nordafrika",
+    "Südamerika",
+    "Subsahara-Afrika",
+    "subtropisch",
+    "tropisch"
+  ]
+}
