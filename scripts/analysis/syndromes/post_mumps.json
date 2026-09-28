@@ -1,0 +1,39 @@
+{
+  "slug": "post_mumps",
+  "name_de": "Post-Mumps-Syndrom",
+  "lag_weeks": 6,
+  "refs": "Hviid et al. 2008 (Lancet), Rubin et al. 2015 (Lancet Infect Dis), Centers for Disease Control Mumps 2021, Galazka et al. 1999 (Bull World Health Organ)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Paramyxovirus-Erkrankungen und post-viralen endokrinen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Mumps (Mumpsvirus, Paramyxovirus): Parotitis, Orchitis, Meningitis, Pankreatitis\n- Post-Mumps-Komplikationen: Hodatrophie mit endokriner Insuffizienz, Taubheit (sensorineural), Post-Mumps-Oophoritis\n- Neuroinvasion: Meningitis (15%), Enzephalitis (selten); persistente kognitive Störungen nach zerebraler Beteiligung\n- Pankreatitis-Sequele: exokrine Pankreasinsuffizienz, Diabetes-Risiko (endokrine Beteiligung)\n- Reaktivierungen: bei unvollständiger MMR-Immunität (1 Dosis < 2 Dosen)\n- Fatigue nach Mumps-Meningitis: wenig systematisch untersucht, aber klinisch bekannt\n- Serologie: Mumps-IgG (Impfschutz vs. natürliche Infektion schwer trennbar), IgM im Akutfall\n- Wearable-Proxy: post-virale ME/CFS-Literatur\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Endokrine/neurologische Komponente**: Hormonstatus, Hörverlust, kognitive Störungen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Mumps-Impfstatus prüfen (2-Dosen-MMR), Audiologie, Endokrinologie.",
+  "icd10_gm": [
+    "B26.0",
+    "B26.1",
+    "B26.3",
+    "B26.8"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "stiko": "STIKO-Empfehlung MMR-Impfung",
+    "rki": "RKI-Ratgeber Mumps (§ 6 IfSG meldepflichtig)"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Kopfschmerzen",
+    "Fieber",
+    "Gesichtsschwellung",
+    "Hörprobleme",
+    "Tinnitus",
+    "Schwindel",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Schlafstörungen",
+    "Muskelschmerzen",
+    "Bauchschmerzen",
+    "Übelkeit",
+    "Hodenschmerzen",
+    "Stimmungsschwankungen",
+    "Abgeschlagenheit"
+  ],
+  "seroprevalence_de": 0.9,
+  "sero_category": "hoch",
+  "endemic_regions": []
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "melioidose",
+  "name_de": "Post-Melioidose-Syndrom",
+  "lag_weeks": 12,
+  "refs": "Currie et al. 2010 (Trans R Soc Trop Med Hyg), Limmathurotsakul et al. 2016 (Nat Microbiol), Wiersinga et al. 2012 (NEJM), ECDC Melioidosis 2021",
+  "system_prompt": "Du bist ein Internist mit Expertise in tropischen Infektionskrankheiten und post-infektiöser Pneumonie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Melioidose: Burkholderia pseudomallei; endemisch Südostasien (Thailand, Vietnam, Kambodscha), Nordaustralien, indischer Subkontinent\n- Übertragung: Kontakt mit kontaminierter Erde/Wasser (Reisfelder, Überschwemmungen); Inhalation\n- Klinik: Pneumonie (häufigste Manifestation), Sepsis, interne Abszesse (Leber, Milz, Prostata)\n- Rückfälle nach Behandlung: bis 10% ohne Eradikationstherapie (Trimethoprim-Sulfamethoxazol)\n- Post-Melioidose: persistente Fatigue, Myalgie, kognitive Störungen; ähnlich anderen schweren Pneumonien\n- Klimawandel: Ausbreitung der Endemiezonen projiziert (Limmathurotsakul 2016: >1 Mrd. Menschen in Risikogebieten)\n- Serologie: Hämagglutinationstest (IHA), Immunfluoreszenz-AK; PCR aus Blut/Sputum im Akutfall\n- Biomarker: Leberenzyme, CRP, PCT; Abszess-Muster bildgebend\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Rückfall-Risiko**: Muster konsistent mit Melioidose-Rezidiv?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Südostasien, Serologie (Tropeninstitut), Bildgebung Abdomen.",
+  "icd10_gm": [
+    "A24.1",
+    "A24.2",
+    "A24.3"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "ecdc": "ECDC Melioidosis – Factsheet 2021",
+    "who": "WHO Melioidosis – Neglected Tropical Disease"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Husten",
+    "Dyspnoe",
+    "Brustschmerzen",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Gewichtsverlust",
+    "Nachtschweiß",
+    "Schüttelfrost",
+    "Bauchschmerzen",
+    "Übelkeit",
+    "Appetitlosigkeit",
+    "Schlafstörungen",
+    "Konzentrationsstörungen",
+    "Abgeschlagenheit"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Südostasien",
+    "Thailand",
+    "Vietnam",
+    "Kambodscha",
+    "Malaysia",
+    "Indonesien",
+    "Australien",
+    "Indien",
+    "Sri Lanka",
+    "Bangladesch",
+    "China",
+    "Südchina"
+  ]
+}

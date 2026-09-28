@@ -1,0 +1,9 @@
+- AF Evidence Score (AFES): selbst berechneter Multi-Signal-Score 0–100 aus allen verfügbaren
+  Gerätedaten. Kein validiertes Medizinprodukt — dient als Screening-Indikator, nicht als Diagnose.
+  Direkte Evidenz (max. 50 Pkt): EKG-fähiger Wearable AFib-Klassifikation (50),
+  Tateno-Glass auf Brustgurt-RR (40), BP-Monitor IHB/AFib (35),
+  AFib-Burden (kontinuierliches passives Monitoring, 30), EKG hohe HF (15).
+  Unterstützende Signale (max. 50 Pkt, summiert): HR-Tachykardie >100 bpm (20), Nacht-HR-CV (15),
+  IHB-Flag BP (15), RMSSD-Chaos intra-nacht (10), SpO2-Abfall (10), Poincaré/SampEn Brustgurt (15),
+  Atemfrequenz (5), Symptome kardial (10), Hauttemperatur (5), Nacht-Dip (8).
+  Level-Schwellen: ≥10 = low, ≥25 = moderate, ≥50 = high, ≥75 = critical.

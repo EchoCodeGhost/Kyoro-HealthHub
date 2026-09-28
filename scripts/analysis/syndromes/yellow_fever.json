@@ -1,0 +1,36 @@
+{
+  "slug": "yellow_fever",
+  "name_de": "Verlängerte Rekonvaleszenz nach Gelbfieber",
+  "lag_weeks": 4,
+  "refs": "RKI-Ratgeber Gelbfieber, WHO Yellow Fever Fact Sheet, Hickie et al. 2006 (BMJ, allgemeines Post-Infektions-Fatigue-Modell als Proxy), Gronwald 2023",
+  "system_prompt": "Du bist ein Tropenmediziner mit Expertise in Gelbfieber und post-infektiösen Verläufen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Gelbfieber verläuft meist mild-biphasisch, kann aber in der toxischen Phase (Fieber, Ikterus, Blutungsneigung, Nierenversagen) lebensbedrohlich werden — Letalität in der toxischen Phase deutlich erhöht\n- Kein etabliertes, formal benanntes \"Post-Gelbfieber-Syndrom\" — Rekonvaleszenz nach schwerem Verlauf (Leber-/Nierenfunktion) kann Wochen bis Monate dauern, Fatigue-Einordnung erfolgt über das allgemeine post-infektiöse Modell\n- Durch Impfstoff hochwirksam vermeidbar (Lebendimpfstoff, oft Einreisevoraussetzung in Endemieländern) — bei fehlender Impfung vor Reise in Endemiegebiete Sub-Sahara-Afrika/Amazonasbecken besonders relevant\n- Serologie: IgM/IgG, Kreuzreaktivität mit anderen Flaviviren (Dengue, Zika, FSME) möglich — Diagnosesicherung ggf. per PCR/Neutralisationstest\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy für die Fatigue-Komponente (keine gelbfieber-spezifischen Wearable-Studien verfügbar)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten (v.a. Leber-/Nierenfunktion, nicht nur Fatigue)?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung?\n5. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden? (Leber-/Nierenwerte bei anhaltenden Beschwerden kontrollieren lassen.)",
+  "icd10_gm": [
+    "A95"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Gelbfieber (§ 6/§ 7 IfSG meldepflichtig)",
+    "who": "WHO Yellow Fever Fact Sheet",
+    "cdc": "CDC Yellow Fever Information for Health Professionals"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Ikterus",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Blutungsneigung",
+    "dunkler Urin",
+    "Konzentrationsstörungen"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Sub-Sahara-Afrika",
+    "Amazonasbecken",
+    "Südamerika",
+    "tropisch"
+  ]
+}

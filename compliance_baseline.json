@@ -1,0 +1,434 @@
+{
+  "scripts/analysis/activity/analyse_fitness_vo2max.py": {
+    "approved": [
+      "Age Information: 'Age'"
+    ],
+    "docstring_hash": "30312e09eeece8296798acec1b85caa23cb665cc34ac82d1e1c7b70533b97dc6"
+  },
+  "scripts/analysis/activity/analyse_functional_capacity.py": {
+    "approved": [
+      "Age Information: 'Alter'",
+      "Age Information: 'age'",
+      "Age Information: 'adult'"
+    ],
+    "docstring_hash": "40af889b2e765acd9dfee42fbdfda48137a03e8cf713ddd52c514e3beda4682b"
+  },
+  "scripts/analysis/activity/analyse_sedentary.py": {
+    "approved": [
+      "Medical Diagnoses: 'Disease '"
+    ],
+    "docstring_hash": "fd608bdb9c01d270adf2e487830f6afbecd42998c19e1ca76e96f37863206223"
+  },
+  "scripts/analysis/cardiovascular/analyse_ans_battery.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '",
+      "Medical Diagnoses: 'Arzt '",
+      "Medical Diagnoses: 'Treatment '",
+      "Age Information: 'Alter'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "d38839c844dde6e3ea0fc84980dfd6354d994e187b1f3ad5777e30a9188fc737"
+  },
+  "scripts/analysis/cardiovascular/analyse_bp_sleep.py": {
+    "approved": [
+      "Medical Diagnoses: 'therapy '",
+      "Medical Diagnoses: 'treatment '"
+    ],
+    "docstring_hash": "115888f69974ae68c39d247bc6ab13c1e8afa60d4fdeedff9d13120b5af83375"
+  },
+  "scripts/analysis/cardiovascular/analyse_fluid_orthostatic.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '",
+      "Medical Diagnoses: 'Treatment '"
+    ],
+    "docstring_hash": "a56cf100b3718ad5baf46781d327b69ff95ff92ff8526c5e11dd54a419a49ab5"
+  },
+  "scripts/analysis/cardiovascular/analyse_high_hr.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnose '",
+      "Medical Diagnoses: 'diagnosis '",
+      "Medical Diagnoses: 'disease '",
+      "Medical Diagnoses: 'treatment '"
+    ],
+    "docstring_hash": "0940d713a86c98742924f0a552c62e9552809a579c4dddb879765adaad826a7f"
+  },
+  "scripts/analysis/cardiovascular/analyse_orthostatic.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnosis '",
+      "Medical Diagnoses: 'treatment '"
+    ],
+    "docstring_hash": "60f3e5ed732d928e8990085cf6ac7527e95224b81c97f53ba0625406c99fb0b8"
+  },
+  "scripts/analysis/cardiovascular/analyse_oura_temperature.py": {
+    "approved": [
+      "Medical Diagnoses: 'Krankheit '"
+    ],
+    "docstring_hash": "afc0342d7b07a7fb01a1cc4fc71c16ef3504f9ff39e1194e54014984c1661c81"
+  },
+  "scripts/analysis/environment/analyse_daylight.py": {
+    "approved": [
+      "Medical Diagnoses: 'therapie\n'",
+      "Medical Diagnoses: 'therapy\n'",
+      "Medical Diagnoses: 'Therapy '"
+    ],
+    "docstring_hash": "153656e6e6c96fbc25b0ddbe0ee42390eca54b3d40ffff00e7b05903cd3b2d3b"
+  },
+  "scripts/analysis/immunology/analyse_allergens.py": {
+    "approved": [
+      "Medical Diagnoses: 'Behandlung '",
+      "Medical Diagnoses: 'treatment '"
+    ],
+    "docstring_hash": "b733fd268037843c583c9d531d7e9e807cc6049f792f2b8db1e6ebb797a4306a"
+  },
+  "scripts/analysis/immunology/analyse_histamine_triggers.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '"
+    ],
+    "docstring_hash": "436249ecba144cb99d45d7c35f6bbd3d122b5c48a661aaebff866aaf890e2eae"
+  },
+  "scripts/analysis/immunology/analyse_mcas_muster.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnose '",
+      "Medical Diagnoses: 'diagnosis '",
+      "Medical Diagnoses: 'Diagnosis '"
+    ],
+    "docstring_hash": "81dfaa307994ff21a63b84df9e01596d86c2298c87205a8d83fad0c33997c692"
+  },
+  "scripts/analysis/immunology/analyse_pollen_symptoms.py": {
+    "approved": [
+      "Medical Diagnoses: 'Therapie\n'",
+      "Medical Diagnoses: 'therapy\n'"
+    ],
+    "docstring_hash": "2968a5a3c7a6f6a547dd10077de5059d228dade879a35182588307fa4510debd"
+  },
+  "scripts/analysis/infectious/analyse_acute_response.py": {
+    "approved": [
+      "Medical Diagnoses: 'disease '",
+      "Medical Diagnoses: 'illness '"
+    ],
+    "docstring_hash": "6984abf438fc981bf5e23a0b90a0510532a6db85118fa7f5bca344b1eab45a8d"
+  },
+  "scripts/analysis/infectious/analyse_background_infection_activity.py": {
+    "approved": [
+      "Medical Diagnoses: 'Erkrankung '",
+      "Medical Diagnoses: 'illness '",
+      "Medical Diagnoses: 'disease '"
+    ],
+    "docstring_hash": "b65298a900408d4366e20fa195c2292d1a4c17dbe199d02a3321190a84f08d48"
+  },
+  "scripts/analysis/infectious/analyse_outbreak_exposure.py": {
+    "approved": [
+      "Medical Diagnoses: 'disease '",
+      "Geographic Locations: 'Praxis'"
+    ],
+    "docstring_hash": "9b04057e5e8215ffc4aed936bf85c84e48d9e09c3be26d250d779c1074ee950d"
+  },
+  "scripts/analysis/infectious/analyse_pathogen_exposure.py": {
+    "approved": [
+      "Medical Diagnoses: 'disease '"
+    ],
+    "docstring_hash": "8463de400e213a1026cd8e0a29ea1d4cb1741183ced10fa82313eee778bc306f"
+  },
+  "scripts/analysis/infectious/analyse_postcovid_sleep_wearable.py": {
+    "approved": [
+      "Age Information: 'Adult'"
+    ],
+    "docstring_hash": "ab80484fd67954f583938f3502cb512ec4eff520d4aad0b3fd6beb331eab1d44"
+  },
+  "scripts/analysis/infectious/analyse_postinfectious_diagnose.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '"
+    ],
+    "docstring_hash": "3b7cb21374b1518e20152311ac1e3c8acd0c649837a83ba8bcea030818a4fa10"
+  },
+  "scripts/analysis/longevity/__init__.py": {
+    "approved": [
+      "Age Information: 'Alter'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "a0c558ba83a71dd1a3758186912ab57a6076ef5aa1583e7f2ef5caeeec9435a0"
+  },
+  "scripts/analysis/longevity/analyse_longevity.py": {
+    "approved": [
+      "Age Information: 'Alter'",
+      "Age Information: 'Age'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "4460b745a74d20398e0316956117068cf7471fecd744dbb80116bd2a0d6e577f"
+  },
+  "scripts/analysis/manual/explain_synthesis.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient\n'",
+      "Medical Diagnoses: 'Patientin\n'"
+    ],
+    "docstring_hash": "506ae7d7a1227ea0e7a1af4a74f89632c59b8c3478290951465e4ac7716c0976"
+  },
+  "scripts/analysis/neurology/analyse_mecfs.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '"
+    ],
+    "docstring_hash": "5e98712cb51124d83f87c1abb8338fc20fb0c440df9d7c664c365a9af6df3576"
+  },
+  "scripts/analysis/psychology/analyse_pacing.py": {
+    "approved": [
+      "Medical Diagnoses: 'Patienten '"
+    ],
+    "docstring_hash": "20595f9ddfa0dcd2d42cb21872d5e2e680e026584a7d55af440600c453000cce"
+  },
+  "scripts/analysis/sleep/analyse_nightmare.py": {
+    "approved": [
+      "Medical Diagnoses: 'disease '",
+      "Medical Diagnoses: 'diagnosed with'"
+    ],
+    "docstring_hash": "0fb03fdc6aa8f0ac9b8f49939784e0041f55125a8d40b27bec4f8bf0cb54e6b3"
+  },
+  "scripts/calibration/calibrate_dash2009_overlap.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnose '",
+      "Medical Diagnoses: 'diagnosis '"
+    ],
+    "docstring_hash": "af62ae8fe511661904c5e020d0be4dba658a4a672ffe1ad1cdeba9932860338a"
+  },
+  "scripts/compute/compute_activity_log_from_symptoms.py": {
+    "approved": [
+      "Age Information: 'ältere'"
+    ],
+    "docstring_hash": "1bfd89bfaa52db88fac787e27ede1ea2065abc5917f5706f29683bb2ca7f9f0d"
+  },
+  "scripts/compute/compute_acute_events.py": {
+    "approved": [
+      "Medical Diagnoses: 'illness '",
+      "Medical Diagnoses: 'Diagnose '",
+      "Medical Diagnoses: 'Erkrankung '",
+      "Gender Information: 'Female'"
+    ],
+    "docstring_hash": "0517693409d685ddfa0b7821c155ae878d75f25a9d03cdff6517b5bbf6a49678"
+  },
+  "scripts/compute/compute_ans_dysfunction_evidence.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '",
+      "Medical Diagnoses: 'Treatment '"
+    ],
+    "docstring_hash": "07fd3fa240cec89b98cf3bcca8fd5f4dbdbca00cc7a62fe559e7635248feebd3"
+  },
+  "scripts/compute/compute_calibrate_sources.py": {
+    "approved": [
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "22b281e060385dc3f0466f20fe742df82fd7dc2209e573721ef435007083e652"
+  },
+  "scripts/compute/compute_orthostatic_detection.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '",
+      "Medical Diagnoses: 'Treatment '"
+    ],
+    "docstring_hash": "5a9cc388c35965c159f8c0c01897119a7f6c6845341417c7536f40adc5a7c3d6"
+  },
+  "scripts/compute/compute_orthostatic_detection_nightly.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnosis '",
+      "Medical Diagnoses: 'Treatment '"
+    ],
+    "docstring_hash": "268aed2fb6abf169774f50d0db4316fc7ddfaa5da85e72032cb57498ed84cb7b"
+  },
+  "scripts/compute/compute_pem.py": {
+    "approved": [
+      "Medical Diagnoses: 'illness '",
+      "Age Information: 'Jahre'"
+    ],
+    "docstring_hash": "647bf78e3d1d22f5ad4c41d40671458241ab5881c8433e2ce24403eeee43b342"
+  },
+  "scripts/exporters/_export_instance_worker.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '"
+    ],
+    "docstring_hash": "125c032bcbb36c053339374982a82ffc5c91f873f6c51c2a65adb76a1b32caa7"
+  },
+  "scripts/exporters/export_arzt_komplett.py": {
+    "approved": [
+      "Medical Diagnoses: 'Doctor '",
+      "Medical Diagnoses: 'Ärzte\n'"
+    ],
+    "docstring_hash": "4e1e9da9d5b11cc2252bb2f59cc8bf7c1935f3f154dbd5a0a6d62d4e72cd91da"
+  },
+  "scripts/exporters/export_research_cohort.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '",
+      "Medical Diagnoses: 'Patient '",
+      "Gender Information: 'gender'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "e37dd56bcfb99b3e5454a001d561c6be2d554eb5cde9f73b9c928fbe6364fad5"
+  },
+  "scripts/exporters/fhir_resources.py": {
+    "approved": [
+      "Medical Diagnoses: 'Patient '",
+      "Medical Diagnoses: 'patient '"
+    ],
+    "docstring_hash": "00cd356574ef47e4bfdf7f7b4e509404d56d07bc824887ab6eb251edeb064e21"
+  },
+  "scripts/importers/import_genetics_aniva.py": {
+    "approved": [
+      "Age Information: 'Alter'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "204b7e6e200ff4d5b1d9eb4581ce73ef6d3f02b03e9bb09734715ed4142f9d53"
+  },
+  "scripts/importers/import_genetics_sequencing.py": {
+    "approved": [
+      "Age Information: 'ältere'"
+    ],
+    "docstring_hash": "025b24a62329c2bdeda1234e6b72404f4a0134ab66e68d734ad7a1466880f7e2"
+  },
+  "scripts/importers/import_notaufnahme.py": {
+    "approved": [
+      "Medical Diagnoses: 'hospital\n'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "d3b61be75209c1bb071934f13a913566fb98af8b06e19fb179c516e6cf911ce7"
+  },
+  "scripts/importers/import_renpho_tape.py": {
+    "approved": [
+      "Age Information: 'ALTER'"
+    ],
+    "docstring_hash": "36134d366bd96afdde16fec0d54e41aef1e6fa6000f7fada752f1394aa1cafeb"
+  },
+  "scripts/migrations/curate_acute_medication_courses.py": {
+    "approved": [
+      "Medical Diagnoses: 'medikation '"
+    ],
+    "docstring_hash": "e6cf853af2c175ae3d292f518e219213f005272f86dc87821c76c768245e034d"
+  },
+  "scripts/migrations/fix_polar_training_device_ids.py": {
+    "approved": [
+      "Age Information: 'ältere'"
+    ],
+    "docstring_hash": "44ebe569cd179191222717e5b1614463e1125391fe7e0af0829dc50577f7d520"
+  },
+  "scripts/migrations/migrate_medications_is_chronic.py": {
+    "approved": [
+      "Medical Diagnoses: 'hospital '",
+      "Medical Diagnoses: 'medikation\n'",
+      "Age Information: 'ALTER'",
+      "Geographic Locations: 'Klinik'"
+    ],
+    "docstring_hash": "f0cda1391b20ca5e730cff5fd1d6ec26a45520567027fba8b25121d440b60b19"
+  },
+  "scripts/migrations/migrate_outbreak_events_person.py": {
+    "approved": [
+      "Age Information: 'ALTER'"
+    ],
+    "docstring_hash": "cd7f966048d89f07ffa489065273b3697913a57a337326aec1b258eb87e36071"
+  },
+  "scripts/migrations/rename_stale_garmin_sleep_ids.py": {
+    "approved": [
+      "Age Information: 'ältere'"
+    ],
+    "docstring_hash": "0b4954ce9a2d4a3f978ca2c837928cdfcfce190957a3a52709975621e026b234"
+  },
+  "scripts/modules/config_backup.py": {
+    "approved": [
+      "Age Information: 'alter'"
+    ],
+    "docstring_hash": "e5079217ef796d8c997e129ac6e46382782c0f37e3e452e8cdeb4ff0e5882908"
+  },
+  "scripts/modules/ecg_signal.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnose '"
+    ],
+    "docstring_hash": "82aeeae656b24293f2f30b6a6c1b84f543f7f49ade9752708f77e58ba95d44e5"
+  },
+  "scripts/modules/endemic_matching.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnosis '"
+    ],
+    "docstring_hash": "9cb1109a9d857f8b668f12f73148658627f5b1cad7a6104aafcb571e6c8e0f19"
+  },
+  "scripts/modules/identity_resolver.py": {
+    "approved": [
+      "Age Information: 'kind'"
+    ],
+    "docstring_hash": "086b33a665ee4ec1e7fca3c3e5a858cc3bcce4e3844654b49c9338f151f58a18"
+  },
+  "scripts/modules/pipeline_runner.py": {
+    "approved": [
+      "Age Information: 'child'"
+    ],
+    "docstring_hash": "a2dc4e05868b79cd5121b2fc6a45e9a5464d53425d6f8608cd6de49ae494ac78"
+  },
+  "scripts/utils/check_outbreak_source_health.py": {
+    "approved": [
+      "Geographic Locations: 'Praxis'"
+    ],
+    "docstring_hash": "b9102ef770bd2452714217721d048def013ea45a01ffcc1ebb4e45c2cd72f7e4"
+  },
+  "scripts/utils/create_master_schema.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '"
+    ],
+    "docstring_hash": "ed9d185a7ff0dee909220c9d9abd62140632c0301277795a9f3c73fa93722272"
+  },
+  "scripts/utils/create_medicine_imaging_schema.py": {
+    "approved": [
+      "Age Information: 'ALTER'"
+    ],
+    "docstring_hash": "781cad0fcf6523b6943944414c3a720c84ad09bf05c51ed9087822483a5c3aea"
+  },
+  "scripts/utils/create_medicine_schema.py": {
+    "approved": [
+      "Age Information: 'ALTER'",
+      "Age Information: 'ältere'"
+    ],
+    "docstring_hash": "ec924d21fb472210a082926c3ccd779d50c455b52bd99eb869901f3874d7f922"
+  },
+  "scripts/utils/deidentify_cohort.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '",
+      "Gender Information: 'gender'",
+      "Age Information: 'age'",
+      "Age Information: 'Age'"
+    ],
+    "docstring_hash": "db50534c802ea76707a32561051fb810150a26d22794049c30c299c292d6d61a"
+  },
+  "scripts/utils/manage/clinic/manage_consent.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '",
+      "Geographic Locations: 'Klinik'",
+      "Geographic Locations: 'Praxis'"
+    ],
+    "docstring_hash": "2a425905218d078216314c95554417028de01bc2109877c3560088a6dc1c962e"
+  },
+  "scripts/utils/manage/clinic/manage_patients.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '",
+      "Medical Diagnoses: 'Patientin '",
+      "Geographic Locations: 'Klinik'",
+      "Geographic Locations: 'Praxis'"
+    ],
+    "docstring_hash": "43260b89b9623929a89cf0afb3eb39ebe40df1311c1f111414fc5d31548e4926"
+  },
+  "scripts/utils/manage/clinic/manage_practice_devices.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '",
+      "Geographic Locations: 'Praxis'",
+      "Geographic Locations: 'praxis'"
+    ],
+    "docstring_hash": "f176d83b94ff8acf83f5e6d32c478572f6e1c603f610541a8bc711d4e459cf88"
+  },
+  "scripts/utils/manage/personal/manage_exposure_history.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnose '"
+    ],
+    "docstring_hash": "7ebab08c47df20bcf42c03d9af06bb79ecb5fd533b3dc6363aeafcf7016c931e"
+  },
+  "scripts/utils/manage/personal/manage_family_history.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnose '",
+      "Medical Diagnoses: 'diagnosis '",
+      "Medical Diagnoses: 'Erkrankung '",
+      "Age Information: 'Alter'",
+      "Age Information: 'age'"
+    ],
+    "docstring_hash": "69f13925f39de1079f32ff494f902b7ca4d3ca4e0ed49f115ac8082432ae3ce8"
+  }
+}

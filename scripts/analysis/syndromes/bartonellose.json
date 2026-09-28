@@ -1,0 +1,50 @@
+{
+  "slug": "bartonellose",
+  "name_de": "Post-Bartonella-Syndrom",
+  "lag_weeks": 8,
+  "refs": "Breitschwerdt et al. 2010 (J Clin Microbiol), Rebman & Aucott 2020 (Front Med), Gronwald 2023, Davis 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Abschn. 3.5.1)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Post-Bartonella-Syndrom und post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Bartonella henselae/quintana: Zeckenübertragung und Katzenkratzkrankheit — stark unterdiagnostiziert\n- Post-Bartonella: autonome Dysregulation, Fatigue, kognitive Störungen, neuropsychiatrische Symptome\n- DBG-Leitlinie 2026 (Abschn. 3.5.1): Bartonellose als bakterielle Co-Infektion bei Lyme-Borreliose gelistet. Bartonella kann Borrelia-Therapieversagen imitieren — häufigste Fehldeutung bei Persistenz unter Doxycyclin. Unterschiedliches Antibiotikaregime nötig: Azithromycin ± Rifampicin für Bartonella vs. Doxycyclin für Borrelia. Immunmodulation → synergistische Verstärkung der Dysautonomie.\n- Häufige Borrelia-Koinfektion; Bartonella-Persistenz verschleiert Borrelia-Therapieerfolg\n- Serologie: IFA Bartonella henselae/quintana IgG/-IgM; PCR in Spezialambulanz (z.B. Breitschwerdt-Labor)\n- Biomarker-Schwellen entstammen der Post-Infektions-/Long-COVID-Literatur (beste verfügbare Proxy)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten — insbesondere autonome Dysregulation?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Borrelia-Koinfektion & Therapieresistenz**: Gibt es Muster, die für Bartonella-bedingte Borrelia-Therapieresistenz sprechen? Welche Erregerkombination erklärt das klinische Bild am besten?\n5. **Trend**: Persistenz oder Erholung — was zeigt der Quartalsverlauf?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A44.0",
+    "A44.1"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Diagnostik und Therapie der Lyme-Borreliose, Frühjahr 2026, Tabelle 5",
+    "idsa": "IDSA Bartonella Guidelines (Rolain et al. 2004)",
+    "rki": "RKI-Ratgeber Bartonellose"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Kopfschmerzen",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Schwindel",
+    "Tachykardie",
+    "Herzrasen",
+    "Schlafstörungen",
+    "Lymphknotenschwellung",
+    "Muskelschmerzen",
+    "Sehstörungen",
+    "Orthostatische Intoleranz",
+    "Angst",
+    "Depression"
+  ],
+  "seroprevalence_de": 0.08,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Mitteleuropa",
+    "mediterran",
+    "Mittelmeer",
+    "Spanien",
+    "Frankreich",
+    "Südeuropa",
+    "Tropen",
+    "subtropisch",
+    "tropisch"
+  ]
+}

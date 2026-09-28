@@ -1,0 +1,52 @@
+{
+  "slug": "ebola_marburg",
+  "name_de": "Post-Ebola/Marburg-Syndrom (PEDS/PVDS)",
+  "lag_weeks": 12,
+  "refs": "Vetter et al. 2016 (Lancet Infect Dis), Scott et al. 2016 (Lancet), Clark et al. 2015 (NEJM), WHO Post-Ebola Syndrome 2016, Shantha et al. 2017 (Emerg Infect Dis)",
+  "system_prompt": "Du bist ein Internist mit Expertise in hochpathogenen viralen hämorrhagischen Fiebersyndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Ebola-Virus (EVD) und Marburg-Virus: Filoviren; Subsahara-Afrika; tierisches Reservoir (Fledermäuse)\n- Post-Ebola Disease Syndrome (PEDS): gut dokumentiert seit dem West-Afrika-Ausbruch 2014–2016\n- PEDS: Uveitis (Erblindungsrisiko!), Arthritis, Myalgie, Fatigue, kognitive Störungen, neuropsychiatrische Symptome (Clark 2015)\n- Persistenz viraler RNA in immunprivilegierten Kompartimenten (Augen, ZNS, Hoden) — Reaktivierungs-Reservoir\n- Marburg: ähnliche Spätfolgen wie Ebola, aber weniger gut untersucht (seltenere Ausbrüche)\n- Für Europa: Importfälle durch Helfer/Reisende; Surveillance durch ECDC und RKI\n- Serologie: Ebola/Marburg IgG (nur BSL-4-Labor); PCR in Akutphase\n- WHO Blueprint Priority Pathogen — höchste Priorität für Pandemievorsorge\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Ophthalmologische/neurologische Komponente**: Sehstörungen, kognitive Defizite (PEDS-Muster)?\n5. **Trend**: Persistenz oder Reaktivierungsmuster?\n6. **Klinische Empfehlung**: Aufenthalt in Endemiegebiet, BSL-4-Serologie, Augenheilkunde, Infektiologe.",
+  "icd10_gm": [
+    "A98.3",
+    "A98.4"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI Ebola — Steckbrief (§ 7 IfSG meldepflichtig)",
+    "ecdc": "ECDC Ebola Virus Disease – Surveillance and Response Support",
+    "who": "WHO Post-Ebola Syndrome – Response Plan 2016"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Sehstörungen",
+    "Augenschmerzen",
+    "Uveitis",
+    "Kopfschmerzen",
+    "Fieber",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Gedächtnisprobleme",
+    "Stimmungsschwankungen",
+    "Angst",
+    "Schlafstörungen",
+    "Post-Exertionelle Malaise",
+    "PEM",
+    "Taubheitsgefühl"
+  ],
+  "seroprevalence_de": 1e-06,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Subsahara-Afrika",
+    "Demokratische Republik Kongo",
+    "Guinea",
+    "Sierra Leone",
+    "Liberia",
+    "Uganda",
+    "Kenia",
+    "Angola",
+    "tropisch",
+    "Afrika"
+  ]
+}

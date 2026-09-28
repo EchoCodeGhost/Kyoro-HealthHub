@@ -1,0 +1,13 @@
+{
+  "name": "mental_health",
+  "description": "Datenpaket für Psychiatrie/Psychologie: PHQ-9, GAD-7, Stress, Schlaf, Mood",
+  "description_en": "Data package for psychiatry/psychology: PHQ-9, GAD-7, stress, sleep, mood",
+  "queries": {
+    "assessments": "SELECT ts, date, instrument, score, details FROM assessments WHERE person = :person AND instrument IN ('PHQ-9','GAD-7','ASRS-5','phq9_score','gad7_score') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "daily_stress": "SELECT date, resting_hr, rmssd_ms, hrv_sdnn_ms, sleep_quality, sleep_hours, training_load, stress_score, source FROM daily_stress WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "sleep_overview": "SELECT date, source_app, total_sleep_min, sleep_score, efficiency_pct, hrv_rmssd_ms, hr_lowest FROM sleep WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "mood_symptoms": "SELECT date, symptom, value_num, value_text, category FROM symptoms WHERE person = :person AND (symptom LIKE '%mood%' OR symptom LIKE '%Stimmung%' OR symptom LIKE '%Anxiety%' OR symptom LIKE '%Angst%' OR symptom LIKE '%depress%' OR symptom LIKE '%Konzentration%' OR symptom LIKE '%anxiety%' OR symptom LIKE '%mood_changes%' OR symptom LIKE '%depressed_mood%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "mindfulness_sessions": "SELECT ts, date, value, source_app FROM measurements WHERE metric='mindful_session' AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "medications": "SELECT ts, date, drug_name, dose_value, dose_unit FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts"
+  }
+}

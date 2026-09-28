@@ -1,0 +1,33 @@
+{
+  "slug": "influenza",
+  "name_de": "Post-Influenza-Syndrom",
+  "lag_weeks": 4,
+  "refs": "Hickie et al. 2006 (Lancet), Townsend et al. 2020 (BMJ Open), Gronwald 2023, Davis 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in Post-Influenza-Syndrom und post-viralen Fatigue-Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Post-Influenza: persistente Fatigue, Myalgie, kognitive Störungen nach Influenza A/B\n- Gut dokumentiertes post-virales Fatigue-Syndrom mit Überlappung zu ME/CFS\n- Hickie et al. 2006: Post-Influenza und Post-EBV/Q-Fieber zeigen identisches Biomarkerprofil\n- Biomarker-Schwellen: Long-COVID-Literatur als Proxy (bester verfügbarer Standard)\n- DFA α1, PEM-Muster, HRV-Marker direkt übertragbar\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung — was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "J10.8",
+    "J11.8"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Influenza",
+    "who": "WHO Influenza (Seasonal) Guidelines",
+    "cdc": "CDC Influenza Antiviral Medications"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Husten",
+    "Kurzatmigkeit",
+    "Schlafstörungen",
+    "Konzentrationsstörungen",
+    "Schwäche",
+    "Post-Exertionelle Malaise",
+    "PEM"
+  ],
+  "seroprevalence_de": 0.99,
+  "sero_category": "hoch",
+  "endemic_regions": []
+}

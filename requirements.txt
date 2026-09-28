@@ -1,0 +1,80 @@
+# Core dependencies
+numpy
+scipy
+matplotlib
+pandas
+statsmodels
+
+# Web / API
+requests
+garminconnect  # Garmin Connect API client
+
+# ECG / HRV processing
+wfdb       # calibration scripts, AFib threshold calibration
+neurokit2  # HRV / ECG signal processing
+
+# HTML parsing (Polar firmware changelog + web imports)
+beautifulsoup4
+
+# Headless browser (scripts/importers/import_outbreak_data.py::fetch_fli_wnv,
+# fetch_fli_avian_influenza) — FLI's TSIS/Cadenza Tierseucheninformationssystem
+# has no plain HTTP/REST API; its "Alle Tabellen (*.xlsx)" export (the most
+# complete, reliable way to get its full case history) only becomes available
+# after real browser navigation opens the right workbook view. These are the
+# only sources in that file needing a browser — every other fetcher there is
+# plain urllib/stdlib. After `pip install`, also run once:
+#   python3 -m playwright install chromium
+playwright
+openpyxl  # reads the .xlsx export above (pandas' engine for .xlsx)
+
+# LibreOffice Calc (.ods) export (scripts/importers/drv_kliniken_export_ods.py)
+odfpy
+
+# Garmin .fit files
+fitparse  # Garmin GDPR-Export (.fit Monitoring/Activity files)
+
+# Medical AI pipeline — required (scripts/medical/)
+Pillow
+pillow-heif   # HEIC/HEIF (iPhone-Fotos) lesen; Fallback: ImageMagick convert
+opencv-contrib-python # Videoframe-Extraktion (MOV/MP4) + Bildverarbeitung
+pydicom       # DICOM medical imaging (fundus, ECG waveforms, etc.)
+pdf2image
+# paddlepaddle / paddleocr — OPTIONAL, nicht per Default installieren.
+#
+# Es gibt keine Wheels fuer Python 3.14 (Stand 2026-08; letzte unterstuetzte
+# Version ist 3.13). Als harte Anforderung liess das `pip install -r
+# requirements.txt` in onboard.py fehlschlagen und brach damit das im README
+# dokumentierte Onboarding komplett ab -- wegen einer Abhaengigkeit, die genau
+# ein Skript braucht (scripts/medical/extract_tables.py, Tabellen-OCR aus
+# gescannten Labor-PDFs).
+#
+# Bei Bedarf und Python <= 3.13 nachinstallieren:
+#     pip install paddlepaddle paddleocr
+# paddlepaddle
+# paddleocr
+pikepdf       # PDF-Metadaten-Scrubbing (Info/XMP + eingebettete EXIF)
+pyexiv2       # RAW-Metadaten-Scrubbing (NEF/CR2/CR3/ARW/DNG/...) ohne Pixel-Dekodierung
+rawpy         # RAW → Vorschau-JPEG dekodieren (LibRaw-Wrapper)
+
+# Optional — LLM providers (nur bei Remote-Nutzung)
+# anthropic  # Anthropic Claude API
+# openvino   # hardware acceleration
+# openvino-genai
+# huggingface_hub  # Hugging Face Inference API (optional — provider nutzt nur requests)
+
+# FHIR export (scripts/exporters/fhir_*.py) — structural validation of the
+# built Bundle uses fhir.resources' pydantic models (code-generated from real
+# HL7 FHIR StructureDefinitions, not hand-vendored) instead of a hand-authored
+# JSON Schema file; see scripts/exporters/fhir_validate.py for the provenance
+# note. jsonschema is not currently used directly (fhir.resources does the
+# real validation) but is listed here per design.md D3 for any future
+# ad-hoc JSON Schema checks a contributor may want to add.
+fhir.resources==8.3.0
+jsonschema
+
+# Datasette — auf 0.65.x gepinnt (kein 1.0.x im verfügbaren Index)
+# datasette-dashboards 0.8.0 kompatibel mit 0.65.x getestet
+datasette==0.65.4
+datasette-dashboards==0.8.0
+datasette-leaflet
+datasette-render-markdown

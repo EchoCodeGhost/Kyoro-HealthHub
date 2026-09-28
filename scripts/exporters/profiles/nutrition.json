@@ -1,0 +1,11 @@
+{
+  "name": "nutrition",
+  "description": "Datenpaket für Ernährungsmediziner: Tagebuch, Tagesaggregate, Glukose, Körperzusammensetzung",
+  "description_en": "Data package for nutrition: diary, daily aggregates, blood glucose, body composition",
+  "queries": {
+    "nutrition_daily": "SELECT date, kcal, fat_g, carbs_g, protein_g, meal_count, last_meal, source FROM nutrition_daily WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "nutrition_entries": "SELECT ts, date, time_str, name, product_id, energy_kj, fat_g, carbs_g, protein_g, source FROM nutrition_entries WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "body_composition": "SELECT date, weight_kg, bmi, body_fat_pct, muscle_pct, water_pct, visceral_fat, metabolic_age, source FROM body_composition WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "blood_glucose": "SELECT ts, date, glucose_mmol, glucose_mgdl, meal_context, source FROM blood_glucose WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts"
+  }
+}

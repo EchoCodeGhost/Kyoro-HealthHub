@@ -1,0 +1,43 @@
+{
+  "slug": "vzv",
+  "name_de": "Post-VZV-Syndrom / Post-Zoster-Neuralgie",
+  "lag_weeks": 4,
+  "refs": "Dworkin et al. 2008 (J Pain), Johnson & Rice 2014 (NEJM), Schmader 2002 (Clin Infect Dis), Chen et al. 2018 (Open Forum Infect Dis), Gershon et al. 2015, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Tabelle 6)",
+  "system_prompt": "Du bist ein Internist mit Expertise in herpetischen Reaktivierungssyndromen und post-viralen Neuropathien.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Varizella-Zoster-Virus (VZV): Primärinfektion = Windpocken; Reaktivierung = Herpes Zoster / Gürtelrose\n- Post-Zoster-Neuralgie (PHN): Schmerzen >90 Tage nach Hautmanifestationsabklingen; bei >60 J. in ~30% (Johnson 2014)\n- Post-VZV-Syndrom: Fatigue, Stimmungsstörungen, kognitive Störungen auch ohne Neuralgie (Chen 2018)\n- VZV als Reaktivierungsmarker für Immunsuppression — Long COVID und ME/CFS begünstigen VZV-Reaktivierung\n- Serologie: VZV-IgG (fast universell positiv nach Infektion/Impfung; wenig diagnostischen Wert allein)\n  Aktive Reaktivierung: VZV-IgM (selten, aber möglich), VZV-PCR (Bläscheninhalt, Liquor)\n- Autonome Neuropathie nach Zoster thoracalis/abdominalis kann HRV beeinflussen\n- Biomarker-Schwellen: ME-CFS-/Long-COVID-Literatur als Proxy\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neuropathisches Muster**: Gibt es Muster, die auf autonome oder periphere Neuropathie (SFN-like) hindeuten?\n5. **Trend**: Persistenz oder Erholung — passend zu PHN-Zeitverlauf?\n6. **Klinische Empfehlung**: Impfstatus (Shingrix-Impfung bei ≥50 J.), VZV-Reaktivierungsserologie, Neuropathie-Abklärung.",
+  "icd10_gm": [
+    "B02.2",
+    "B02.9",
+    "G53.0"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen — Herpesviren)",
+    "stiko": "STIKO-Empfehlung Herpes-Zoster-Impfung (Shingrix) ab 60 J.",
+    "awmf": "AWMF-Leitlinie Herpes Zoster und post-herpetische Neuralgie",
+    "escmid": "ESCMID Herpes Zoster Management Guidelines"
+  },
+  "symptoms": [
+    "Schmerzen",
+    "Brennen",
+    "Allodynie",
+    "Fatigue",
+    "Schlafstörungen",
+    "Stimmungsschwankungen",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Juckreiz",
+    "Taubheitsgefühl",
+    "Kribbeln",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Lichtempfindlichkeit",
+    "Post-Exertionelle Malaise",
+    "PEM"
+  ],
+  "seroprevalence_de": 0.95,
+  "sero_category": "hoch",
+  "endemic_regions": []
+}

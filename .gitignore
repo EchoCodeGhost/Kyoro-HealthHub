@@ -1,0 +1,163 @@
+# ── Datenbanken (zu groß, werden aus Rohdaten generiert) ─────────────────────
+health*.db
+health*.db-shm
+health*.db-wal
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.db-backup
+
+# -- 
+
+
+# ── Rohdaten / Quelldateien (zu groß, sensibel) ───────────────────────────────
+imports/
+
+# ── Medizinische Originaldokumente (sensibel) ─────────────────────────────────
+/medizin/*
+/medicine/*
+
+# ── Krankenkassen-/Versicherungsdaten (sensibel) ──────────────────────────────
+data/tabellen/
+data/*
+# Ausnahmen: berechnete Kalibrierungsergebnisse (öffentliche AFDB-Daten, kein PHI)
+!data/calibration/
+!data/calibration/afdb_thresholds.json
+!data/calibration/afdb_calibration.csv
+!data/calibration/afdb_roc.png
+!data/calibration/dash2009_thresholds.json
+!data/calibration/dash2009_public_calibration.csv
+# dash2009_self_thresholds.json is NOT whitelisted: unlike the above (calibrated
+# against the public AFDB/PPG-AFib datasets), it's written per-person by
+# calibrate_dash2009_overlap.py and should stay local, not committed.
+# Explicit re-ignore needed: !data/calibration/ above un-ignores the whole
+# directory, so any per-person file placed directly in it (not in one of the
+# raw-dataset subdirectories below) is tracked unless named here individually.
+data/calibration/dash2009_self_thresholds.json
+data/calibration/*_self_*.json
+# Rohe AFDB-Binaries bleiben ignoriert (werden per download_afdb.py geholt)
+data/calibration/afdb/
+# Roher Zenodo-PPG-AFib-Datensatz bleibt ignoriert (Non-Commercial-Lizenz,
+# ~7 GB, wird per download_ppg_afib_zenodo.py geholt) — nur die destillierten
+# Schwellenwerte oben werden committet
+data/calibration/zenodo_afib_ppg/
+# BACK-26 Presyncope-Kalibrierungsdatensätze (roh) bleiben ignoriert, auch
+# die offen lizenzierten (ODC-BY/CC-BY) — werden per download_ppg_datasets.py
+# geholt, nicht committet (Repo-Hygiene, s. Diskussion in intern/backlog.md
+# BACK-26). MIMIC-III-Ext-PPG zusätzlich aus Lizenzgründen (Credentialed
+# Health Data License verbietet Weiterverteilung) niemals committen.
+data/calibration/bidmc/
+data/calibration/bidmc_csv/
+data/calibration/pulse_transit_time_ppg/
+data/calibration/ppgbp/
+data/calibration/mimic_iii_ext_ppg/
+# Staging-Platzhalter für leeres Verzeichnis nach clone
+!data/staging/
+!data/staging/.gitkeep
+# Tagesinhalte im Staging ignorieren (werden täglich neu erzeugt)
+data/staging/*/
+
+# ── Manuelle Notizen / persönliche Einträge ───────────────────────────────────
+imports/manual/
+imports/*
+
+# ── Nutzerspezifische Konfiguration (Tokens, API-Keys, persönliche Daten) ──────
+*.env
+.env*
+secrets.json
+oura_token.txt
+health_config*.json
+!health_config.example.json
+
+# ── KI-generierte Analysen & Arztbriefe (Artefakte, sensibel) ────────────────
+analysen/*
+analyses/*
+diagno*/
+
+# ── Exportierte Gesundheitsdaten (sensibel, werden aus DB generiert) ──────────
+exports/*
+
+# ── Interne Notizen (persönlich, nicht zur Veröffentlichung) ──────────────────
+intern/*
+
+# ── Einweg-Migrationsskripte (v1→v2, nur intern relevant) ────────────────────
+scripts/utils/migrate_phase*.py
+
+# ── Experimentelle Skripte (noch nicht reif für Commit) ───────────────────────
+scripts/analysis/cardiovascular/analyse_ans_battery.py
+docs/de/analysis/cardiovascular/analyse_ans_battery.md
+docs/en/analysis/cardiovascular/analyse_ans_battery.md
+
+# ── Generierte Doku ohne Zweisprachigkeit (2026-09-28, vorerst zurückgezogen) ──
+docs/generated/
+
+# ── Noch nicht zur Veröffentlichung bereit (2026-09-28) ────────────────────────
+docs/RECOMMENDED_APPS.md
+docs/RECOMMENDED_APPS_DE.md
+docs/DATA_COLLECTION_GUIDE.md
+docs/DATA_COLLECTION_GUIDE_DE.md
+
+# ── Python-Cache ──────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# ── Logs (automatisch generiert) ─────────────────────────────────────────────
+logs/
+*.log
+
+# ── PWA Build-Artefakte ───────────────────────────────────────────────────────
+node_modules/
+dist/
+.lovable/
+
+# ── Claude Code (projektlokale Commands, nicht zur Veröffentlichung) ─────────
+.claude/
+CLAUDE.md
+
+# ── Sonstiges ─────────────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+*.bak
+data/datasette_queries.db
+
+# ── Archiv / Entwürfe (nicht für Veröffentlichung) ───────────────────────────
+archiv_pwa/
+scripts/cluster/cluster.env
+*.zip
+.env
+.config/garmin/
+
+# ── Connect IQ Build-Artefakte ────────────────────────────────────────────────
+tools/KPO-GPulsOx/*.prg
+tools/KPO-GPulsOx/*.prg.debug.xml
+tools/KPO-GPulsOx/gen/
+tools/KPO-GPulsOx/internal-mir/
+tools/KPO-GPulsOx/mir/
+
+# ── Nicht auf GitHub (bewusst ausgeschlossen, bleibt nur lokal) ──────────────
+tools/KSG-SleepGuard/
+
+# ── PWA-Verzeichnisse: vorübergehend zurückgezogen (2026-07-28) ─────────────
+# Vor öffentlichem Release erst konsolidieren (pwa/ vs. tools/KST-PWA/, siehe
+# intern/DEV/plan_mistral_pwa_konsolidierung_2026-07-28.md) und den vollen
+# Privacy-Sweep abschließen. Bleibt lokal vorhanden, nur aus Git-Tracking raus.
+pwa/
+mobile/
+tools/KST-PWA/
+
+# ── Lokale Shell-/IDE-/Tooling-Artefakte (Sandbox/Dev-Umgebung, nicht Projektinhalt) ──
+/.bash_profile
+/.bashrc
+/.gitconfig
+/.gitmodules
+/.profile
+/.ripgreprc
+/.zprofile
+/.zshrc
+/.idea
+/.vscode
+/.mcp.json

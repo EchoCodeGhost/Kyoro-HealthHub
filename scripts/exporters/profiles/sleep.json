@@ -1,0 +1,15 @@
+{
+  "name": "sleep",
+  "description": "Datenpaket für Schlafmediziner: alle Schlaf-Sessions, Hypnogramm, nächtliche SpO2/HRV",
+  "description_en": "Data package for sleep medicine: all sleep sessions, hypnogram, nocturnal SpO2/HRV",
+  "queries": {
+    "sleep_sessions": "SELECT date, source_app, total_sleep_min, total_sleep_s, asleep_min, rem_min, deep_min, light_min, awake_s, latency_s, sleep_score, efficiency_pct, hrv_rmssd_ms, hr_lowest, hr_avg, respiration_avg, spo2_avg, snore_s, body_temp_dev FROM sleep WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "polar_hypnogram": "SELECT date, offset_s, state, sleep_start FROM polar_sleep_hypnogram WHERE date BETWEEN :date_from AND :date_to ORDER BY date, offset_s",
+    "polar_sleep_wake": "SELECT date, device, millis_in_day, state FROM polar_sleep_wake WHERE date BETWEEN :date_from AND :date_to ORDER BY date, millis_in_day",
+    "nocturnal_spo2": "SELECT ts, date, value as spo2, unit, device_id, source_app FROM measurements WHERE metric IN ('spo2','oxygen_saturation') AND person = :person AND date BETWEEN :date_from AND :date_to AND (strftime('%H', ts) < '08' OR strftime('%H', ts) >= '21') ORDER BY ts",
+    "nightly_hrv": "SELECT date, rmssd_ms, rri_ms, respiration_ms, recovery_indicator, ans_status, ans_rate, baseline_rmssd_ms FROM polar_nightly_hrv WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "oura_sleep_model": "SELECT day, bedtime_start, bedtime_end, total_sleep_duration, deep_sleep_duration, light_sleep_duration, rem_sleep_duration, awake_time, efficiency, latency, restless_periods, lowest_heart_rate, average_heart_rate, average_hrv, average_breath FROM oura_sleep_model WHERE day BETWEEN :date_from AND :date_to ORDER BY day",
+    "sleep_environment": "SELECT date, temp_out_c, humidity_out_pct, pressure_hpa, aqi, pm25 FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to AND (temp_out_c IS NOT NULL OR aqi IS NOT NULL) ORDER BY date",
+    "sleep_symptoms": "SELECT date, symptom, value_num, value_text FROM symptoms WHERE person = :person AND (symptom LIKE '%Schweiß%' OR symptom LIKE '%night_sweat%' OR symptom LIKE '%Nykturie%' OR symptom LIKE '%nocturia%' OR symptom LIKE '%restless%' OR symptom LIKE '%Beine%' OR symptom LIKE '%Schlaf%' OR symptom LIKE '%insomnia%' OR symptom LIKE '%Einschlafen%' OR symptom LIKE '%Durchschlafen%' OR symptom LIKE '%Albtraum%' OR symptom LIKE '%nightmare%' OR symptom LIKE '%Schnarchen%' OR symptom LIKE '%snoring%' OR symptom LIKE '%Apnoe%' OR symptom LIKE '%apnea%') AND date BETWEEN :date_from AND :date_to ORDER BY date"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "slug": "ross_river",
+  "name_de": "Post-Ross-River-Syndrom",
+  "lag_weeks": 6,
+  "refs": "Hickie et al. 2006 (Lancet, doi:10.1016/S0140-6736(06)68925-6), Mylonas et al. 2004 (Med J Aust), Harley et al. 2001 (Epidemiol Infect), Suhrbier et al. 2012 (Nat Rev Microbiol)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Alphavirus-Erkrankungen und post-infektiösen Fatigue-Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Ross-River-Virus (RRV): Alphavirus, Australien/Pazifik; Aedes/Culex-Mücken\n- Einer der historisch bedeutsamsten ME/CFS-Trigger: Hickie et al. 2006 (Lancet) identifizierte RRV neben EBV und Q-Fieber als klassischen post-infektiösen ME/CFS-Auslöser\n- Post-RRV: persistente Arthritis, Arthralgie, Myalgie, Fatigue bei ~10–60% (je nach Kohorte)\n- Für Patienten in Europa relevant durch: Australien-Reisen, Ozeanien, Papua-Neuguinea\n- Klimawandel: Ausbreitung der Vektoren in tropische/subtropische Zonen weltweit diskutiert\n- Serologie: RRV-IgM (bis 6 Monate), RRV-IgG; Kreuzreaktion mit anderen Alphaviren möglich\n- Biomarker-Schwellen: direkt aus Hickie 2006 — DFA α1, Fatigue-Muster; ME/CFS-Proxy valide\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Arthritis-Muster**: Wandernde Gelenkbeteiligung, Morgensteifigkeit — passend zu RRV?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Reiseanamnese Australien/Pazifik, RRV-Serologie (Spezial-Labor), Tropeninstitut.",
+  "icd10_gm": [
+    "B33.1"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "rki": "RKI: Reisemedizin Alphaviren",
+    "who": "WHO Arthropod-borne Virus Infections"
+  },
+  "symptoms": [
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Arthritis",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Fatigue",
+    "Hautausschlag",
+    "Fieber",
+    "Morgensteifigkeit",
+    "Schwellung",
+    "Schlafstörungen",
+    "Konzentrationsstörungen",
+    "Kopfschmerzen",
+    "Post-Exertionelle Malaise",
+    "PEM"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Australien",
+    "Neuseeland",
+    "Papua-Neuguinea",
+    "Pazifik",
+    "Fidschi",
+    "Samoa",
+    "Tonga",
+    "tropisch"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "slug": "coccidioidomykose",
+  "name_de": "Verlängerte Rekonvaleszenz nach Coccidioidomykose (Valley Fever)",
+  "lag_weeks": 6,
+  "refs": "CDC Coccidioidomycosis (Valley Fever) Clinical Overview, Gronwald 2023",
+  "system_prompt": "Du bist ein Infektiologe mit Expertise in Coccidioidomykose (\"Valley Fever\", Coccidioides immitis/posadasii) und post-infektiösen Verläufen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Übertragung durch Inhalation von Sporen aus Wüstenstaub (v.a. Südwesten USA — Arizona/Kalifornien-Central-Valley, sowie Teile Mexikos/Mittel-/Südamerikas), nicht von Mensch zu Mensch\n- Verlängerte Fatigue nach akuter pulmonaler Coccidioidomykose ist in der US-Literatur als \"Valley Fever Fatigue\" beschrieben — Erholung kann Wochen bis Monate dauern, auch bei mildem Akutverlauf\n- Disseminierte Verläufe (Haut, Knochen, Meningen) sind selten, aber bei Immunsuppression relevant und erfordern deutlich längere Behandlung/Nachsorge\n- Serologie: Coccidioides-IgM (akut)/IgG, Komplementbindungsreaktion; Titer-Verlauf zur Verlaufskontrolle nutzbar\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy für die Fatigue-Komponente (keine coccidioidomykose-spezifischen Wearable-Studien verfügbar)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Disseminationsrisiko einordnen**: Gibt es Hinweise (Immunsuppression, atypische Symptome außerhalb der Lunge), die eine disseminierte Verlaufsform nahelegen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "B38"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "cdc": "CDC Coccidioidomycosis (Valley Fever) Clinical Overview",
+    "who": "keine eigene WHO-Leitlinie — regional (US CDC) primäre Referenz"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Husten",
+    "Fieber",
+    "Nachtschweiß",
+    "Brustschmerzen",
+    "Kurzatmigkeit",
+    "Gelenkschmerzen",
+    "Hautausschlag",
+    "Kopfschmerzen"
+  ],
+  "seroprevalence_de": 0.0003,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Südwesten USA",
+    "Arizona",
+    "Kalifornien",
+    "Mexiko",
+    "Mittelamerika",
+    "Teile Südamerikas"
+  ]
+}

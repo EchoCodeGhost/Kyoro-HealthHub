@@ -1,0 +1,58 @@
+{
+  "slug": "rickettsia",
+  "name_de": "Post-Rickettsiose-Syndrom",
+  "lag_weeks": 4,
+  "refs": "Demeester et al. 2020 (Clin Infect Dis), Rolain et al. 2005, Gronwald 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Abschn. 3.5.1)",
+  "system_prompt": "Du bist ein Internist / Infektiologe mit Expertise in Rickettsiosen und Zecken-übertragenen Erkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Rickettsia spp.: obligat intrazelluläre Erreger, Zeckenübertragung\n- R. helvetica: in Mitteleuropa (Deutschland, Schweiz, Österreich) via Ixodes ricinus — gleicher Vektor wie Borrelia\n- In Südeuropa: Mittelmeerfleckfieber (R. conorii) via Dermacentor/Rhipicephalus\n- Post-Rickettsiose: Fatigue, kognitive Störungen, autonome Dysfunktion nach Akutphase\n- DBG-Leitlinie 2026 (Abschn. 3.5.1): Rickettsiose als Co-Infektion bei Lyme-Borreliose gelistet. Endothelschäden durch Vaskulitis beider Erreger → additive HRV-Verschlechterung und kardiovaskuläre AFES-Last. Doxycyclin deckt beide Erreger ab.\n- Serologie: IFA Rickettsia conorii IgG/-IgM; Kreuzreaktionen zwischen Spezies beachten\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Autonome & kardiovaskuläre Domäne**: Additive Vaskulitis-Last durch Rickettsia+Borrelia auf HRV und AFES?\n3. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n4. **Borrelia-Koinfektion**: Erklärt die Kombination Rickettsia+Borrelia (gemeinsamer Vektor R. helvetica/Ixodes) das kardiovaskuläre Muster besser als Mono-Infektion?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A77.1",
+    "A79.9"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Diagnostik und Therapie der Lyme-Borreliose, Frühjahr 2026, Tabelle 5",
+    "rki": "RKI-Ratgeber Rickettsiosen",
+    "cdc": "CDC Rocky Mountain Spotted Fever & Other Spotted Fever Rickettsioses",
+    "idsa": "IDSA Rickettsial Diseases Guidelines"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Kopfschmerzen",
+    "Fieber",
+    "Hautausschlag",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Lichtempfindlichkeit",
+    "Schwindel"
+  ],
+  "seroprevalence_de": 0.03,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Deutschland",
+    "Schweiz",
+    "Österreich",
+    "Mitteleuropa",
+    "zentraleuropäisch",
+    "mediterran",
+    "Mittelmeer",
+    "Spanien",
+    "Frankreich",
+    "Italien",
+    "Griechenland",
+    "Portugal",
+    "Balearen",
+    "Mallorca",
+    "Kanarische Inseln",
+    "Nordafrika",
+    "nordafrikanisch",
+    "Türkei",
+    "nahöstlich",
+    "Bulgarien",
+    "Marokko"
+  ]
+}

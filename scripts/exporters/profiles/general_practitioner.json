@@ -1,0 +1,12 @@
+{
+  "name": "general_practitioner",
+  "description": "Datenpaket für Hausarzt: tägliche Aggregate aller Domänen, keine Rohzeitreihen",
+  "description_en": "Data package for the GP: daily aggregates across all domains, no raw time series",
+  "queries": {
+    "daily_summary": "SELECT date, person, sleep_score, sleep_duration_min AS total_sleep_min, sleep_rem_min AS rem_min, sleep_deep_min AS deep_min, sleep_efficiency_pct, training_count, training_duration_min*60 AS training_duration_s, training_sport AS sports, steps, active_energy_kcal AS active_calories, sleep_hr_avg AS hr_avg, resting_hr_bpm AS hr_resting, hrv_rmssd_ms, spo2_avg_pct AS spo2_avg, resp_rate_avg AS respiration_avg, readiness_score, NULL AS activity_score, bp_sys AS bp_systolic, bp_dia AS bp_diastolic, bp_pulse, cgm_mean_mmol AS glucose_mmol, NULL AS hba1c, weight_kg, NULL AS bmi, body_fat_pct, nutrition_kcal AS kcal, nutrition_protein_g AS protein_g, nutrition_carbs_g AS carbs_g, nutrition_fat_g AS fat_g, NULL AS migraine, NULL AS migraine_severity, (SELECT COUNT(*) FROM ecg_sessions WHERE person=daily_context.person AND date(datetime)=daily_context.date) AS ecg_count, (SELECT COUNT(*) FROM symptoms WHERE person=daily_context.person AND date=daily_context.date) AS symptom_count, (SELECT COUNT(*) FROM medications WHERE person=daily_context.person AND date=daily_context.date) AS medication_count FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "medications_log": "SELECT ts, date, drug_name, dose_value, dose_unit, route, notes, source FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "lab_results": "SELECT date, parameter, wert AS value, einheit AS unit, ref_min AS range_min, ref_max AS range_max, status, labor AS lab, kommentar AS notes FROM lab_all WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date, parameter",
+    "assessments": "SELECT date, instrument, score, details FROM assessments WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "blood_pressure_summary": "SELECT date, ROUND(AVG(systolic),1) as systolic_avg, ROUND(AVG(diastolic),1) as diastolic_avg, MAX(systolic) as systolic_max, COUNT(*) as n_measurements, SUM(CASE WHEN ihb_flag=1 THEN 1 ELSE 0 END) as ihb_events, SUM(CASE WHEN afib_possible=1 THEN 1 ELSE 0 END) as afib_events FROM blood_pressure WHERE person = :person AND date BETWEEN :date_from AND :date_to GROUP BY date ORDER BY date"
+  }
+}

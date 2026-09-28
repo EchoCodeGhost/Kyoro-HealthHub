@@ -1,0 +1,54 @@
+{
+  "slug": "hantavirus",
+  "name_de": "Post-Hantavirus-Syndrom",
+  "lag_weeks": 6,
+  "refs": "Vaheri et al. 2013 (Nat Rev Microbiol), Rasche et al. 2011 (Emerg Infect Dis), Jonsson et al. 2010 (Clin Infect Dis), RKI Hantavirus-Statistik 2024, Tersago et al. 2009 (Epidemiol Infect, Mastjahr-/Klimakorrelation Hantavirus-Ausbrüche)",
+  "system_prompt": "Du bist ein Internist mit Expertise in hämorrhagischen Fiebersyndromen und post-infektiösen Nierenerkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Hantavirus (in DE v.a. Puumala-Virus): Übertragung durch Rötelmaus-Aerosole, nicht von Mensch zu Mensch\n- In Deutschland: v.a. Südwestdeutschland (Schwäbische Alb, Bayerischer Wald, Altmühltal), Endemiejahre ~alle 3–4 Jahre\n- KLIMAWANDEL-BEZUG: die Endemiejahre korrelieren mit Buchen-/Eichen-Mastjahren, die durch warme, trockene Sommer begünstigt werden — ein Mastjahr führt zu einem Nahrungsüberschuss und einer Populationsexplosion der Rötelmaus im Folgejahr; mildere Winter erhöhen zusätzlich die Überwinterungsrate der Nagerpopulation\n- Klinik: HFRS (hämorrhagisches Fieber mit renalem Syndrom) — Akutphase mit Thrombopenie, Nierenversagen\n- Post-Hantavirus: persistente Fatigue, Nierenfunktionsstörung, Hypertonie, kognitive Störungen (Vaheri 2013)\n- Langzeitfolgen nach Puumala: Nierenfunktionsreduktion, Bluthochdruck-Risiko, Fatigue ≥6 Monate\n- Serologie: Hantavirus-IgG (lebenslang positiv nach Infektion), Puumala-spezifische AK\n- Biomarker-Hinweise: Kreatinin-Anstieg, eGFR-Reduktion, erhöhtes Bluthochdruck-Risiko\n- Biomarker-Schwellen: ME-CFS-/Long-COVID-Literatur als Proxy für Wearable-Domänen\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Renale Komponente**: Gibt es Hinweise auf persistierende Nierenfunktionsstörung (eGFR, Kreatinin)?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Expositionsanamnese (Wald, Scheune, Nager), Serologie, Nierenwerte.",
+  "icd10_gm": [
+    "A98.5"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Hantavirus (§ 7 IfSG meldepflichtig)",
+    "rki_epidbull": "RKI Epidemiologisches Bulletin Hantavirus 2024"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Kopfschmerzen",
+    "Rückenschmerzen",
+    "Flankenschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Sehstörungen",
+    "Schlafstörungen",
+    "Schwindel",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Konzentrationsstörungen",
+    "Bluthochdruck"
+  ],
+  "seroprevalence_de": 0.01,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Altmühltal-Panoramaweg (Treuchtlingen–Kelheim)",
+    "Altmühltal-Panoramaweg Teil 2 (Gunzenhausen–Treuchtlingen)",
+    "Ramsau bei Berchtesgaden",
+    "Steibis, Allgäu",
+    "Eifel (bei Demerath)",
+    "Bayern",
+    "Baden-Württemberg",
+    "Schwäbische Alb",
+    "Bayerischer Wald",
+    "Skandinavien",
+    "Finnland",
+    "Osteuropa",
+    "Russland",
+    "Balkanhalbinsel",
+    "Kroatien",
+    "Bosnien",
+    "Bosnien-Herzegowina",
+    "Serbien"
+  ]
+}

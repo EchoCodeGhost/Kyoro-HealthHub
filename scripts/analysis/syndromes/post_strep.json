@@ -1,0 +1,45 @@
+{
+  "slug": "post_strep",
+  "name_de": "Post-Streptokokken-Syndrom (PANS/rheumatische Folgen)",
+  "lag_weeks": 6,
+  "refs": "Swedo et al. 1997 (Am J Psychiatry), Murphy et al. 2012 (Pediatrics), Carapetis et al. 2005 (Lancet Infect Dis), RKI Streptokokken-Erkrankungen, Cunningham 2012 (Nat Rev Immunol)",
+  "system_prompt": "Du bist ein Internist und Neurologe mit Expertise in post-infektiösen Autoimmunsyndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Post-Streptokokken-Syndrome: Autoimmunreaktionen nach Streptococcus pyogenes (Gruppe A, GAS)\n- PANS (Pediatric Acute-onset Neuropsychiatric Syndrome) / PANDAS: OCD, Tics, kognitive Regression nach Strep-Infekt; kann auch im Erwachsenenalter auftreten / persistieren\n- Rheumatisches Fieber: Karditis, Chorea, Erythema marginatum — selten in Deutschland, aber Strep-Autoimmunität nicht\n- Post-Strep-Arthritis: Gelenkbeteiligung ohne vollständiges rheumatisches Fieber; chronisch möglich\n- Neuropsychiatrische Komponente: Stimmungsschwankungen, OCD-Symptome, Konzentrationsstörungen, Angst\n- Serologie: Anti-Streptolysin O (ASL), Anti-DNase B (spezifischer für kutane/systemische Infektionen)\n- PANDAS/PANS-Kriterien: Cunningham-Panel (CaMKII-Aktivierung, Antikörper gegen neuronale Antigene)\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neuropsychiatrisches Muster**: Kognitive Störungen, Stimmung, OCD-ähnliche Muster?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: ASL, Anti-DNase B, Cunningham-Panel, rheumatologische Mitbeurteilung.",
+  "icd10_gm": [
+    "M02.9",
+    "I00",
+    "I01",
+    "F95"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "awmf": "AWMF-Leitlinie Streptokokken-Erkrankungen",
+    "who": "WHO Rheumatic Fever and Rheumatic Heart Disease 2004",
+    "nimh": "NIMH PANDAS Guidelines"
+  },
+  "symptoms": [
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Arthritis",
+    "Fatigue",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Stimmungsschwankungen",
+    "Angst",
+    "Schlafstörungen",
+    "Kopfschmerzen",
+    "Muskelschmerzen",
+    "Herzrasen",
+    "Schwindel",
+    "Gedächtnisprobleme",
+    "Wortfindungsstörungen",
+    "Halsschmerzen",
+    "Reizbarkeit"
+  ],
+  "seroprevalence_de": 0.15,
+  "sero_category": "mittel",
+  "endemic_regions": [
+    "Deutschland",
+    "Europa",
+    "weltweit"
+  ]
+}

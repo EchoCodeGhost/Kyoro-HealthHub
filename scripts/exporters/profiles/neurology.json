@@ -1,0 +1,11 @@
+{
+  "name": "neurology",
+  "description": "Datenpaket für Neurologen: Migräne-Sessions, Symptome, HIT-6, MIDAS",
+  "description_en": "Data package for neurologists: migraine sessions, symptoms, HIT-6, MIDAS",
+  "queries": {
+    "migraine_episodes": "SELECT date, ts_start, ts_end, severity, duration_h, aura, nausea, vomiting, photophobia, activity_impact, type, medication, notes FROM migraine WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts_start",
+    "headache_assessments": "SELECT ts, date, instrument, score, details FROM assessments WHERE person = :person AND instrument IN ('HIT-6','MIDAS') AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "neuro_symptoms": "SELECT date, symptom, value_num, value_text, category, source FROM symptoms WHERE person = :person AND (symptom LIKE '%Kopf%' OR symptom LIKE '%Migräne%' OR symptom LIKE '%headache%' OR symptom LIKE '%dizziness%' OR symptom LIKE '%Schwindel%' OR symptom LIKE '%aura%' OR category LIKE '%Neuro%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "apple_headache_events": "SELECT date, ts, value, source_app FROM measurements WHERE metric IN ('headache','memory_lapse','dizziness') AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts"
+  }
+}

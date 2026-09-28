@@ -1,0 +1,12 @@
+{
+  "name": "oncology",
+  "description": "Datenpaket für Onkologen: Laborwerte, Symptome, Gewicht, Medikamente, HR",
+  "description_en": "Data package for oncology: lab results, symptoms, body composition, medications, HR",
+  "queries": {
+    "lab_results": "SELECT date, parameter, wert AS value, einheit AS unit, ref_min AS range_min, ref_max AS range_max, status, labor AS lab, kommentar AS notes FROM lab_all WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date, parameter",
+    "symptoms": "SELECT date, symptom, value_num, value_text, category FROM symptoms WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "body_composition": "SELECT ts, date, weight_kg, bmi, body_fat_pct, muscle_pct, source FROM body_composition WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "medications": "SELECT ts, date, drug_name, dose_value, dose_unit, route, notes FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "daily_vitals": "SELECT date, sleep_hr_avg AS hr_avg, resting_hr_bpm AS hr_resting, hrv_rmssd_ms, spo2_avg_pct AS spo2_avg, resp_rate_avg AS respiration_avg, sleep_duration_min AS total_sleep_min, steps FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date"
+  }
+}

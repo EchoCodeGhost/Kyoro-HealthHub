@@ -1,0 +1,54 @@
+{
+  "slug": "onchozerkose",
+  "name_de": "Post-Onchozerkose / Nodding Syndrome",
+  "lag_weeks": 104,
+  "refs": "Sejvar et al. 2013 (Epilepsia), Tumwine et al. 2012 (Epilepsy Behav), Hotterbeekx et al. 2019 (PLoS Negl Trop Dis), WHO Onchocerciasis 2023, Johnson et al. 2017 (Sci Transl Med)",
+  "system_prompt": "Du bist ein Neurologe und Tropenmediziner mit Expertise in Onchozerkose-assoziierten neurologischen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Onchozerkose (Flussblindheit): Onchocerca volvulus; Schwarzfliegen (Simulium) als Vektor; endemisch Subsahara-Afrika, jemenitische Küste, Lateinamerika\n- Chronisch-aktive Erkrankung (Mikrofila rien im Gewebe), aber nach Behandlung/Parasitenfreiheit persistierende Sequelen\n- Nodding Syndrome (NS): kindliche epileptische Enzephalopathie; stark assoziiert mit O. volvulus-Exposition; Pathomechanismus unklar (Autoimmun-Hypothese: Antikörper gegen leiomodin-1)\n- NS-Symptome: Kopfnicken bei Nahrungsaufnahme (pathognomisch), progressive kognitive Regression, Wachstumsstörung, Epilepsie\n- Post-Onchozerkose im Erwachsenenalter: Fatigue, persistierende Sehminderung (nach Hornhaut-Narben), chronische Dermatitis\n- Serologie: Onchocerca-spezifische IgG4-ELISA; Skin-Snip-PCR; Ov16-Antigen-Test\n- Biomarker: Eosinophilie, persistierende Sehminderung als Surrogatmarker\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Neurologisches Muster**: Kognitive Regression, Anfallsmuster, Sehstörungen?\n5. **Trend**: Progressiv (NS) oder stabilisiert (post-aktive Onchozerkose)?\n6. **Klinische Empfehlung**: Reiseanamnese Subsahara-Afrika, Ov16-Serologie (Tropeninstitut), Neurologie, Ophthalmologie.",
+  "icd10_gm": [
+    "B73",
+    "G40.8"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "who": "WHO Onchocerciasis – Fact Sheet 2023",
+    "who_ns": "WHO Nodding Syndrome – Fact Sheet 2012",
+    "dtg": "DTG-Leitlinie Importierte Parasitosen"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Sehstörungen",
+    "Sehminderung",
+    "Juckreiz",
+    "Hautveränderungen",
+    "Konzentrationsstörungen",
+    "Gedächtnisprobleme",
+    "Krampfanfälle",
+    "Epilepsie",
+    "Kopfschmerzen",
+    "Stimmungsschwankungen",
+    "Schlafstörungen",
+    "Schwäche",
+    "Gewichtsverlust",
+    "Brain Fog",
+    "Verlangsamtes Denken"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "Subsahara-Afrika",
+    "Uganda",
+    "Tansania",
+    "Kamerun",
+    "Kongo",
+    "Nigeria",
+    "Äthiopien",
+    "Sudan",
+    "Westafrika",
+    "Afrika",
+    "Jemen",
+    "Lateinamerika",
+    "Brasilien",
+    "Venezuela",
+    "tropisch"
+  ]
+}

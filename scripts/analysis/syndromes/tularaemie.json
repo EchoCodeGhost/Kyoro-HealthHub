@@ -1,0 +1,56 @@
+{
+  "slug": "tularaemie",
+  "name_de": "Post-Tularämie-Syndrom",
+  "lag_weeks": 8,
+  "refs": "Tärnvik & Chu 2007 (Ann N Y Acad Sci), Eliasson et al. 2006 (Scand J Infect Dis), RKI-Ratgeber Tularämie 2024, ECDC Tularaemia in Europe 2022",
+  "system_prompt": "Du bist ein Internist mit Expertise in Zoonosen und bakteriellen post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Tularämie: Francisella tularensis, hochinfektiöse Zoonose; Übertragung durch Nager (Hasen, Nagetiere), Zeckenstich, Aerosol, kontaminiertes Wasser\n- In Deutschland endemisch: v.a. Hessen, Brandenburg, Sachsen-Anhalt, Thüringen, Bayern; Ausbrüche sporadisch\n- Klinische Formen: ulzeroglandulär (häufigste, Hauterosion + Lymphadenopathie), pneumonisch (schwer), typhoidal\n- Post-Tularämie: Fatigue, Myalgie, kognitive Störungen; Langzeitdaten begrenzt aber Analogie zu anderen Zoonosen\n- Chronische Verläufe selten; Rückfälle bei unbehandelten Formen möglich\n- Serologie: Tularämie-Agglutinationstest (SAT), ELISA; PCR in der Akutphase\n- Biomarker: Lymphadenopathie, LDH-Erhöhung, Hepatitis-Muster möglich\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Expositionsanamnese**: Nager-/Zecken-/Wasserexposition in Endemiegebiet?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Tularämie-Serologie, Expositionsabklärung, Infektiologe.",
+  "icd10_gm": [
+    "A21.0",
+    "A21.1",
+    "A21.3",
+    "A21.9"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Tularämie (§ 7 IfSG meldepflichtig)",
+    "ecdc": "ECDC Tularaemia in Europe – Surveillance Report 2022"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Lymphknotenschwellung",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Hautgeschwür",
+    "Husten",
+    "Halsschmerzen",
+    "Übelkeit",
+    "Appetitlosigkeit",
+    "Nachtschweiß",
+    "Schüttelfrost",
+    "Abgeschlagenheit",
+    "Gelenkschmerzen",
+    "Schlafstörungen"
+  ],
+  "seroprevalence_de": 0.002,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Bayern",
+    "Hessen",
+    "Brandenburg",
+    "Sachsen-Anhalt",
+    "Altmühltal-Panoramaweg (Treuchtlingen–Kelheim)",
+    "Altmühltal-Panoramaweg Teil 2 (Gunzenhausen–Treuchtlingen)",
+    "Ramsau bei Berchtesgaden",
+    "Eifel (bei Demerath)",
+    "Skandinavien",
+    "Finnland",
+    "Schweden",
+    "Osteuropa",
+    "Russland",
+    "Nordamerika",
+    "Spanien"
+  ]
+}

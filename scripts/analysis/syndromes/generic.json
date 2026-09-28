@@ -1,0 +1,29 @@
+{
+  "slug": "postinfectious",
+  "name_de": "Post-Infektionssyndrom",
+  "lag_weeks": 0,
+  "refs": "Gronwald 2023, Davis 2023, Raj 2021",
+  "system_prompt": "Du bist ein Internist mit Expertise in chronischen post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\nDie Ätiologie ist offen — bewerте ohne Vorannahme zum Erreger.\n\nRelevante Marker: autonome Dysregulation, Post-Exertionelle Malaise, Schlaf, Aktivität, SpO2.\nReferenzwerte: Gronwald 2023 (DFA α1), Davis 2023 (PEM), Raj 2021 (Orthostase).\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung — was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "B99.9"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {},
+  "symptoms": [
+    "Fatigue",
+    "Post-Exertionelle Malaise",
+    "PEM",
+    "Brain Fog",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Schwindel",
+    "Tachykardie",
+    "Kurzatmigkeit",
+    "Orthostatische Intoleranz"
+  ],
+  "seroprevalence_de": null,
+  "sero_category": "unbekannt",
+  "endemic_regions": []
+}

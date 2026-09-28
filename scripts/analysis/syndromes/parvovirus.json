@@ -1,0 +1,36 @@
+{
+  "slug": "parvovirus",
+  "name_de": "Post-Parvovirus-B19-Syndrom",
+  "lag_weeks": 8,
+  "refs": "Kerr et al. 2002 (J Infect), Stahl et al. 2021, Young & Brown 2004 (NEJM), Gronwald 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Tabelle 6)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Parvovirus B19 und post-infektiösen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Parvovirus B19: weit verbreitet, >50% der Erwachsenen seropositiv\n- Post-Parvovirus: persistente Arthropathie, chronische Fatigue, kognitive Störungen\n- Chronische Parvovirus-Infektion möglich bei Immunsuppression (persistierende Virämie)\n- Serologie: IgG/-IgM Anti-VP2; PCR für persistierende Infektion bei Immunsuppression\n- DBG-Leitlinie 2026 (Tabelle 6): Parvovirus als virale Co-Infektion bei Lyme-Borreliose gelistet. Parvovirus-assoziierte Symptome bei Borrelia-Ko-Infektion: Schmerzsymptomatik, gastrointestinale Beteiligung. Borrelia-Arthritis vs. Parvovirus-Arthropathie: DD wichtig — beide: Gelenkschmerzen; Parvovirus typisch symmetrisch kleine Gelenke, Borrelia asymmetrisch große Gelenke.\n- Biomarker-Schwellen: Post-Infektions-/Long-COVID-Literatur als Proxy\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Arthropathie-assoziierte Aktivitätseinschränkung besonders beachten\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung?\n5. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "B08.3",
+    "B34.3"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen)",
+    "rki": "RKI-Ratgeber Ringelröteln (Parvovirus B19)",
+    "cdc": "CDC Parvovirus B19 Clinical Information"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Arthritis",
+    "Muskelschmerzen",
+    "Hautausschlag",
+    "Anämie-Symptome",
+    "Blässe",
+    "Erschöpfung",
+    "Schwäche",
+    "Konzentrationsstörungen"
+  ],
+  "seroprevalence_de": 0.6,
+  "sero_category": "hoch",
+  "endemic_regions": []
+}

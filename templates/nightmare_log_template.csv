@@ -1,0 +1,10 @@
+# Kyoro SleepGuard – Nightmare Event Log
+# Vom Uhrendisplay ablesen: "RBD Gesamt" + "letzt:" Datum, Details über nmLogTs/Hr/Base im Storage
+# Spalten:
+#   ts_utc      – Zeitstempel UTC (ISO 8601: YYYY-MM-DDTHH:MM:SSZ)
+#   hr_bpm      – gemessene Herzfrequenz beim Alarm (bpm)
+#   baseline_bpm – berechnete Baseline (25. Perz. Schlaf-HR, bpm)
+#   notes       – optionale Notiz (Traumerinnerung, Aufgewacht j/n, etc.)
+ts_utc,hr_bpm,baseline_bpm,notes
+2026-07-12T02:30:00Z,95,58,aufgewacht, Traum erinnert
+2026-07-12T04:15:00Z,88,58,nicht aufgewacht

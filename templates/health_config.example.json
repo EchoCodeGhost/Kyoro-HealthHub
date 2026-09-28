@@ -1,0 +1,573 @@
+{
+  "language": "de",
+  "_db_key_note": "Set to a strong passphrase to enable AES-256 database encryption (SQLCipher 4). Without it, health.db is a plain unencrypted SQLite file. Also protect imports/ and backups with full-disk encryption (LUKS / FileVault / BitLocker).",
+  "db_key": null,
+  "_country_note": "ISO 3166-1 alpha-2 country code; region is free text (state/Bundesland). Not read by any guideline script yet — clinical guideline thresholds (screening ages, diagnostic criteria) are currently hardcoded to German sources (AWMF/RKI) regardless of this field. Captured now so it's available once guideline selection is built; see local feature backlog BACK-32.",
+  "user": {
+    "name":      "Max Mustermann",
+    "birthdate": "1967-03-15",
+    "gender":    "male",
+    "height_cm": 170,
+    "weight_kg": 84,
+    "timezone":  "Europe/Berlin",
+    "country":   "DE",
+    "region":    "Hamburg"
+  },
+  "paths": {
+    "db":           "~/Kyoro-HealthHub/data/health.db",
+    "medicine_db":  "~/Kyoro-HealthHub/data/medicine.db",
+    "medicine_imaging_db": "~/Kyoro-HealthHub/data/medicine_imaging.db",
+    "data_root":    "~/Kyoro-HealthHub/imports",
+    "analyses":     "~/Kyoro-HealthHub/analyses",
+    "manual":       "~/Kyoro-HealthHub/imports/manual",
+    "polar":        "~/Kyoro-HealthHub/imports/polar",
+    "apple_xml":    "~/Kyoro-HealthHub/imports/apple_health/Export.xml",
+    "beurer":       "~/Kyoro-HealthHub/imports/beurer",
+    "omron":        "~/Kyoro-HealthHub/imports/omron",
+    "migraine":     "~/Kyoro-HealthHub/imports/migraine",
+    "symptom_diary": "~/Kyoro-HealthHub/imports/symptom_diary",
+    "garmin":               "~/Kyoro-HealthHub/imports/garmin",
+    "_garmin_gdpr_note":    "Optional: Garmin-Modell-ID für GDPR-Import. Wird automatisch aus device_registry (brand=Garmin, sensor_type in {optical_wrist, optical_wrist_gps}) abgeleitet.",
+    "garmin_gdpr_device_id": "",
+    "kubios":               "~/Kyoro-HealthHub/imports/kubios",
+    "camerahRV":            "~/Kyoro-HealthHub/imports/camerahRV"
+  },
+  "location": {
+    "name": "Freiburg im Breisgau",
+    "lat":  47.9990,
+    "lon":  7.8421
+  },
+  "devices": {
+    "polar":         true,
+    "apple_health":  true,
+    "oura":          false,
+    "garmin":        false,
+    "beurer":        false,
+    "omron":         true,
+    "migraine_app":  false,
+    "symptom_diary": false,
+    "sleep_cycle":   false,
+    "fddb":          false,
+    "ftms_mac":      "AA:BB:CC:DD:EE:FF"
+  },
+  "oura": {
+    "api_token": "your-oura-api-token"
+  },
+  "apis": {
+    "aemet_api_key": "eyJ..."
+  },
+  "models": {
+    "llm_path":   "/path/to/llm-model",
+    "llm_device": "GPU"
+  },
+  "llm": {
+    "_comment": "Set provider to one of: openvino, ovms, ollama, lmstudio, openrouter, anthropic, mistral, perplexity, mammouth, huggingface, nvidia, azure, exo, llamacpp, multi",
+    "_comment_multi": "multi routes to different backends by system-prompt keywords. 'default' is required. See llm_provider.py for details.",
+    "_example_multi": {
+      "provider": "multi",
+      "multi_backends": {
+        "default": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8080/v1", "llamacpp_model": "local-model", "timeout": 0 },
+        "medical": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8081/v1", "llamacpp_model": "local-model", "timeout": 300 }
+      },
+      "multi_routing": {
+        "medical": ["labor", "diagnos", "medikament", "klinisch", "befund", "symptom", "therapie", "blutbild", "laborwert"]
+      }
+    },
+    "provider": "openvino",
+    "openvino_path":   "/path/to/llm-model-genai",
+    "openvino_device": "GPU",
+    "openrouter_api_key":  "sk-or-...",
+    "openrouter_model":    "meta-llama/llama-3.1-8b-instruct:free",
+    "anthropic_api_key":   "sk-ant-...",
+    "anthropic_model":     "claude-haiku-4-5-20251001",
+    "mistral_api_key":     "...",
+    "mistral_model":       "mistral-small-latest",
+    "perplexity_api_key":  "...",
+    "perplexity_model":    "llama-3.1-sonar-small-128k-online",
+    "mammouth_api_key":    "...",
+    "mammouth_model":      "llama-3.3-70b-instruct",
+    "huggingface_api_key": "hf_...",
+    "huggingface_model":   "meta-llama/Llama-3.1-8B-Instruct",
+    "nvidia_api_key":      "nvapi-...",
+    "nvidia_model":        "meta/llama-3.1-8b-instruct",
+    "azure_api_key":       "...",
+    "azure_endpoint":      "https://YOUR-RESOURCE.openai.azure.com",
+    "azure_deployment":    "gpt-4o",
+    "azure_api_version":   "2024-02-01",
+    "ollama_url":          "http://localhost:11434/v1",
+    "ollama_model":        "qwen3:30b",
+    "lmstudio_url":        "http://localhost:1234/v1",
+    "lmstudio_model":      "local-model",
+    "mlx_model":           "mlx-community/Qwen3-30B-A3B-4bit",
+    "mlx_vlm_model":       "",
+    "ovms_url":            "http://localhost:8080/v1",
+    "ovms_model":          "qwen3",
+    "exo_url":             "http://localhost:52415/v1",
+    "exo_model":           "llama-3.2-3b",
+    "llamacpp_url":        "http://localhost:8080/v1",
+    "llamacpp_model":      "local-model"
+  },
+  "synthesis_panel": {
+    "_comment": "Optional: Multi-model consult panel for analyse_synthesis.py. When enabled, multiple LLMs independently assess the analyses, and a chair model consolidates the opinions. Disabled by default (enabled: false) for backward compatibility. Preferred: store this block in ~/.config/kyoro/synthesis_panel.json instead — it takes precedence over this inline value and keeps model choices out of the versioned config.",
+    "enabled": false,
+    "members": [
+      "anthropic/claude-opus-4-8",
+      "openai/gpt-5.6"
+    ],
+    "chair_model": "anthropic/claude-opus-4-8"
+  },
+  "persons": [
+    {"person_id": "max",     "device_user_id": "u1", "timezone": "Europe/Berlin", "active": 1},
+    {"person_id": "partner", "device_user_id": "u2", "timezone": "Europe/Berlin", "active": 1}
+  ],
+  "_device_registry_note": "List the devices you actually own. Each entry needs a unique device_id; sensor_type is used by importers and source_priority to disambiguate metrics. Valid sensor_type: optical_wrist | optical_wrist_gps | chest_strap | handheld_ecg | ring | handheld_gps | scale | bp_monitor | glucometer | thermometer | smartphone | phone_optical | cgm | hub | weather_station. Add date_to for retired devices. serial is required for Polar wrist devices so import_polar.py can automatically identify which watches recorded H7/H10 chest-strap RR intervals; leave null for non-Polar or chest-strap devices. Optional 'regulatory' block documents regulatory status; grade: 'medical' | 'research_grade' | 'consumer'. IVD devices (CGM, glucometer) use ivdr_class instead of mdr_class. Optional 'source_apps' (list of strings): every source_app value this device's data can appear under in measurements/sessions — matters when the same physical device is reachable via more than one import path (e.g. a PDF export and an app-screenshot import of the same reading get two different source_app values). Only needed if you reference this device_id in clinical.reference_devices; compute_calibrate_sources.py uses it to resolve which source_app rows belong to your configured calibration anchor.",
+  "device_registry": [
+    {
+      "device_id": "polar_vantage", "brand": "Polar", "model": "Vantage V3", "serial": "A3B7F2D1",
+      "sensor_type": "optical_wrist_gps", "person": "max", "date_from": "2023-10-01",
+      "regulatory": {
+        "medical_device": false, "grade": "consumer", "ce_marked": true, "mdr_class": null,
+        "fda_510k": null, "notes": "Consumer-Sportuhr mit ECG-Feature; CE als Elektrogerät; kein Medizinprodukt nach MDR trotz ECG"
+      }
+    },
+    {
+      "device_id": "polar_h10", "brand": "Polar", "model": "H10", "serial": null,
+      "sensor_type": "chest_strap", "person": "max", "date_from": "2019-11-05",
+      "source_apps": ["polar_connect"],
+      "regulatory": {
+        "medical_device": false, "grade": "research_grade", "ce_marked": true, "mdr_class": null,
+        "fda_510k": null, "notes": "Research-Grade-Brustgurt; CE als Consumer-Sportgerät; kein Medizinprodukt nach MDR; ECG-Feature für Trainings-/HRV-Nutzung"
+      }
+    },
+    {
+      "device_id": "omron_m7", "brand": "Omron", "model": "M7 Intelli IT", "serial": null,
+      "sensor_type": "bp_monitor", "person": null, "date_from": "2006-04-10",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIa",
+        "fda_510k": null, "notes": "Klinisch validiertes Blutdruckmessgerät; CE-Medizinprodukt MDD/MDR Klasse IIa"
+      }
+    },
+    {
+      "device_id": "apple_watch", "brand": "Apple", "model": "Watch Series 9", "serial": null,
+      "sensor_type": "optical_wrist", "person": "max", "date_from": "2023-09-22",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIa",
+        "fda_510k": "K192160", "fda_de_novo": "DEN180044",
+        "notes": "ECG-App: FDA 510(k) K192160 + CE MDR IIa. AFib-Erkennung: FDA De Novo DEN180044. Gilt nur für ECG/AFib-Feature — HR/SpO2 sind Consumer-Funktionen ohne Medizinzulassung."
+      }
+    },
+    {
+      "device_id": "oura_ring4", "brand": "Oura", "model": "Ring 4", "serial": null,
+      "sensor_type": "ring", "person": "max", "date_from": "2024-01-15",
+      "regulatory": {
+        "medical_device": false, "grade": "research_grade", "ce_marked": true, "mdr_class": null,
+        "fda_510k": null,
+        "notes": "CE Consumer; FDA general wellness device (kein Medical Device nach MDR/FDA); gut validiert für Schlaf/HRV-Forschung"
+      }
+    },
+    {
+      "device_id": "kardia_6l", "brand": "AliveCor", "model": "KardiaMobile 6L", "serial": null,
+      "sensor_type": "handheld_ecg", "person": "max", "date_from": "2023-03-01",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIa",
+        "fda_510k": "K192718",
+        "notes": "1- und 6-Kanal-ECG; FDA 510(k) + CE MDR IIa; klinisch validiert für AFib, Bradykardie/Tachykardie, ST-Veränderungen; bestes validiertes Consumer-ECG"
+      }
+    },
+    {
+      "device_id": "omron_x7", "brand": "Omron", "model": "X7 Smart AFib", "serial": null,
+      "sensor_type": "bp_monitor", "person": "max", "date_from": "2023-06-01",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIb",
+        "fda_510k": null,
+        "notes": "Blutdruck + AFib-Screening; MDR Klasse IIb (AFib-Feature hebt Klasse auf IIb vs. IIa bei reinem BP-Monitor)"
+      }
+    },
+    {
+      "device_id": "libre3", "brand": "Abbott", "model": "Freestyle Libre 3", "serial": null,
+      "sensor_type": "cgm", "person": "max", "date_from": "2024-04-01",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": null,
+        "ivdr_class": "C", "fda_cleared": true,
+        "notes": "CGM-System; CE IVDR Klasse C (In-Vitro-Diagnostik — IVDR statt MDR); FDA cleared; 14-Tage-Sensor; rtCGM ohne Fingerstich-Kalibrierung"
+      }
+    }
+  ],
+  "_app_registry_note": "Apps mit medizinischer oder Research-Grade-Funktion. input_sensor: Hardware die die App nutzt. kyoro_importer: zugehöriges Import-Script falls vorhanden.",
+  "app_registry": [
+    {
+      "app_id": "fibricheck",
+      "name": "FibriCheck",
+      "vendor": "Qompium",
+      "platform": "iOS/Android",
+      "input_sensor": "phone_optical",
+      "function": "AFib-Erkennung via Smartphone-Kamera (PPG-Fingerauflage)",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIa",
+        "fda_510k": null,
+        "notes": "CE MDR IIa; FDA De Novo; klinisch validiert; in einigen EU-Ländern auf Rezept"
+      },
+      "data_export": {"format": null, "method": "PDF-Arztbericht", "notes": "Kein CSV/JSON-Export; nur PDF"},
+      "kyoro_importer": null
+    },
+    {
+      "app_id": "skinscreener",
+      "name": "Skinscreener",
+      "vendor": "Skinscreener GmbH",
+      "platform": "iOS/Android",
+      "input_sensor": "camera",
+      "function": "KI-gestützte Risikoeinschätzung Hautläsionen (ABCDE + Dermoskopie-Algorithmus)",
+      "regulatory": {
+        "medical_device": true, "grade": "medical", "ce_marked": true, "mdr_class": "IIa",
+        "fda_510k": null,
+        "notes": "CE MDR IIa (EU); kein FDA-Clearance; kein Datenexport aus App — Screenshot-Workflow"
+      },
+      "data_export": {"format": null, "method": "Screenshot", "notes": "Kein Export; Screenshots via import_skin.py importieren"},
+      "kyoro_importer": "importers/import_skin.py"
+    }
+  ],
+  "_travel_history_note": "Besuchte Orte/Regionen für Differenzialdiagnose und Expositionsrisiko. climate_zone: tropisch | subtropisch | mediterran | kontinental | osteuropaeisch | skandinavisch | suedostasiatisch | afrikanisch | nordafrikanisch | nahöstlich | lateinamerikanisch",
+  "travel_history": [
+    {"name": "Marokko (Rabat, Agadir) — privat",                       "country": "Marokko",       "country_iso": "MA", "subregion": "Nordafrika",   "climate_zone": "nordafrikanisch",    "date_from": "1986-08-10", "date_to": "1986-09-02", "notes": "Hepatitis-A-Infektion (ikterischer Verlauf)"},
+    {"name": "Indonesien (Jakarta, Sumatra) — Montageauftrag",         "country": "Indonesien",    "country_iso": "ID", "subregion": "Südostasien",  "climate_zone": "tropisch",           "date_from": "1993-03-15", "date_to": "1993-05-28", "notes": "Erstmontage Industrieanlage; Dengue-Expositionsgebiet"},
+    {"name": "Saudi-Arabien (Riad, Dammam) — Montageauftrag",         "country": "Saudi-Arabien", "country_iso": "SA", "subregion": null,           "climate_zone": "nahöstlich",         "date_from": "1995-09-04", "date_to": "1995-11-12", "notes": "Prozessleittechnik-Installation"},
+    {"name": "Nigeria (Lagos, Port Harcourt) — Montageauftrag",        "country": "Nigeria",       "country_iso": "NG", "subregion": "Westafrika",   "climate_zone": "afrikanisch",        "date_from": "1997-01-20", "date_to": "1997-03-08", "notes": "Malaria- und Gelbfieber-Endemiegebiet; Chloroquin-Prophylaxe"},
+    {"name": "Brasilien (São Paulo, Minas Gerais) — Montageauftrag",   "country": "Brasilien",     "country_iso": "BR", "subregion": "Südamerika",   "climate_zone": "lateinamerikanisch", "date_from": "1999-02-03", "date_to": "1999-04-14", "notes": "Gelbfieber-Endemiegebiet (Hinterland)"},
+    {"name": "Malaysia (Kuala Lumpur, Penang) — Montageauftrag",       "country": "Malaysia",      "country_iso": "MY", "subregion": "Südostasien",  "climate_zone": "suedostasiatisch",   "date_from": "2001-06-10", "date_to": "2001-08-22", "notes": null},
+    {"name": "Ägypten (Alexandria, Kairo) — Montageauftrag",           "country": "Ägypten",       "country_iso": "EG", "subregion": "Nordafrika",   "climate_zone": "nordafrikanisch",    "date_from": "2002-10-07", "date_to": "2002-12-19", "notes": null},
+    {"name": "Russland (Nowosibirsk, Westsibirien) — Montageauftrag",  "country": "Russland",      "country_iso": "RU", "subregion": "Sibirien",     "climate_zone": "kontinental",        "date_from": "2003-04-14", "date_to": "2003-06-30", "notes": "FSME-Risikogebiet; Zeckenstiche möglich"},
+    {"name": "Vietnam (Ho-Chi-Minh-Stadt, Mekong-Delta) — Montageauftrag", "country": "Vietnam",  "country_iso": "VN", "subregion": "Südostasien",  "climate_zone": "suedostasiatisch",   "date_from": "2005-09-05", "date_to": "2005-12-02", "notes": "Dengue-Typ-2-Infektion November 2005"},
+    {"name": "Griechenland (Kreta) — privat",                          "country": "Griechenland",  "country_iso": "GR", "subregion": null,           "climate_zone": "mediterran",         "date_from": "2006-07-14", "date_to": "2006-07-28", "notes": null},
+    {"name": "Kenia (Mombasa, Tsavo) — Montageauftrag + Safari",       "country": "Kenia",         "country_iso": "KE", "subregion": "Ostafrika",    "climate_zone": "afrikanisch",        "date_from": "2007-07-08", "date_to": "2007-08-25", "notes": "Malaria-Prophylaxe (Atovaquon/Proguanil)"},
+    {"name": "Indien (Chennai, Tamil Nadu) — Montageauftrag",          "country": "Indien",        "country_iso": "IN", "subregion": "Südindien",    "climate_zone": "subtropisch",        "date_from": "2009-02-16", "date_to": "2009-05-03", "notes": null},
+    {"name": "Türkei (Antalya) — privat",                              "country": "Türkei",        "country_iso": "TR", "subregion": null,           "climate_zone": "mediterran",         "date_from": "2011-08-06", "date_to": "2011-08-20", "notes": null},
+    {"name": "Kasachstan (Almaty, Tengiz-Ölfeld) — Montageauftrag",   "country": "Kasachstan",    "country_iso": "KZ", "subregion": "Zentralasien", "climate_zone": "kontinental",        "date_from": "2012-04-09", "date_to": "2012-07-14", "notes": "Extreme Temperaturschwankungen; Staubexposition"},
+    {"name": "Peru (Lima, Arequipa) — Montageauftrag",                 "country": "Peru",          "country_iso": "PE", "subregion": "Südamerika",   "climate_zone": "lateinamerikanisch", "date_from": "2013-05-20", "date_to": "2013-08-11", "notes": "Höhenaufenthalt bis 3200 m ü.M. (Arequipa)"},
+    {"name": "Katar (Doha) — Montageauftrag",                          "country": "Katar",         "country_iso": "QA", "subregion": null,           "climate_zone": "nahöstlich",         "date_from": "2017-10-03", "date_to": "2018-01-05", "notes": "Hitzeexposition bis 46 °C; Influenza-Pneumonie direkt nach Rückkehr"},
+    {"name": "Südafrika (Johannesburg, Kapstadt) — Montageauftrag + privat", "country": "Südafrika", "country_iso": "ZA", "subregion": null,        "climate_zone": "afrikanisch",        "date_from": "2019-02-11", "date_to": "2019-04-30", "notes": null}
+  ],
+  "_exposure_history_note": "Exposition gegenüber Zoonoseerregern, Umweltfaktoren und sexuell übertragbaren Infektionen — wichtig für die Differenzialdiagnose ungeklärter Symptome. Tierkontakt → Q-Fieber (Schaf/Ziege/Rind), Brucella (Rind), Leptospira (Pferd/Wasser), Echinococcus (Hund), Toxoplasma (Katze). Ländliche Umgebung → FSME, Borrelia, Hantavirus. Häufig wechselnde Sexualpartner → HIV, HCV, Syphilis, HPV, Gonorrhoe, Chlamydien.",
+  "exposure_history": {
+    "childhood_environment": "ländlich — Weiler bei Freiburg (Schwarzwald); aufgewachsen auf Großelternhof",
+    "animal_contacts": [
+      {"animal": "Rind",        "exposure": "regelmäßig", "period": "1970–1985", "context": "Großelternhof; Q-Fieber-Endemiegebiet Schwarzwald"},
+      {"animal": "Schaf/Ziege", "exposure": "saisonal",   "period": "1972–1985", "context": "Großelternhof; hohe Coxiella-Exposition beim Lammen"},
+      {"animal": "Pferd",       "exposure": "regelmäßig", "period": "1974–1995", "context": "Reitverein Schwarzwald; Zeckenstich-Exposition"},
+      {"animal": "Hund",        "exposure": "dauerhaft",  "period": "1970–1985", "context": "Hofhund; Echinococcus-Risiko"},
+      {"animal": "Katze",       "exposure": "dauerhaft",  "period": "1970–1980", "context": "Haustier; Toxoplasma-Exposition möglich"}
+    ],
+    "occupational_exposures": [
+      "Industrie-Stäube und Lösemittel (Anlagenmontagen weltweit, 1993–2019)",
+      "Hitzeexposition bis 46 °C (Saudi-Arabien, Katar, Kasachstan)",
+      "Höhenaufenthalt bis 3200 m ü.M. (Arequipa/Peru, 2013)",
+      "Aral-Staubexposition (Tengiz-Ölfeld Kasachstan, 2012)"
+    ],
+    "sexual_history": {
+      "_note": "Häufig wechselnde Sexualpartner — STI-Screeninghistorie dokumentieren; HPV-Impfung nie erfolgt",
+      "multiple_partners": true,
+      "hpv_vaccination": false,
+      "sti_screening": [
+        {"date": "2018-06-12", "panel": ["HIV-Ak",      "HCV-Ak",    "Syphilis-TPPA", "HBsAg"],              "result": "alle negativ"},
+        {"date": "2023-05-20", "panel": ["HIV-Ak/p24-Ag","HCV-Ak",   "Syphilis-TPPA", "Gonorrhoe-PCR", "Chlamydien-PCR"], "result": "alle negativ"}
+      ],
+      "known_stis": []
+    }
+  },
+  "_allergies_note": "Bekannte Allergien und Unverträglichkeiten. type: Arzneimittel | Insektengift | Inhalationsallergie | Kontaktallergie | Nahrungsmittel | Autoimmun. severity: leicht | mittel | schwer | lebensbedrohlich. Arzneimittelallergien müssen bei jeder Behandlung sichtbar sein.",
+  "allergies": [
+    {
+      "allergen":  "Penicillin (alle Penicilline und Aminopenicilline)",
+      "type":      "Arzneimittel",
+      "reaction":  "Urtikaria, Angioödem (anaphylaktoide Reaktion Grad II)",
+      "severity":  "schwer",
+      "diagnosed": "1977-10-17",
+      "notes":     "Erstreaktion während Scharlach-Behandlung im Kindesalter; Kreuzreaktivität mit Amoxicillin anzunehmen; Alternativen dokumentieren"
+    },
+    {
+      "allergen":  "Gräserpollen / Frühblüher (Birke, Hasel, Erle)",
+      "type":      "Inhalationsallergie",
+      "reaction":  "saisonaler Heuschnupfen, Konjunktivitis, Bronchospasmus",
+      "severity":  "mittel",
+      "diagnosed": "1989-03-15",
+      "notes":     "Prick-Test positiv; RAST Gräser Klasse 3, Birke Klasse 2; Hyposensibilisierung 1991–1994 (Teilerfolg)"
+    },
+    {
+      "allergen":  "Nickel / Kobalt",
+      "type":      "Kontaktallergie",
+      "reaction":  "allergische Kontaktdermatitis (Papulovesikel)",
+      "severity":  "leicht",
+      "diagnosed": "1998-05-12",
+      "notes":     "Epikutantest positiv; relevant bei Metallkontakt in Montagetätigkeit; nickelhaltiger Schmuck gemieden"
+    },
+    {
+      "allergen":  "Wespengift (Vespula spp.)",
+      "type":      "Insektengift",
+      "reaction":  "generalisierte Urtikaria, Hypotonie, Tachykardie (Grad II nach Ring & Messmer)",
+      "severity":  "schwer",
+      "diagnosed": "2019-06-04",
+      "notes":     "Reaktion nach Stich im Garten; EpiPen 300 µg verschrieben; Hyposensibilisierung empfohlen, noch nicht begonnen"
+    },
+    {
+      "allergen":  "Gluten (Zöliakie, autoimmun)",
+      "type":      "Nahrungsmittel / Autoimmun",
+      "reaction":  "intestinale Malabsorption, Meteorismus, Fatigue-Verstärkung, Steatorrhoe",
+      "severity":  "mittel",
+      "diagnosed": "2019-09-18",
+      "notes":     "tTG-IgA 87 U/ml (Norm <10); Duodenalbiopsie Marsh 3b; autoimmune Komorbidität zu Hashimoto-Thyreoiditis; glutenfreie Ernährung ab Diagnose — Refluxbeschwerden seitdem deutlich rückläufig (Omeprazol 2025 abgesetzt)"
+    },
+    {
+      "allergen":  "Soja (Kreuzreaktivität Birkenpollenallergie)",
+      "type":      "Nahrungsmittel",
+      "reaction":  "oropharyngeales Allergiesyndrom (Kribbeln, Schwellung Lippen/Zunge)",
+      "severity":  "leicht",
+      "diagnosed": "2019-10-05",
+      "notes":     "PR-10-Protein-Kreuzreaktivität (Bet v 1 / Gly m 4); Soja meiden empfohlen — klinisch relevant wegen Levothyroxin-Resorptionsstörung durch Soja; wichtig bei Asien-Reisen"
+    }
+  ],
+  "_family_history_note": "Familienanamnese erstgradiger und relevanter Verwandter. Wichtig für polygenetische Risiken (kardiovaskulär, autoimmun, metabolisch). deceased: null = lebt noch.",
+  "family_history": [
+    {"relation": "Vater",                   "born": "1938", "deceased": "2009", "cause_of_death": "Herzinfarkt (zweiter)", "conditions": ["Koronare Herzkrankheit", "Hypertonie", "Herzinfarkt mit 58 Jahren (1996)"]},
+    {"relation": "Mutter",                  "born": "1941", "deceased": null,   "cause_of_death": null,                    "conditions": ["Hashimoto-Thyreoiditis (seit ca. 1975)", "Hypertonie"]},
+    {"relation": "Schwester (Jg. 1969)",    "born": "1969", "deceased": null,   "cause_of_death": null,                    "conditions": ["Zöliakie (Diagnose 2017)", "Heuschnupfen"]},
+    {"relation": "Großvater (väterlich)",   "born": "1910", "deceased": "1978", "cause_of_death": "Schlaganfall",          "conditions": ["Hypertonie", "Schlaganfall mit 68 Jahren"]},
+    {"relation": "Großmutter (mütterlich)", "born": "1915", "deceased": "1998", "cause_of_death": "Herzinsuffizienz",      "conditions": ["Diabetes mellitus Typ 2", "Adipositas"]}
+  ],
+  "_source_priority_note": "Which device wins per metric when multiple sources report the same thing. priority 1 = highest.",
+  "source_priority": [
+    {"metric": "heart_rate", "device_id": "polar_vantage", "source_app": "polar", "priority": 1, "person": "max"},
+    {"metric": "hrv_sdnn",   "device_id": "polar_h10",     "source_app": "polar", "priority": 1, "person": "max"}
+  ],
+  "_home_assistant_note": "Optional: per-metric HA sensor entity_ids of a nearby DWD weather station. Leave empty to skip DWD import. id/name are stored verbatim in weather_dwd_station.",
+  "home_assistant": {
+    "dwd_station": {
+      "id":   null,
+      "name": null,
+      "entities": {
+        "uv_index":     null,
+        "solar_wm2":    null,
+        "sunshine_s":   null,
+        "cloud_pct":    null,
+        "temp_c":       null,
+        "dewpoint_c":   null,
+        "humidity":     null,
+        "pressure_hpa": null
+      }
+    }
+  },
+  "clinical": {
+    "_reference_devices_note": "Optional: per-metric calibration/reference device_id (must exist in device_registry above). Unset metrics fall back to the project's hardcoded default anchor (see compute_calibrate_sources.py ANCHORS, compute_pem.py's HRV source hierarchy) — leaving this empty changes nothing. For compute_calibrate_sources.py to resolve a configured device into an anchor, that device_registry entry also needs 'source_apps' set (see _device_registry_note above); without it, that metric still falls back to the hardcoded default.",
+    "reference_devices": {},
+    "hrv_baseline_from": null,
+    "hrv_baseline_to":   null,
+    "data_start":        null,
+    "max_hr":            null,
+    "measured_at_bpm":   null,
+    "measured_at_date":  null,
+    "measured_at_method": null,
+    "_measured_at_note": "Optional: formally measured aerobic/anaerobic threshold in bpm — from cardiopulmonary exercise testing (CPET/VT1) or a graded lactate test (LT1), ideally with a provider experienced in ME/CFS/PEM pacing (standard maximal-effort protocols risk triggering a crash). Set measured_at_bpm (the threshold in bpm), measured_at_date (YYYY-MM-DD), and measured_at_method ('cpet' or 'lactate'). When set, compute_pem.py's aerobic-threshold trigger (Config.measured_at_bpm) uses this directly instead of the HRV-derived DFA-alpha1 HRVT1 estimate, whose reliability is not established under autonomic dysfunction (see compute_pem.py comment near _HRVT1_MIN_MARGIN).",
+    "_pacing_note": "Optional: compute_hr_zones.py zone boundaries for pacing/exertion-budget scoring. Add a 'pacing' object here (sibling of this note, e.g. 'pacing': {'zone_thresholds_bpm': [..4 values..], 'zone_weights': [..5 values..]}) to override the default. zone_thresholds_bpm needs exactly 4 absolute bpm values (the boundaries between the 5 zones: recovery < z1 | z1-z2 | z2-z3 | z3-z4 | red zone >= z4) — ideally taken from a lactate/exercise test's aerobic and anaerobic thresholds. zone_weights needs exactly 5 entries (one per zone) and controls how disproportionately higher zones count toward the daily budget. Left unset here deliberately: without this block, thresholds fall back to fixed percentages of max_hr (or the 220-age rule of thumb if max_hr is also unset) — a reasonable generic default, whereas a copied-in example bpm value would silently override that personalized fallback with a number that isn't actually yours.",
+    "_baseline_note": "compute_personal_baseline.py device filter. baseline_method: all_iqr | all_top | device_iqr | device_top. baseline_device: list of device_ids to restrict device_top/device_iqr to (your own wrist-device history, e.g. which watch you wore when) — empty = no filter, all devices count.",
+    "baseline_method":  "device_top",
+    "baseline_device":  [],
+    "baseline_top_pct": 25,
+    "_observations_note": "Clinical observations not derivable from wearable data alone. Used by analyse_clinical_addendum.py to supplement the data-only synthesis with pharmacological response patterns and known methodological test limitations.",
+    "observations": {
+      "treatment_responses": [
+        {
+          "substance": "Example drug A",
+          "response": "positive_systemic",
+          "date": "YYYY-MM",
+          "notes": "Describe response and clinical interpretation."
+        },
+        {
+          "substance": "Example drug B (COX-inhibitor)",
+          "response": "none",
+          "date": "YYYY",
+          "notes": "No response — mechanism X not involved."
+        }
+      ],
+      "diagnostic_limitations": [
+        {
+          "condition": "Example condition",
+          "limitation": "Describe why standard measurements systematically underestimate this condition in this patient (e.g., ceiling effects, missing biomarkers, self-limiting behaviour masking symptoms)."
+        }
+      ],
+      "additional_context": [
+        {
+          "label": "Optional extra context label",
+          "text": "Any other clinical observation not captured above."
+        }
+      ]
+    },
+    "_events_note": "Ordered list of clinical events. type: infection | reinfection | diagnosis | medication_start | medication_stop | relapse | hospitalization | surgery | symptom_onset | remission | vaccination | other. PRIMARY source is ~/.config/kyoro/clinical_events.json (managed via scripts/utils/manage/personal/manage_clinical_events.py) — cfg.events merges that file with the inline list below, external file wins on (name, date) collisions. The inline list here is only a fallback/example; if you maintain clinical_events.json, code MUST read cfg.events, never this key directly (cfg._cfg['clinical']['events']) — that silently sees only the (usually empty) inline fallback, never the real history.",
+    "_events_biography_note": "SYNTHETIC EXAMPLE — replace with your own history. Goal: complete medical biography from birth to today, not just current conditions. The more complete the timeline, the better the system detects baseline shifts, turning points, and causal patterns. Include infections (even resolved ones), vaccinations, surgeries, hospitalisations, all diagnoses (acute + chronic), long-term medications (start + stop), relapses/remissions, travel to endemic regions. Go back as far as memory or records allow.",
+    "events": [
+      {"name": "Windpocken (Varizellen)",                                              "date": "1972-04-03", "type": "infection"},
+      {"name": "Masern",                                                               "date": "1973-02-14", "type": "infection"},
+      {"name": "Tonsillektomie (rezidivierende Tonsillitis)",                          "date": "1973-09-05", "type": "surgery"},
+      {"name": "Mumps (Parotitis epidemica)",                                          "date": "1974-11-20", "type": "infection"},
+      {"name": "Röteln (Rubeola)",                                                     "date": "1975-03-08", "type": "infection"},
+      {"name": "Scharlach",                                                            "date": "1977-10-17", "type": "infection"},
+      {"name": "Keuchhusten (Pertussis)",                                              "date": "1978-02-03", "type": "infection"},
+      {"name": "Tetanus/Diphtherie-Impfung (Schulimpfung)",                           "date": "1980-05-12", "type": "vaccination"},
+      {"name": "Hepatitis-A-Infektion (Marokko-Reise, Ikterie 3 Wochen)",            "date": "1986-08-22", "type": "infection"},
+      {"name": "EBV-Infektion (Pfeiffersches Drüsenfieber)",                          "date": "1988-03-14", "type": "infection"},
+      {"name": "Ausgeprägte Fatigue + Pharyngitis nach EBV",                          "date": "1988-04-01", "type": "symptom_onset"},
+      {"name": "Vollständige Erholung nach EBV",                                      "date": "1989-01-15", "type": "remission"},
+      {"name": "Heuschnupfen-Diagnose (Prick-Test: Gräser Kl.3, Birke Kl.2); Hyposensibilisierung begonnen", "date": "1989-03-15", "type": "diagnosis"},
+      {"name": "Kreuzbandriss rechts (Skiunfall), Arthroskopie",                      "date": "1990-01-28", "type": "surgery"},
+      {"name": "Tetanus/Diphtherie Auffrischung (perioperativ, Kreuzbandriss-OP)",    "date": "1990-02-10", "type": "vaccination"},
+      {"name": "Hepatitis-B-Impfung (3-fach-Serie abgeschlossen)",                    "date": "1992-10-08", "type": "vaccination"},
+      {"name": "FSME-Grundimmunisierung (3-fach-Serie)",                              "date": "1994-05-19", "type": "vaccination"},
+      {"name": "Hypothyreose Diagnose (Hashimoto-Thyreoiditis, TSH 8,4 mU/l)",       "date": "1996-02-27", "type": "diagnosis"},
+      {"name": "Levothyroxin 75 μg/d Start",                                          "date": "1996-03-01", "type": "medication_start"},
+      {"name": "Typhus-Impfung (oral, vor Tropenmontagetätigkeit)",                   "date": "1996-03-10", "type": "vaccination"},
+      {"name": "Gelbfieber-Impfung (vor Afrika- und Lateinamerika-Einsätzen)",        "date": "1996-03-10", "type": "vaccination"},
+      {"name": "Malaria-Prophylaxe Start — Chloroquin (Nigeria-Einsatz Lagos)",       "date": "1997-01-13", "type": "medication_start"},
+      {"name": "Malaria-Prophylaxe Ende — Chloroquin (Nigeria-Rückkehr)",             "date": "1997-03-22", "type": "medication_stop"},
+      {"name": "Nickel/Kobalt-Kontaktallergie Diagnose (Epikutantest positiv)",       "date": "1998-05-12", "type": "diagnosis"},
+      {"name": "Refluxösophagitis Diagnose (Gastroskopie)",                           "date": "2001-11-06", "type": "diagnosis"},
+      {"name": "Omeprazol 20 mg/d Start",                                             "date": "2001-11-07", "type": "medication_start"},
+      {"name": "FSME Auffrischung (vor Sibirien-Einsatz)",                            "date": "2003-03-12", "type": "vaccination"},
+      {"name": "Bandscheibenvorfall L4/L5 (konservativ, Physiotherapie 3 Monate)",   "date": "2004-07-13", "type": "diagnosis"},
+      {"name": "Dengue-Infektion Typ 2 (Vietnam-Einsatz, serologisch bestätigt)",    "date": "2005-11-15", "type": "infection"},
+      {"name": "Hypertonie Diagnose (RR 165/98 mmHg, Langzeit-RR bestätigt)",        "date": "2006-04-03", "type": "diagnosis"},
+      {"name": "Ramipril 5 mg/d Start",                                               "date": "2006-04-04", "type": "medication_start"},
+      {"name": "Malaria-Prophylaxe Start — Atovaquon/Proguanil (Kenia-Einsatz)",     "date": "2007-07-06", "type": "medication_start"},
+      {"name": "Malaria-Prophylaxe Ende — Atovaquon/Proguanil (Kenia-Rückkehr)",     "date": "2007-08-29", "type": "medication_stop"},
+      {"name": "Nierenkolik rechts (Harnleiterstein 5 mm, stationär 3 Tage)",        "date": "2008-09-18", "type": "hospitalization"},
+      {"name": "Tetanus/Diphtherie/Pertussis Auffrischung (Tdap, regulär)",          "date": "2010-04-20", "type": "vaccination"},
+      {"name": "FSME Auffrischung",                                                   "date": "2013-03-05", "type": "vaccination"},
+      {"name": "Schlafapnoe Diagnose (AHI 22/h, obstruktiv, Polysomnographie)",      "date": "2014-03-11", "type": "diagnosis"},
+      {"name": "CPAP-Therapie Start (ResMed AirSense 10, EPAP 8 cmH₂O)",            "date": "2014-04-02", "type": "medication_start"},
+      {"name": "Levothyroxin Dosisanpassung auf 100 μg/d (TSH-Verlaufskontrolle)",   "date": "2016-09-14", "type": "other"},
+      {"name": "Vorsorgekoloskopie (Altersvorsorge ab 50, unauffällig; nächste Kontrolle 2027)", "date": "2017-05-08", "type": "other"},
+      {"name": "Influenza A (H3N2) mit bakterieller Pneumonie, stationär 6 Tage",    "date": "2018-01-22", "type": "infection"},
+      {"name": "STI-Screening (HIV, HCV, Syphilis, HBsAg) — alle negativ",           "date": "2018-06-12", "type": "other"},
+      {"name": "PSA-Screening: 1,8 ng/ml (Norm <4,0 ng/ml; kein Anhalt für Prostatapathologie)", "date": "2019-05-12", "type": "other"},
+      {"name": "Wespenstich mit anaphylaktoider Reaktion Grad II; EpiPen verschrieben", "date": "2019-06-04", "type": "diagnosis"},
+      {"name": "Zöliakie Diagnose (tTG-IgA 87 U/ml, Duodenalbiopsie Marsh 3b); glutenfreie Ernährung begonnen", "date": "2019-09-18", "type": "diagnosis"},
+      {"name": "Soja-Kreuzreaktivität bestätigt (PR-10, oropharyngeales Syndrom); Soja gemieden", "date": "2019-10-05", "type": "diagnosis"},
+      {"name": "Influenza-Impfung (jährlich seit Influenza-Pneumonie 2018)",          "date": "2019-10-15", "type": "vaccination"},
+      {"name": "COVID-19-Infektion (Wildtyp, Welle 1, Antikörper nachträglich pos.)", "date": "2020-03-28", "type": "infection"},
+      {"name": "COVID-19-Impfung 1. Dosis (BioNTech/Pfizer)",                        "date": "2021-04-08", "type": "vaccination"},
+      {"name": "COVID-19-Impfung 2. Dosis (BioNTech/Pfizer)",                        "date": "2021-05-06", "type": "vaccination"},
+      {"name": "COVID-19-Reinfektion (Delta-Variante, PCR-bestätigt)",               "date": "2021-11-17", "type": "reinfection"},
+      {"name": "Anhaltende Fatigue + Belastungsintoleranz nach COVID",               "date": "2021-12-05", "type": "symptom_onset"},
+      {"name": "Post-COVID-Syndrom Diagnose (Hausarzt)",                             "date": "2022-03-22", "type": "diagnosis"},
+      {"name": "COVID-19-Reinfektion (Omikron BA.5, Antigentest)",                   "date": "2022-08-11", "type": "reinfection"},
+      {"name": "Rückfall (PEM-Episode nach Reinfektion, Bettruhe 10 Tage)",          "date": "2022-09-01", "type": "relapse"},
+      {"name": "Stationäre Abklärung Herzrhythmusstörungen (3 Tage)",               "date": "2023-02-14", "type": "hospitalization"},
+      {"name": "Echokardiographie: normale LV-Funktion, kein struktureller Befund",  "date": "2023-03-05", "type": "other"},
+      {"name": "Langzeit-EKG 7 Tage (Holter): SVES-Salven, kein Vorhofflimmern",    "date": "2023-03-10", "type": "other"},
+      {"name": "Cetirizin 10 mg/d Dauermedikation Start (Histaminintoleranz-Verdacht)", "date": "2023-05-03", "type": "medication_start"},
+      {"name": "STI-Screening (HIV, HCV, Syphilis, Gonorrhoe, Chlamydien) — alle negativ", "date": "2023-05-20", "type": "other"},
+      {"name": "Omeprazol abgesetzt (Beschwerdepause > 12 Monate)",                 "date": "2025-01-08", "type": "medication_stop"},
+      {"name": "Partielle Remission — Belastungstoleranz deutlich verbessert",       "date": "2025-06-01", "type": "remission"}
+    ],
+    "_known_risk_exposures_note": "Chronic/cumulative personal risk exposures that shift prior probability above population baseline. Each entry: slug (syndrome slug from syndromes/), description (free text), level (high|medium|low), notes (optional). Alternatively store in ~/.config/kyoro/known_risk_exposures.json. The exposure analysis LLM will weight syndromes with overlapping slugs at least one priority level higher. Airport-proximity malaria risk is detected automatically from location_stays (is_home=1) and does NOT need a manual entry here — see scripts/modules/airport_proximity.py.",
+    "known_risk_exposures": [
+      {
+        "slug": "ornithose",
+        "description": "Wellensittiche ~24 Jahre im Haushalt (1997–2021) + Enten/Gänse/Hühner + frühkindlicher Vogelkontakt + S'Albufera Mallorca + Delta de l'Ebre",
+        "level": "high",
+        "notes": "Tägliche inhalative Exposition (Federstaub, Kot, Atemluft); C. psittaci = obligat intrazellulär wie Coxiella; atypische Pneumonie 2017 ohne adäquate Therapie"
+      },
+      {
+        "slug": "q_fieber",
+        "description": "Großelternhof Kindheit (Rinder/Schweine) + Mallorca Reiten jährlich + Barthelmarkt Oberstimm 2017 + Stallarbeit 2020/21 + Pferde/Hühner täglich ab Sep 2025 am Wohnort",
+        "level": "high",
+        "notes": "Kumulative Lebenslang-Exposition über ≥5 unabhängige Tierquellen; Coxiella = aerogen übertragen, bis km Reichweite; klinisch nie ausgeschlossen"
+      },
+      {
+        "slug": "fsme",
+        "description": "Wohnsitz Bayern 42 Jahre + intensives Wandern (Zecken!) + Impflücke mehrere Jahre",
+        "level": "high",
+        "notes": "FSME-IgG nie bestimmt; stille Durchseuchung in Lückenphase nicht ausgeschlossen; Post-FSME-Syndrom schwer von ME/CFS zu trennen"
+      },
+      {
+        "slug": "borreliose",
+        "description": "Wohnsitz Bayern 42 Jahre + Wandern + 1× laborbestätigt 2020",
+        "level": "medium",
+        "notes": "Wiederholungsexposition durch Dauerwohnsitz im Endemiegebiet; Post-Lyme-DD bei Brain Fog + Fatigue"
+      },
+      {
+        "slug": "rickettsia",
+        "description": "Mallorca jährlich (Reiten) + Bulgarien 2018 + Kroatien 2011 + Ostspanien 2024",
+        "level": "medium",
+        "notes": "Repetitive Exposition über 30+ Jahre; Rickettsia conorii = Zecken + Hundezecken Mittelmeer"
+      }
+    ],
+    "_legacy_note": "event_date1/2 and infection_date are derived automatically from events[]. Only set these if you do not use events[].",
+    "event_date1":    null,
+    "event_date2":    null,
+    "infection_date": null,
+    "arrhythmia": {
+      "cv_threshold":  0.15,
+      "min_windows":   2,
+      "tpr_threshold": 0.60,
+      "rmssd_confirm": 30
+    },
+    "_afes_note": "AFES (Atrial Fibrillation Evidence Score) Geräte-Klassifizierung. exclude_coarse_hr_devices listet device_ids, deren HR-Stream zu grob ist (Smart-Recording-Mittelung), z.B. älteren Garmin-Modellen mit 120s-Recording. sleep_device_priority bestimmt die Reihenfolge für Sleep-Session-Erkennung. wrist_hr_devices wird automatisch aus device_registry abgeleitet (sensor_type in {optical_wrist, optical_wrist_gps, ring}), kann hier überschrieben werden. ecg_quality_devices: Brustgurt-/ECG-Geräte für Pre-AF-Trainings-Filter; wird automatisch aus device_registry (sensor_type == 'chest_strap') abgeleitet.",
+    "afes": {
+      "exclude_coarse_hr_devices": [],
+      "sleep_device_priority":     [],
+      "wrist_hr_devices":          [],
+      "ecg_quality_devices":       []
+    },
+    "_sleep_source_priority_note": "Quellen-Priorität (session.source-Werte, beste zuerst) für analyse_bp_sleep.py's Auswahl der besten Schlaf-Session pro Nacht bei mehreren überlappenden Quellen. Leer = keine Priorisierung (erste gefundene Session gewinnt). Beispielwerte je nach eigenem Geräte-Setup: z.B. ['oura_app', 'sleep_cycle', 'garmin_connect', 'polar_connect'].",
+    "sleep_source_priority": [],
+    "_polar_wrist_date_reassignments_note": "Nur relevant, falls scripts/migrations/fix_polar_wrist_device_attribution.py gebraucht wird (historische Polar-Wrist-Daten ohne per-entry Geräte-ID, fälschlich einem Platzhalter-device_id zugeordnet). Jeder Eintrag: {new_device_id, date_condition (rohe SQL-Bedingung auf die Spalte 'date')}. Leer = Migration ist No-Op. Beispiel: [{\"new_device_id\": \"polar_m430\", \"date_condition\": \"date < '2022-01-01'\"}].",
+    "polar_wrist_date_reassignments": [],
+    "_pem_note": "PEM Evidence Score (compute_pem.py). Dreistufige Quellen-Hierarchie: 1) Polar RMSSD, 2) Apple Watch SDNN, 3) RHR-Proxy. Alle Thresholds konfigurierbar. AT-Schwellen-Hierarchie fuer den HF-ueber-AT-Trigger-Kanal: 1) HRVT1 (DFA-alpha1-basiert, individuell) 2) falls fehlend UND rhr_baseline_stable=true (Standard): RHR+at_rhr_offset_bpm (Workwell-Faustregel, Standard 15bpm) 3) falls weder HRVT1 noch RHR verfuegbar: at_hr_fraction als Anteil HRmax (Standard 0.60, unbelegter Notfallwert). rhr_baseline_stable auf false setzen, wenn die Ruhe-HF bei dieser Person kein stabiler Bezugswert ist (z.B. dauerhafte statt punktuelle HF-Erhoehung durch orthostatische Instabilitaet) — deaktiviert dann den Kanal komplett fuer Tage ohne HRVT1, statt einen irrefuehrenden bpm-Fallback zu nutzen. at_hr_fraction: aerobler Notfall-Threshold = Anteil HRmax (Standard 0.60), nur relevant wenn auch RHR fehlt. recovery_ratio: Anteil Baseline ab dem HRV/RHR als 'erholt' gilt (Standard 0.90 = 90%). supcomp_ratio für HRV: 1.05 = 5% über Baseline. Für RHR intern 1.03. pem_ratio: Schwelle für PEM-Muster (Standard 0.85 = 15% unter Baseline). ortho_*: von compute_orthostatic_detection.py gelesen (dieselbe clinical.pem-Sektion, kein eigener Config-Block) — ortho_hr_jump_min: Mindest-HF-Sprung in bpm für einen Kandidaten; ortho_ref_window_s / ortho_onset_window_s / ortho_sustain_min_s: Referenz-, Anstiegs- und Mindesthaltedauer-Fenster in Sekunden; ortho_steps_max: max. Schritte im Bestätigungsfenster (Sport-Ausschluss); ortho_min_beats: Mindest-Beat-Anzahl für eine gültige Messung; ortho_artifact_pct_max: max. Artefaktanteil im Fenster; ortho_pulse_ms_floor: Untergrenze für Puls-Rohwerte in ms; ortho_bp_window_min: Zeitfenster für den Blutdruck-Gegencheck in Minuten; ortho_bp_sys_drop_min / ortho_bp_dia_drop_min: Sheldon-2015-Schwellen für systolischen/diastolischen Abfall in mmHg.",
+    "pem": {
+      "steps_light":      3000,
+      "steps_moderate":   6000,
+      "steps_high":      10000,
+      "energy_light":     200,
+      "energy_moderate":  400,
+      "energy_high":      700,
+      "at_hr_fraction":   0.60,
+      "rhr_baseline_stable": true,
+      "at_rhr_offset_bpm": 15,
+      "at_min_minutes":   15,
+      "hrv_drop_moderate": 10,
+      "hrv_drop_high":     20,
+      "rhr_rise_moderate":  5,
+      "rhr_rise_high":     10,
+      "sleep_eff_drop":     8,
+      "recovery_ratio":   0.90,
+      "supcomp_ratio":    1.05,
+      "pem_ratio":        0.85,
+      "severity_healthy_min": 30,
+      "severity_reduced_min": 20,
+      "own_baseline_min_nights": 30,
+      "own_baseline_sd_near":   -1.0,
+      "own_baseline_sd_severe": -2.0,
+      "symptom_window_days": 30,
+      "symptom_confidence_target": 25,
+      "symptom_severity_scale_max": 10.0,
+      "ortho_hr_jump_min": 15,
+      "ortho_ref_window_s": 180,
+      "ortho_onset_window_s": 45,
+      "ortho_sustain_min_s": 180,
+      "ortho_steps_max": 30,
+      "ortho_min_beats": 15,
+      "ortho_artifact_pct_max": 0.20,
+      "ortho_pulse_ms_floor": 315,
+      "ortho_bp_window_min": 45,
+      "ortho_bp_sys_drop_min": 20,
+      "ortho_bp_dia_drop_min": 10
+    }
+  },
+  "_privacy_check_note": "forbidden_identifiers: Python identifier fragments that must not appear in source code (e.g. diagnosis names used as variable/constant names). The check script (check_source_privacy.py) reads these at runtime and stays diagnosis-agnostic itself.",
+  "privacy_check": {
+    "forbidden_identifiers": []
+  },
+  "_synthesis_panel_note": "Multi-model consult panel config for scripts/analysis/manual/analyse_synthesis.py (Config.synthesis_panel). PRIMARY source is ~/.config/kyoro/synthesis_panel.json (no manage_*.py script for it yet — hand-edit the JSON directly, it's a 4-line file). The inline synthesis_panel block below is only a fallback if that external file doesn't exist. Schema: enabled (bool) — turns the multi-model panel on/off, panel disabled falls back to a single _call_llm() with chair_model; members (list of OpenRouter model IDs) — each independently reads the specialist reports category-by-category (own notes, own final opinion, never sees peers mid-process) before the chair sees any of it; chair_model (OpenRouter model ID) — reads raw data only (AI interpretation sections stripped) in its own category rounds, only compares against the members' finished opinions in the final round.",
+  "synthesis_panel": {
+    "enabled": false,
+    "members": [],
+    "chair_model": ""
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "common_first_names": [
+    "Micha", "Michael", "Sandra", "Alexander", "Thomas", "Andreas",
+    "Stefan", "Christian", "Daniel", "Markus", "Jan", "Peter",
+    "Anna", "Julia", "Lisa", "Sarah", "Laura", "Maria", "Sophie",
+    "Hanna", "Emma", "Lea", "Mia", "Lena", "Hannah", "Johanna"
+  ],
+  "common_last_names": [
+    "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer",
+    "Wagner", "Becker", "Schulz", "Hoffmann", "Bauer", "Richter",
+    "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann",
+    "Braun", "Krüger", "Hofmann", "Hartmann", "Lange", "Schmitt",
+    "Werner", "Schmitz", "Krause", "Meier", "Lehmann", "Schmid",
+    "Schulze", "Maier", "Köhler", "Herrmann", "König", "Walter",
+    "Mayer", "Huber", "Kaiser", "Fuchs", "Peters", "Lang"
+  ],
+  "common_arzt_titles": [
+    "Dr. med.", "Dr.", "Prof. Dr. med.", "Prof. Dr.",
+    "Arzt", "Ärztin", "Facharzt", "Fachärztin",
+    "Chefarzt", "Chefärztin", "Oberarzt", "Oberärztin"
+  ],
+  "common_mvz_names": [
+    "MVZ", "Medizinisches Versorgungszentrum", "Gemeinschaftspraxis",
+    "Praxisgemeinschaft", "Ärztehaus", "Gesundheitszentrum"
+  ]
+}

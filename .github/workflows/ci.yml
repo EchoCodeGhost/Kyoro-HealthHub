@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qa:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Commit-message privacy check below needs the actual commit range,
+          # not just the single checked-out commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install ruff
+        # Only the linter itself — kept separate from the scoped dev-deps
+        # install below so it's available for the quality gate step next.
+        run: pip install ruff
+
+      - name: Pre-checkin quality gate
+        # Covers: docs-in-sync (gen_docs --check), SPDX headers, syntax, source
+        # privacy, and ruff (restricted to critical bug classes — undefined
+        # names, redefinitions, bare except; see tools/qa_check.py::check_ruff).
+        # Runs without personal config: check_source_privacy.py skips the
+        # forbidden_identifiers check but still catches hardcoded person-IDs,
+        # timezones and fallback dicts.
+        run: python tools/qa_check.py
+
+      - name: Commit message privacy
+        # The local commit-msg hook (.githooks/commit-msg) only fires for
+        # contributors who ran `git config core.hooksPath .githooks` (wired
+        # into onboard.py) — this step is the actual gate for everyone else,
+        # or for a local --no-verify bypass.
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          zero_sha="0000000000000000000000000000000000000000"
+          if [ -z "$base" ] || [ "$base" = "$zero_sha" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            # First push of a branch (e.g. a brand-new repo's initial push):
+            # base is empty or the all-zeros sentinel GitHub sends in that
+            # case. `git rev-parse --verify` alone doesn't reliably catch
+            # the zero SHA -- it can report success on the syntax alone
+            # without checking the object actually exists -- so check the
+            # literal sentinel explicitly, and use `git cat-file -e` (which
+            # does check existence) for the general "does this commit even
+            # exist here" case. Falls back to just the tip commit instead of
+            # the commit's entire ancestry.
+            commits="${{ github.sha }}"
+          else
+            commits=$(git rev-list "$base..${{ github.sha }}")
+          fi
+          failed=0
+          for c in $commits; do
+            if ! git show -s --format=%B "$c" | python scripts/utils/check_commit_message_privacy.py -; then
+              echo "  ^ in commit $c"
+              failed=1
+            fi
+          done
+          exit $failed
+
+      - name: Install unit-test dependencies
+        # Deliberately scoped to what tests/unit/ actually imports (numpy,
+        # scipy, requests, pytest) rather than the full requirements.txt —
+        # that file also pulls in heavy, unrelated packages (paddleocr,
+        # opencv, ...) that would slow CI down for no benefit here. requests
+        # is needed even though no test calls the network: import_oura.py /
+        # import_polar_accesslink.py exit(1) at module import time if it's
+        # missing (a guard meant for someone running the script without it
+        # installed), which crashes pytest's collection for the whole suite
+        # the moment any test imports one of those modules — not just a
+        # failure in that one test file.
+        run: pip install numpy scipy requests -r requirements-dev.txt
+
+      - name: Unit tests
+        # This step existed as a local-only pytest suite for months without
+        # ever running in CI — nothing caught a broken test until someone
+        # happened to run it by hand. Wiring it in here closes that gap.
+        run: pytest tests/unit -v

@@ -1,0 +1,40 @@
+{
+  "slug": "masern",
+  "name_de": "Post-Masern-Syndrom / Masern-Immunsuppression",
+  "lag_weeks": 8,
+  "refs": "Mina et al. 2019 (Science), Elbers et al. 2023 (Lancet Infect Dis), Huttunen & Syrjänen 2019, Griffin 2016 (Virology), RKI-Ratgeber Masern 2024",
+  "system_prompt": "Du bist ein Internist mit Expertise in post-viraler Immunpathologie.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Masern (Morbillivirus): trotz Impfprogramm Ausbrüche in Europa bei Impflücken\n- Masern-Immunamnesie (Mina 2019, Science): Masern können bis zu 73% des vorbestehenden Antikörper-Repertoires löschen → bis zu 3 Jahre erhöhte Infektanfälligkeit\n- Immunsuppression: ausgeprägte T-Zell-Erschöpfung nach Masern-Infektion; reaktivierte Viren möglich\n- SSPE (Subakute Sklerosierende Panenzephalitis): seltene, aber fatale Spätfolge (1:10.000, Latenz 5–10 J.)\n- Post-Masern: Fatigue, Immunschwäche, reaktivierte Herpesviren, erhöhtes Infektionsrisiko\n- Besonders relevant bei: unvollständiger Impfung (1 Dosis), Reise in Endemiegebiete\n- Serologie: Masern-IgG (Impfschutz vs. natürliche Immunität), IgM im Akutfall\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Immunologisches Muster**: Häufigere Infekte, reaktivierte Herpesviren (EBV, CMV, VZV) nach Masern?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Masern-Impfstatus (2-Dosen-MMR), Immunglobuline, SSPE-Ausschluss bei Neurologie.",
+  "icd10_gm": [
+    "B05.0",
+    "B05.1",
+    "B05.2",
+    "B05.9"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "stiko": "STIKO-Empfehlung MMR-Impfung (2 Dosen ab 1. Lebensjahr)",
+    "rki": "RKI-Ratgeber Masern (§ 6 IfSG meldepflichtig)",
+    "ecdc": "ECDC Measles Surveillance 2024"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Hautausschlag",
+    "Husten",
+    "Lichtempfindlichkeit",
+    "Augenentzündung",
+    "Konjunktivitis",
+    "Kopfschmerzen",
+    "Immunschwäche",
+    "Häufige Infektionen",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Schlafstörungen",
+    "Abgeschlagenheit",
+    "Muskelschmerzen",
+    "Lymphknotenschwellung"
+  ],
+  "seroprevalence_de": 0.95,
+  "sero_category": "hoch",
+  "endemic_regions": []
+}

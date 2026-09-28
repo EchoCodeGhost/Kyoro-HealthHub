@@ -1,0 +1,15 @@
+{
+  "name": "cardiology",
+  "description": "Datenpaket für Kardiologen: HR, HRV, SpO2, AFib-Burden, EKGs, Blutdruck",
+  "description_en": "Data package for cardiologists: HR, HRV, SpO2, AFib burden, ECG, blood pressure",
+  "queries": {
+    "daily_heart": "SELECT date, person, resting_hr_bpm AS resting_hr, hrv_rmssd_ms, spo2_avg_pct AS spo2_avg, NULL AS spo2_min, resp_rate_avg AS respiration_avg, NULL AS stress_avg FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "ecg_sessions": "SELECT datetime, classification, symptoms, lead, duration_s, sample_rate_hz, device_id FROM ecg_sessions WHERE person = :person AND date(datetime) BETWEEN :date_from AND :date_to ORDER BY datetime",
+    "afib_burden": "SELECT date, value as afib_burden_pct, source_app FROM measurements WHERE metric='afib_burden' AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "blood_pressure_log": "SELECT ts, date, systolic, diastolic, pulse, ihb_flag, afib_possible, notes, device_id FROM blood_pressure WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "arrhythmia_episodes": "SELECT episode_start, episode_end, dauer_min, n_fenster, cv_max, cv_mean, hr_mean, time_of_day, person, detection_method FROM arrhythmie_episoden WHERE person = :person AND date(episode_start) BETWEEN :date_from AND :date_to ORDER BY episode_start",
+    "orthostatic_tests": "SELECT date, hr_supine, hr_stand_peak, hr_stand, hr_delta, rmssd_supine, rmssd_stand, rmssd_delta, source_app FROM orthostatic_test WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "ecg_logger_sessions": "SELECT session_id, duration_s, mean_hr_bpm, rmssd_ms, afib_suspected, afib_score, afib_votes, poincare_ratio, sampen, turning_pt_ratio, cv_rr, tachy_sustained, brady_flag, artifact_pct, tags FROM ecg_logger_sessions WHERE person = :person AND date(session_id) BETWEEN :date_from AND :date_to ORDER BY session_id"
+  },
+  "algorithm_note": "Arrhythmia detection uses a heuristic CV threshold (cv_threshold_heuristic), not a clinically validated algorithm. Thresholds are configurable in health_config.json under clinical.arrhythmia. See detection_method column for algorithm identifier per episode."
+}

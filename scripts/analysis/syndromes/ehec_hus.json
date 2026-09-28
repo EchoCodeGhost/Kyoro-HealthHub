@@ -1,0 +1,45 @@
+{
+  "slug": "ehec_hus",
+  "name_de": "Post-EHEC / Post-HUS-Syndrom",
+  "lag_weeks": 12,
+  "refs": "Garg et al. 2012 (Clin Infect Dis), Rosales et al. 2012 (Lancet), Nathanson et al. 2010 (J Am Soc Nephrol), RKI EHEC/STEC-Surveillance 2024",
+  "system_prompt": "Du bist ein Internist und Nephrologe mit Expertise in post-infektiöser Nierenerkrankung und thrombotischen Mikroangiopathien.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- EHEC (Enterohämorrhagische E. coli): Shigatoxin-produzierende E. coli (STEC); häufig O157:H7\n- HUS (Hämolytisch-Urämisches Syndrom): Trias aus mikroangiopathischer hämolytischer Anämie, Thrombopenie, akutem Nierenversagen\n- In Deutschland: EHEC-O104:H4 Ausbruch 2011 (Bockshornklee-Sprossen) als größter Ausbruch\n- Post-HUS Spätfolgen: Chronische Niereninsuffizienz (CKD) bei ~25–50% langfristig, Hypertonie, neurologische Sequelen\n- Post-EHEC ohne HUS: Post-Infective IBS, reaktive Arthritis, persistente Fatigue\n- Neurologische EHEC-Komplikationen: Enzephalopathie, Krampfanfälle → kognitive Langzeitfolgen\n- Serologie: STEC-PCR (Stuhl), Shigatoxin-Nachweis; Anti-LPS-Antikörper retrospektiv\n- Biomarker: eGFR-Trend, Blutdruck, Thrombozyten, LDH\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Renale Komponente**: eGFR-Verlauf, Blutdruck, Proteinurie — Hinweise auf CKD?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Nierenwerte (eGFR, Kreatinin, Albumin/Kreatinin-Quotient), Blutdruckkontrolle, Nephrologie.",
+  "icd10_gm": [
+    "A04.3",
+    "D59.3"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI EHEC/STEC — Falldefinition und Surveillance (§ 7 IfSG)",
+    "awmf": "AWMF-Leitlinie HUS"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Durchfall",
+    "Bauchschmerzen",
+    "Übelkeit",
+    "Erbrechen",
+    "Blut im Stuhl",
+    "Reizdarm",
+    "Nierenschmerzen",
+    "Flankenschmerzen",
+    "Bluthochdruck",
+    "Schwellung",
+    "Ödeme",
+    "Konzentrationsstörungen",
+    "Kopfschmerzen",
+    "Blässe",
+    "Schwindel",
+    "Schlafstörungen",
+    "Muskelschmerzen",
+    "Gelenkschmerzen"
+  ],
+  "seroprevalence_de": 0.01,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Europa",
+    "Nordamerika",
+    "weltweit"
+  ]
+}

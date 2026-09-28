@@ -1,0 +1,66 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+context: |
+  Kyoro-HealthHub: local-first health data pipeline (SQLite, Python 3).
+  Raw exports from wearables/medical devices -> health.db / medicine.db ->
+  derived metrics -> natural-language query or doctor export. Database,
+  raw data, and config always stay local; a remote LLM provider (OpenRouter,
+  Anthropic etc.) is opt-in per query tool, never a silent default
+  -- see README "External AI providers".
+
+  Pipeline: imports/ -> import_all.py (DB writes) -> compute_all.py (derived
+  tables, fixed dependency order, see scripts/compute_all.py header)
+  -> analyse_all.py (plots + text). compute_all.py MUST run after import_all.py;
+  analysis scripts read from derived tables and otherwise silently
+  produce empty output.
+
+  DB split: health.db = wearable/sensor time series (measurements, ppi_raw,
+  sessions, cgm_readings) + raw genetics data (genetic_variants,
+  genetic_risk_markers). medicine.db = clinical values a doctor
+  measures or orders (lab_manual, lab_results, assessments, medications).
+  health.db's copies of these clinical tables have been empty
+  shells since the migration (schema compatibility only).
+
+  DB design: EAV for all time series (measurements, session_metrics:
+  ts/metric/value) -- no column additions needed for new devices. sessions
+  unifies sleep+training. Every health table has a person column
+  (default 'self', never as a string literal in code -- always OWN_PERSON_ID from
+  health_config). Compatibility views (e.g. sleep_sessions) in
+  utils/create_schema.py.
+
+  Scripts layout: importers/ (import_<source>.py, run(conn, data_path,
+  lang='de', person=None) -> ImportResult), compute/ (derived tables),
+  analysis/ (analyse_<topic>.py), query/ (LLM natural-language), exporters/
+  profiles/ (one JSON per doctor export profile), utils/ (base.py, i18n.py,
+  create_schema.py).
+
+  Config: scripts/health_config.py loads ~/.config/kyoro/health_config.json,
+  Config class with typed property access. No personal value
+  hardcoded -- date/device-ID/person-ID always from config.
+
+  Privacy (repo is public): no diagnosis names/entity IDs in
+  identifiers, filenames, or variables -- use generic names (EVENT_DATES,
+  postinfectious), real meaning only in config values. Never
+  hardcode an IANA timezone (resolve_timezone()/cfg.home_timezone). No
+  _FOO_DEFAULTS dicts with hardcoded entity IDs -- missing config ->
+  sys.exit with a clear error message. Compliance check:
+  scripts/utils/check_source_privacy.py must exit 0.
+
+  Conventions: SPDX header (GPL-3.0-or-later) on all new files, commits
+  signed-off, INSERT OR IGNORE never INSERT OR REPLACE (audit trails), ts columns
+  always UTC ISO 8601, date = local calendar day via resolve_timezone(). Language
+  defaults to German, t("DE", "EN") helper for bilingualism.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

@@ -1,0 +1,10 @@
+{
+  "dash2009_h_threshold": 0.4171,
+  "dash2009_cv_threshold": 0.0985,
+  "auc_h": 0.6565,
+  "auc_cv": 0.7133,
+  "n_windows": 31595,
+  "n_afib_windows": 1400,
+  "source": "zenodo_5815074_public",
+  "calibrated_at": "2026-08-09T14:26:59+00:00"
+}

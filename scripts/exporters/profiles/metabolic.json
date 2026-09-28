@@ -1,0 +1,19 @@
+{
+  "name": "metabolic",
+  "description": "Datenpaket für Stoffwechselmediziner: Blutzucker, CGM, Medikamente, Körperzusammensetzung",
+  "description_en": "Data package for metabolic medicine: blood glucose, CGM, medications, body composition",
+  "aliases": [
+    "diabetology",
+    "endocrinology"
+  ],
+  "queries": {
+    "blood_glucose_log": "SELECT ts, date, glucose_mmol, glucose_mgdl, meal_context, hba1c, comment, device_id, source FROM blood_glucose WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "cgm_readings": "SELECT ts, date, glucose_mmol, trend, device_id FROM cgm_readings WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "medications": "SELECT ts, date, drug_name, dose_value, dose_unit, route, notes, source FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "body_composition": "SELECT ts, date, weight_kg, bmi, body_fat_pct, water_pct, muscle_pct, bone_kg, visceral_fat, metabolic_age, comment, device_id, source FROM body_composition WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "lab_results": "SELECT date, parameter, wert AS value, einheit AS unit, ref_min AS range_min, ref_max AS range_max, status, labor AS lab FROM lab_all WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date, parameter",
+    "nutrition_daily": "SELECT date, kcal, fat_g, carbs_g, protein_g, meal_count, last_meal, source FROM nutrition_daily WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "lab_manual": "SELECT date, parameter, kategorie, wert, wert_num, einheit, ref_min, ref_max, labor, status, kommentar FROM lab_manual WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date, parameter",
+    "cgm_context": "SELECT date, cgm_mean_mmol, cgm_min_mmol, cgm_max_mmol, cgm_cv_pct, cgm_tir_pct, cgm_readings_n FROM daily_context WHERE person = :person AND date BETWEEN :date_from AND :date_to AND cgm_mean_mmol IS NOT NULL ORDER BY date"
+  }
+}

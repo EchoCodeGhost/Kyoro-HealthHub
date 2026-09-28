@@ -1,0 +1,48 @@
+# Pre-commit Hooks für Kyoro-HealthHub
+# Führt Docstring-Validierung vor jedem Commit aus
+
+repos:
+  - repo: local
+    hooks:
+      # Docstring-Validierung (inkl. Compliance-Checks)
+      - id: check-docstrings
+        name: Check Docstrings
+        entry: python3 scripts/check_docstrings.py
+        language: system
+        types: [python]
+        files: ^scripts/.*\.py$
+        stages: [pre-commit]
+        pass_filenames: false
+
+# ============================================================================
+# INSTALLATION & VERWENDUNG
+# ============================================================================
+#
+# 1. Pre-commit installieren:
+#    pip install pre-commit
+#
+# 2. Hooks aktivieren (im Projektverzeichnis):
+#    pre-commit install
+#
+# 3. Manuell für alle Dateien ausführen:
+#    pre-commit run --all-files
+#
+# 4. Automatisch vor jedem Commit:
+#    git commit -m "Deine Nachricht"  # Hook wird automatisch ausgeführt
+#
+# 5. Hooks überspringen (NUR FÜR NOTFÄLLE):
+#    git commit --no-verify -m "Deine Nachricht"
+#
+# 6. Hooks aktualisieren:
+#    pre-commit autoupdate
+#
+# ============================================================================
+# KONFIGURATION
+# ============================================================================
+#
+# - Der Hook prüft nur Python-Dateien im scripts/-Verzeichnis
+# - Bei Fehler bricht der Commit ab (Exit Code != 0)
+# - Alle Prüfungen (Docstrings, Compliance, etc.) werden durch
+#   scripts/check_docstrings.py abgedeckt
+#
+# ============================================================================

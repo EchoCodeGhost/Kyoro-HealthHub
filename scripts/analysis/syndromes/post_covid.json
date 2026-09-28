@@ -1,0 +1,44 @@
+{
+  "slug": "post_covid",
+  "name_de": "Long COVID",
+  "lag_weeks": 12,
+  "refs": "WHO/Soriano 2022, NICE NG188, Gronwald 2023, Raj 2021, Davis 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Tabelle 6), AWMF S3 Neuroborreliose 030/071 (2024)",
+  "system_prompt": "Du bist ein Internist mit Expertise in Long COVID und post-viralen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nWissenschaftliche Grundlage:\n- WHO 2021 Delphi-Definition (Soriano et al., Lancet Infect Dis 2022): ≥12 Wochen post-Infektion\n- NICE NG188: Symptome ≥12 Wochen, nicht durch andere Diagnose erklärbar\n- DFA α1 <0.75: Übergang aerob→anaerob (Gronwald 2023); bei Long COVID chronisch erniedrigt\n- POTS-Kriterium: HR-Anstieg ≥30 bpm liegend→stehend (Raj et al. 2021)\n- PEM: 2-Tages-Lag, HRV-Einbruch >10% (Davis et al. 2023)\n- DBG-Leitlinie 2026 (Tabelle 6): SARS-CoV-2 / Long-Covid als virale Co-Infektion gelistet — phenotypische Überlappung mit PTLDS (Post-Treatment Lyme Disease Syndrome). Bei vorbestehender Borrelia-Belastung kann Long COVID das PTLDS verschlimmern oder umgekehrt maskieren; Borrelia+COVID = doppelte Immundefizienz mit potenzierter ME/CFS-Schwere.\n- AWMF S3 NB 2024 (Kap. 4.3): Abgrenzung PTLDS vs. Long COVID anhand Serologie und klinischer Zeitachse — Borrelia-Serologie (ELISA + Western Blot) unbedingt mitbestimmen wenn Long COVID therapierefraktär.\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Infektions-Baseline?\n4. **Trend**: Persistenz oder Erholung — was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "U09.9"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (SARS-CoV-2 / Long-Covid — phenotypische Überlappung mit PTLDS)",
+    "awmf_nb_2024": "AWMF S3 Neuroborreliose 030/071 (2024): PTLDS-Abgrenzung zu Long COVID, Kap. 4.3",
+    "who": "WHO Delphi Definition (Soriano et al., Lancet Infect Dis 2022)",
+    "nice": "NICE NG188 (2021, aktualisiert 2023)",
+    "rki": "RKI-Falldefinition Long COVID (2022)",
+    "cdc": "CDC Post-COVID Conditions (2022)"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Post-Exertionelle Malaise",
+    "PEM",
+    "Brain Fog",
+    "Konzentrationsstörungen",
+    "Wortfindungsstörungen",
+    "Gedächtnisprobleme",
+    "Kurzatmigkeit",
+    "Tachykardie",
+    "Herzrasen",
+    "Schwindel",
+    "Orthostatische Intoleranz",
+    "Schlafstörungen",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Sinusitis",
+    "Verschleimung"
+  ],
+  "seroprevalence_de": null,
+  "sero_category": "novel",
+  "endemic_regions": []
+}

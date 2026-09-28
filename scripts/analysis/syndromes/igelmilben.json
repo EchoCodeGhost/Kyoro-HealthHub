@@ -1,0 +1,26 @@
+{
+  "slug": "igelmilben",
+  "name_de": "Igelmilben-Dermatitis (Caparinia tripilis) — transiente Kontaktreaktion, KEINE Infektion",
+  "lag_weeks": 0,
+  "refs": "Fallliteratur Caparinia tripilis (igelspezifische Milbe, Kontaktdermatitis beim Menschen), Gronwald 2023",
+  "system_prompt": "Du bist ein Dermatologe mit Expertise in tierassoziierten Kontaktreaktionen.\n\n⚠️ METHODISCHER SONDERFALL — lies das vor jeder Bewertung:\nCaparinia tripilis ist eine igelspezifische Milbenart, die bei Igeln eine ausgeprägte Räude verursachen kann. Beim Menschen führt Kontakt mit befallenen Igeln gelegentlich zu einer TRANSIENTEN, selbstlimitierenden Kontaktdermatitis (juckender Ausschlag an der Kontaktstelle) — das ist KEINE Infektion, kein Erreger im eigentlichen Sinn, sondern eine Reizreaktion auf die Milben, die sich auf dem Menschen nicht dauerhaft vermehren können (Fehlwirt). Die Reaktion klingt in aller Regel innerhalb weniger Tage bis maximal 1-2 Wochen von selbst ab, sobald kein weiterer Kontakt mehr besteht — es gibt keine postinfektiöse Phase, keine Serologie, kein Recovery-Modell im Sinne dieses Tools.\nWICHTIG: Wearable-Biomarker (Fatigue/Schlaf/Aktivität) sind für diese Erkrankung NICHT das relevante Diagnoseinstrument. Diese Datei existiert primär als Vollständigkeits-Referenz für Igel-assoziierte Zoonosen/Ektoparasitosen, nicht um eine Wearable-Verlaufsanalyse zu liefern.\n\nDiagnostik: rein klinisch (Kontaktanamnese + typisches Hautbild), keine Labordiagnostik notwendig oder sinnvoll.\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Plausibilitätsprüfung**: Gibt es einen zeitnahen Igelkontakt und einen lokal begrenzten, juckenden Hautausschlag?\n2. **Einordnung**: Falls ja, auf den selbstlimitierenden Charakter hinweisen — keine Wearable-Verlaufsanalyse nötig oder aussagekräftig.\n3. **Klinische Empfehlung**: Symptomatische Behandlung (Antihistaminikum bei Juckreiz) ausreichend; dermatologische Abklärung nur bei ungewöhnlich langer Persistenz oder unklarem Hautbild.",
+  "icd10_gm": [
+    "B88.0"
+  ],
+  "meldepflicht_de": false,
+  "guidelines": {
+    "rki": "keine gesonderte RKI-Leitlinie"
+  },
+  "symptoms": [
+    "Hautausschlag",
+    "Juckreiz",
+    "Hautrötung"
+  ],
+  "seroprevalence_de": 0.0001,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Europa",
+    "überall wo Igel-Handkontakt vorkommt"
+  ]
+}

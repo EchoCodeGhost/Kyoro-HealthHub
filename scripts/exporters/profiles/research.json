@@ -1,0 +1,23 @@
+{
+  "name": "research",
+  "description": "Vollständiger Datenexport für eigene Forschung/Analyse — inkl. ppi_raw, Firmware, Rohzeitreihen",
+  "description_en": "Full data export for research/own analysis — incl. ppi_raw, firmware history, raw time series",
+  "queries": {
+    "measurements": "SELECT * FROM measurements WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "sessions": "SELECT * FROM sessions WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts_start",
+    "session_metrics": "SELECT sm.* FROM session_metrics sm JOIN sessions s ON s.id = sm.session_id WHERE s.person = :person AND s.date BETWEEN :date_from AND :date_to",
+    "ppi_raw": "SELECT * FROM ppi_raw WHERE person = :person AND date(datetime) BETWEEN :date_from AND :date_to ORDER BY datetime",
+    "ecg_sessions": "SELECT * FROM ecg_sessions WHERE person = :person AND date(datetime) BETWEEN :date_from AND :date_to",
+    "ecg_samples": "SELECT * FROM ecg_samples WHERE session_person = :person ORDER BY session_dt, sample_index",
+    "ppi_hrv_advanced": "SELECT * FROM ppi_hrv_advanced WHERE date(fenster_start) BETWEEN :date_from AND :date_to ORDER BY fenster_start",
+    "polar_nightly_hrv": "SELECT * FROM polar_nightly_hrv WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "polar_sleep_hypnogram": "SELECT * FROM polar_sleep_hypnogram WHERE date BETWEEN :date_from AND :date_to ORDER BY date, offset_s",
+    "polar_sleep_wake": "SELECT * FROM polar_sleep_wake WHERE date BETWEEN :date_from AND :date_to ORDER BY date, millis_in_day",
+    "oura_sleep_model": "SELECT * FROM oura_sleep_model WHERE day BETWEEN :date_from AND :date_to ORDER BY day",
+    "devices": "SELECT * FROM devices",
+    "device_firmware_history": "SELECT * FROM device_firmware_history ORDER BY device_id, date_from",
+    "persons": "SELECT person_id, device_user_id, timezone, active FROM persons WHERE person_id = :person",
+    "health_canonical": "SELECT * FROM health_canonical WHERE date BETWEEN :date_from AND :date_to ORDER BY date, metric",
+    "data_quality_flags": "SELECT * FROM data_quality_flags ORDER BY severity, table_name"
+  }
+}

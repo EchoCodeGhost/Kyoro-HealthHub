@@ -1,0 +1,12 @@
+{
+  "name": "gynecology",
+  "description": "Datenpaket für Gynäkologen: Zyklus, Temperatur-Abweichung, Medikamente",
+  "description_en": "Data package for gynecologists: cycle, temperature deviation, medications",
+  "queries": {
+    "reproductive_events": "SELECT date, event_type, value_num, value_text, source FROM reproductive_health WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "cycle_symptoms": "SELECT date, symptom, value_num, value_text, category FROM symptoms WHERE person = :person AND (category IN ('Zyklus','Reproductive') OR symptom LIKE '%menstrual%' OR symptom LIKE '%cramp%' OR symptom LIKE '%bloat%' OR symptom LIKE '%breast_pain%' OR symptom LIKE '%pelvic_pain%') AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "temp_deviation": "SELECT date, ts, value, source_app FROM measurements WHERE metric IN ('temp_deviation','wrist_temp_sleep') AND person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts",
+    "contraception_oura": "SELECT id, method, method_start_date, method_end_date, timestamp FROM oura_contraception WHERE method_start_date <= :date_to OR method_end_date >= :date_from ORDER BY method_start_date",
+    "medications_hormonal": "SELECT ts, date, drug_name, dose_value, dose_unit, route FROM medications WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "sports_medicine",
+  "description": "Datenpaket für Sportmedizin: Trainings, Fitnesstest, HRV, klinische Befunde",
+  "description_en": "Data package for sports medicine: training, fitness test, HRV, clinical findings",
+  "queries": {
+    "training_sessions": "SELECT session_id, date, ts_start, ts_end, sport, duration_s, distance_m, calories, hr_avg, hr_max, training_load, recovery_h, carbo_pct, fat_pct, intensity, source_app FROM training WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts_start",
+    "fitness_tests": "SELECT session_id, date, ts_start, vo2_max, hr_max, hr_avg, fitness_class, source_app FROM fitness_test WHERE person = :person AND date BETWEEN :date_from AND :date_to ORDER BY ts_start",
+    "polar_fitness_assessments": "SELECT ts, date, instrument, score, details FROM assessments WHERE person = :person AND instrument='polar_fitness_test' AND date BETWEEN :date_from AND :date_to ORDER BY date",
+    "nightly_hrv": "SELECT date, rmssd_ms, recovery_indicator, ans_status, baseline_rmssd_ms FROM polar_nightly_hrv WHERE date BETWEEN :date_from AND :date_to ORDER BY date",
+    "clinical_findings": "SELECT finding_date, category, finding_type, value, unit, status, severity, description FROM clinical_findings WHERE category IN ('hr_recovery','pots','pem') AND finding_date BETWEEN :date_from AND :date_to ORDER BY finding_date"
+  }
+}

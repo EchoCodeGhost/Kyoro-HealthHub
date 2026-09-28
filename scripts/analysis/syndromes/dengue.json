@@ -1,0 +1,58 @@
+{
+  "slug": "dengue",
+  "name_de": "Post-Dengue-Syndrom",
+  "lag_weeks": 4,
+  "refs": "Pang et al. 2010 (PLoS ONE), Wilder-Smith et al. 2010, WHO Dengue Guidelines 2009, Nat. Expertenkommission Stechmücken/FLI 2022 (Integriertes Management vektorkompetenter Stechmücken in Deutschland), ECDC 2022b (autochthone DENV-Ausbrüche Europa), Lachmann, Frank, Jung-Sendzik (2026). Saison 2026 stechmückenübertragener Krankheitserreger in Deutschland beginnt. RKI Epidemiologisches Bulletin. doi:10.25646/14274, Gronwald 2023",
+  "system_prompt": "Du bist ein Internist mit Expertise in Dengue-Fieber und tropischen Post-Infektionssyndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Post-Dengue: persistente Fatigue, Myalgie, Arthralgie, kognitive Störungen nach Dengue-Infektion\n- Häufigkeit: ~20% der Dengue-Patienten entwickeln Fatigue >3 Monate (Pang 2010)\n- Diagnostischer blinder Fleck: Dengue wird ohne positive Reiseanamnese oft nicht in Betracht gezogen. Übertragung durch die Tigermücke (Aedes albopictus, effiziente Überträgerin von mindestens 20 Arboviren inkl. DENV/ZIKV/CHIKV — Nat. Expertenkommission Stechmücken/FLI 2022; seit 2021 in Spanien/Italien/Frankreich/Griechenland etabliert). In Deutschland ist die Tigermücke bereits dauerhaft etabliert in Baden-Württemberg, Rheinland-Pfalz, Hessen und Nordrhein-Westfalen, zusätzlich Einzelfunde in Städten in Bayern, Thüringen und Berlin (RKI Epid. Bull. 2026); weitere Ausbreitung erwartet — autochthone Dengue-Ausbrüche sind bereits dokumentiert in Portugal/Madeira (2007) sowie wiederholt in Frankreich (2010, 2013, 2014, 2015, 2018, 2019, 2020, 2022; ECDC 2022b), zuletzt teils grenznah zu Deutschland. In Deutschland selbst bisher (Stand 2026) keine autochthone Übertragung nachgewiesen, nur importierte Fälle (RKI). RKI-Empfehlung (Epid. Bull. 2026): In Regionen mit Tigermücken-Vorkommen sollte Dengue (ebenso Chikungunya/Zika) differentialdiagnostisch geprüft werden, unabhängig von der Reiseanamnese\n- Thrombopenie und Hämatopoese-Störung können HRV-Muster beeinflussen\n- Serologie: NS1-Antigen, Dengue-IgM/-IgG; PCR in der Akutphase\n- Biomarker-Schwellen: Long-COVID-/ME-CFS-Literatur als Proxy\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Prä-Erkrankungs-Baseline?\n4. **Expositionsweg**: Spricht das Bild eher für reiseassoziierte oder autochthone (tigermückenbedingte) Exposition — unabhängig davon, ob eine Reise dokumentiert ist?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "A90",
+    "A91"
+  ],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI-Ratgeber Dengue-Fieber (§ 7 IfSG meldepflichtig)",
+    "who": "WHO Dengue: Guidelines for Diagnosis, Treatment (2009, update 2023)",
+    "cdc": "CDC Dengue Clinical Guidance"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Gelenkschmerzen",
+    "Arthralgie",
+    "Muskelschmerzen",
+    "Myalgie",
+    "Kopfschmerzen",
+    "Fieber",
+    "Hautausschlag",
+    "Konzentrationsstörungen",
+    "Schlafstörungen",
+    "Schwindel"
+  ],
+  "seroprevalence_de": 0.02,
+  "sero_category": "reise",
+  "endemic_regions": [
+    "tropisch",
+    "subtropisch",
+    "Kanarische Inseln",
+    "Madeira",
+    "Südostasien",
+    "Lateinamerika",
+    "Afrika",
+    "Indien",
+    "Spanien",
+    "Portugal",
+    "Mittelmeer",
+    "Deutschland",
+    "Baden-Württemberg",
+    "Rheinland-Pfalz",
+    "Hessen",
+    "Nordrhein-Westfalen",
+    "Bayern",
+    "Thüringen",
+    "Berlin",
+    "Brasilien",
+    "Frankreich",
+    "Indonesien",
+    "Thailand",
+    "Vietnam"
+  ]
+}

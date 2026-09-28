@@ -1,0 +1,14 @@
+{
+  "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/mosquito-maps": {
+    "last_checked": "2026-09-23",
+    "sha256": "2b242697e9c48bfc689990c6f822f9d21162007b8a0050994b08b36443123dd8"
+  },
+  "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/tick-maps": {
+    "last_checked": "2026-09-23",
+    "sha256": "e57d74007e3dc9d944be250964137b50b19987480553ce00e169d66dea75cb38"
+  },
+  "https://www.lgl.bayern.de/gesundheit/umweltbezogener_gesundheitsschutz/klimawandel_gesundheit/infektionskrankheiten/index.htm": {
+    "last_checked": "2026-09-23",
+    "sha256": "8b04529dec078063fe44d19215e8ca087a5d1e0189547360002235b24f86bc9d"
+  }
+}

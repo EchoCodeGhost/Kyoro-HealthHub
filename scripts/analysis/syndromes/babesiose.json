@@ -1,0 +1,44 @@
+{
+  "slug": "babesiose",
+  "name_de": "Post-Babesiose-Syndrom",
+  "lag_weeks": 6,
+  "refs": "IDSA Babesiosis Guidelines 2012, Vannier & Krause 2012 (NEJM), Gronwald 2023, Davis 2023, DBG-Leitlinie Lyme-Borreliose Frühjahr 2026 (Abschn. 3.5.3)",
+  "system_prompt": "Du bist ein Internist / Infektiologe mit Expertise in Babesiose und Zecken-übertragenen Erkrankungen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Babesiose (Babesia microti/divergens): intraerythrozytärer Parasit, Zeckenübertragung\n- Häufig als Koinfektion mit Borrelia; milde Fälle bleiben oft undiagnostiziert\n- Post-Babesiose: persistente Fatigue, Anämie-Folgen, Splenomegalie, kognitive Symptome\n- Besonderheit: SpO2-Abfälle können durch hämolytische Anämie verstärkt sein\n- Serologie: IFA Babesia microti IgG/-IgM; Blutausstrich + PCR bei akutem Verdacht\n- KLIMAWANDEL-BEZUG: gleicher Vektor Ixodes ricinus wie Borrelia/FSME — die dort dokumentierte klimabedingte Ausdehnung von Zeckensaison und Verbreitungsgebiet (s. `fsme.json`) erhöht auch das Babesiose-Expositionsrisiko\n- **DBG-Leitlinie 2026 (Abschn. 3.5.3):** Babesia als Parasit mit **demselben Vektor Ixodes ricinus** wie Borrelia gelistet → simultane Übertragung in einem einzigen Zeckenstich möglich. Borrelia+Babesia-Koinfektion verschlechtert klinisches Bild synergistisch — Babesia-Immunsuppression (erythrozytäre Parasitämie) potenziert Borrelia-Persistenz. Wichtig: Babesia-Serologie unbedingt bei therapieresistenter Borreliose und ungeklärter Anämie mitbestimmen (IFA Babesia microti).\n- Biomarker-Schwellen: Post-Infektions-Literatur als Proxy\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeinträchtigung?\n2. **SpO2-Befund**: Besonders im Kontext möglicher hämolytischer Anämie interpretieren\n3. **Domänen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n4. **Koinfektion**: Muster, die für gleichzeitige Borrelia/Anaplasma-Beteiligung sprechen?\n5. **Trend**: Persistenz oder Erholung?\n6. **Klinische Empfehlung**: Was sollte im nächsten Arztgespräch priorisiert werden?",
+  "icd10_gm": [
+    "B60.0"
+  ],
+  "meldepflicht_de": false,
+  "coinfection_with": [
+    "borreliose"
+  ],
+  "guidelines": {
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.3 (Parasiten — gleicher Vektor Ixodes ricinus)",
+    "rki": "RKI-Ratgeber Babesiose",
+    "idsa": "IDSA Babesiosis Guidelines (Vannier et al. 2012)",
+    "cdc": "CDC Babesiosis Clinical Information"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Schüttelfrost",
+    "Schwitzen",
+    "Myalgie",
+    "Muskelschmerzen",
+    "Kopfschmerzen",
+    "Kurzatmigkeit",
+    "Blässe",
+    "Gelbsucht",
+    "Konzentrationsstörungen"
+  ],
+  "seroprevalence_de": 0.005,
+  "sero_category": "niedrig",
+  "endemic_regions": [
+    "Deutschland",
+    "Bayern",
+    "Osteuropa",
+    "Skandinavien",
+    "Mitteleuropa",
+    "Österreich",
+    "Schweiz"
+  ]
+}

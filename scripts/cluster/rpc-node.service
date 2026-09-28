@@ -1,0 +1,34 @@
+# llama.cpp RPC-Node systemd-Service (Linux-Worker-Node)
+#
+# systemd-inhibit blockiert Sleep/Idle solange der Dienst läuft.
+#
+# Deployment (vom Master-Node aus):
+#   scp cluster/rpc-node.service <user>@<node-ip>:~/.config/systemd/user/
+#   ssh <user>@<node-ip> 'systemctl --user daemon-reload && systemctl --user enable --now rpc-node.service'
+#
+# Logs:
+#   journalctl --user -u rpc-node -f
+#
+# Binary-Pfad anpassen falls abweichend:
+#   systemctl --user edit rpc-node  →  [Service]\nExecStart=...
+
+[Unit]
+Description=llama.cpp RPC Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=LLAMA_RPC=%h/llama.cpp/build/bin/llama-rpc-server
+Environment=PORT=50052
+ExecStart=/usr/bin/systemd-inhibit \
+    --what=sleep:idle \
+    --who=llama-rpc-node \
+    --why="RPC node active" \
+    --mode=block \
+    ${LLAMA_RPC} --host 0.0.0.0 --port ${PORT}
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

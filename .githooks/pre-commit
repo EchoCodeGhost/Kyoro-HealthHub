@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Pre-checkin quality gate. Enable once per clone:
+#     git config core.hooksPath .githooks
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+python3 "$repo_root/tools/qa_check.py" --quiet
