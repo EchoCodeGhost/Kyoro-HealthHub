@@ -51,6 +51,7 @@ from health_config import Config as _Cfg, KYORO_CONFIG_DIR
 from modules.db import open_db
 from modules.base import log_import, resolve_person
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.secure_io import write_private_text
 
 try:
     import requests
@@ -111,11 +112,7 @@ def _load_config() -> dict:
 
 
 def _save_config(cfg: dict) -> None:
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2))
-    try:
-        CONFIG_PATH.chmod(0o600)
-    except OSError:
-        pass
+    write_private_text(CONFIG_PATH, json.dumps(cfg, indent=2))
 
 
 def _oauth2_setup(cfg: dict, person: str, manual: bool = False) -> dict:
