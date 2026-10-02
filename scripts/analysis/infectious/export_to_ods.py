@@ -42,7 +42,7 @@ def ensure_dependencies():
     """Stellt sicher, dass pandas und odfpy installiert sind."""
     try:
         import pandas as pd
-        import odfpy
+        import odf  # noqa: F401 -- the "odfpy" package imports as "odf", not "odfpy"
         return True
     except ImportError:
         print("Benötigte Pakete fehlen: pandas, odfpy")
@@ -71,18 +71,30 @@ def parse_outbreak_exposure_file(file_path):
     for line in lines:
         line = line.strip()
         
-        # Überschriften erkennen
+        # Überschriften erkennen. Die "### Empfohlene Syndrome ..."-Überschrift
+        # matcht auch dieses generische "### "-Pattern und wurde deshalb, bevor
+        # der speziellere "Empfohlene Syndrome"-Check weiter unten je erreicht
+        # wurde, hier schon mit "continue" auf den vollen Überschriftentext
+        # gesetzt -- current_section wurde nie exakt "syndrome", die Syndrome
+        # darunter wurden nie eingesammelt. Deshalb hier direkt normalisieren.
         if line.startswith('## '):
             current_section = line[3:].strip()
+            if 'Empfohlene Syndrome' in current_section:
+                current_section = 'syndrome'
             continue
-        
+
         if line.startswith('### '):
             current_section = line[4:].strip()
+            if 'Empfohlene Syndrome' in current_section:
+                current_section = 'syndrome'
             continue
         
-        # Reisen-Daten
-        if 'Reisen analysiert:' in line:
-            match = re.search(r'Reisen analysiert:\s*(\d+)', line)
+        # Reisen-Daten. Der Generator (analyse_outbreak_exposure.py) nannte
+        # das Feld frueher "Reisen analysiert", inzwischen "Aufenthalte
+        # analysiert" -- beide Formulierungen kommen in bestehenden
+        # Reports vor, deshalb beide matchen statt nur die veraltete.
+        if 'Reisen analysiert:' in line or 'Aufenthalte analysiert:' in line:
+            match = re.search(r'(?:Reisen|Aufenthalte) analysiert:\s*(\d+)', line)
             if match:
                 data['reisen_count'] = int(match.group(1))
         
