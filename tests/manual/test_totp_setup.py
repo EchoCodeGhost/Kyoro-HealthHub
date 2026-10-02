@@ -58,7 +58,7 @@ def test_totp_setup():
     if not secret:
         print(f"   ✗ Kein TOTP-Secret für Benutzer '{test_user}' gefunden")
         sys.exit(1)
-    print(f"   ✓ TOTP-Secret abgerufen: {secret}")
+    print(f"   ✓ TOTP-Secret abgerufen ({len(secret)} Zeichen)")
     
     # Schritt 3: QR-Code generieren
     print("\n3. QR-Code generieren...")

@@ -46,6 +46,7 @@ from functools import lru_cache
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from modules.i18n import t
+from modules.secure_io import write_private_text
 
 _ACTIVE_PATIENT_DIR = _os.environ.get("KYORO_ACTIVE_PATIENT_DIR")
 _BASE_HOME = Path(_ACTIVE_PATIENT_DIR) if _ACTIVE_PATIENT_DIR else Path.home()
@@ -324,9 +325,7 @@ def _normalize_family_history_entry(raw: dict) -> list[dict]:
 
 
 def save(cfg: dict) -> None:
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps(cfg, indent=2, ensure_ascii=False))
-    CONFIG_PATH.chmod(0o600)
+    write_private_text(CONFIG_PATH, json.dumps(cfg, indent=2, ensure_ascii=False))
     load.cache_clear()
 
 
@@ -1079,9 +1078,7 @@ def _migrate_key():
             print(f"FEHLER: {_KEY_FILE} existiert aber enthält anderen Key. Abbruch.")
             sys.exit(1)
     else:
-        _KEY_FILE.parent.mkdir(parents=True, exist_ok=True)
-        _KEY_FILE.write_text(key + "\n", encoding="utf-8")
-        _KEY_FILE.chmod(0o600)
+        write_private_text(_KEY_FILE, key + "\n")
         print(f"Key gespeichert in {_KEY_FILE} (chmod 600)")
 
     # db_key aus config entfernen
