@@ -51,6 +51,7 @@ _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, load as _load_cfg, KYORO_CONFIG_DIR
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.secure_io import write_private_text
 from utils.anonymize import round_coords
 from modules.base import tz_from_coords, log_import, resolve_person
 _cfg = _Cfg()
@@ -201,9 +202,7 @@ def setup_config():
         token = input("Long-Lived Access Token: ").strip()
 
     config = {"url": url, "token": token, "entities": {}}
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps(config, indent=2))
-    CONFIG_PATH.chmod(0o600)
+    write_private_text(CONFIG_PATH, json.dumps(config, indent=2))
     print(t(f"\nGespeichert: {CONFIG_PATH}", f"\nSaved: {CONFIG_PATH}"))
     print(t("Jetzt --discover ausführen um Somneo-Entitäten zu finden.",
             "Now run --discover to find Somneo entities."))
@@ -1289,7 +1288,7 @@ def main():
         if eid not in ap_entities:
             ap_entities.append(eid)
         config["airpurifier_entities"] = ap_entities
-        CONFIG_PATH.write_text(json.dumps(config, indent=2))
+        write_private_text(CONFIG_PATH, json.dumps(config, indent=2))
         brand = _airpurifier_brand(eid)
         stype = infer_sensor_type(eid, "")
         print(t(f"Luftreiniger-Entität hinzugefügt: {eid} ({brand}, {stype})",
@@ -1321,7 +1320,7 @@ def main():
         stype = infer_sensor_type(eid, "")
         entities[stype] = eid
         config["entities"] = entities
-        CONFIG_PATH.write_text(json.dumps(config, indent=2))
+        write_private_text(CONFIG_PATH, json.dumps(config, indent=2))
         print(t(f"Entität hinzugefügt: {stype} = {eid}", f"Entity added: {stype} = {eid}"))
         return
 
