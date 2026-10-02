@@ -59,6 +59,7 @@ _cfg = _Cfg()
 
 import argparse
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.secure_io import write_private_text
 from modules.base import log_import
 
 try:
@@ -129,8 +130,7 @@ def setup_config():
     print("Token: https://cloud.ouraring.com/personal-access-tokens\n")
     token = input(t("Personal Access Token: ", "Personal Access Token: ")).strip()
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps({"token": token}, indent=2))
-    CONFIG_PATH.chmod(0o600)
+    write_private_text(CONFIG_PATH, json.dumps({"token": token}, indent=2))
     print(t(f"\nGespeichert: {CONFIG_PATH}", f"\nSaved: {CONFIG_PATH}"))
 
 

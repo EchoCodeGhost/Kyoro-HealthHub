@@ -41,6 +41,7 @@ import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, KYORO_CONFIG_DIR
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.secure_io import write_private_text
 _cfg = _Cfg()
 
 CONFIG_PATH = KYORO_CONFIG_DIR / "garmin_config.json"
@@ -61,8 +62,7 @@ def setup():
     email = input(t("Garmin Connect E-Mail: ", "Garmin Connect e-mail: ")).strip()
     config = {"email": email}
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(json.dumps(config, indent=2))
-    CONFIG_PATH.chmod(0o600)
+    write_private_text(CONFIG_PATH, json.dumps(config, indent=2))
     print(t(f"Gespeichert: {CONFIG_PATH}", f"Saved: {CONFIG_PATH}"))
     print(t("Beim nächsten Start wird das Passwort interaktiv abgefragt.",
             "On next start the password will be prompted interactively."))
@@ -181,8 +181,7 @@ def main():
     # E-Mail direkt als Argument → in Config speichern
     if args.email:
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG_PATH.write_text(json.dumps({"email": args.email}, indent=2))
-        CONFIG_PATH.chmod(0o600)
+        write_private_text(CONFIG_PATH, json.dumps({"email": args.email}, indent=2))
         print(t(f"E-Mail gespeichert: {args.email}",
                 f"E-mail saved: {args.email}"))
         if not args.password:
