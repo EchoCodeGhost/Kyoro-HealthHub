@@ -68,30 +68,42 @@ LGBTQ+-Schutz, verbotene Nutzungen und Sicherheitsanforderungen.
 
 ## Git-Workflow
 
-`main` ist ein geschützter Branch: direkte Pushes werden abgelehnt — für
+Dieses Repo hat zwei Branches:
+
+- **`dev`** (der Default-Branch) — hier läuft die normale Arbeit. Öffne
+  deinen PR gegen `dev`.
+- **`main`** — die stabile Release-Linie. Wird nur von einer Maintainerin
+  aktualisiert, per Squash-Merge von `dev`, wenn ein Änderungsstand als
+  "der" veröffentlichte Stand reif ist, getaggt als
+  [GitHub Release](../../releases). Ziele mit einem PR nicht direkt auf
+  `main`.
+
+Beide Branches sind geschützt: direkte Pushes werden abgelehnt — für
 jeden Beitrag, ob menschlich oder KI-unterstützt, auch für Repo-Admins.
 Jede Änderung läuft über einen Branch und einen Pull Request:
 
 ```bash
-git checkout -b <kurzer-beschreibender-branch-name>
+git checkout -b <kurzer-beschreibender-branch-name> dev
 # Änderungen machen, committen
 git push -u origin <branch-name>
-gh pr create --base main   # oder den PR direkt auf github.com öffnen
+gh pr create --base dev   # oder den PR direkt auf github.com öffnen
 ```
 
-Ein PR wird merge-bar, sobald sein **„Quality gate"**-Check (`ci.yml`, führt
-`tools/qa_check.py` aus) grün ist und der Branch auf dem aktuellen Stand von
-`main` ist. Es gibt keine Pflicht-Anzahl an Approvals: Dies ist ein kleines,
-größtenteils solo-/KI-unterstütztes Projekt (siehe
-[CONTRIBUTORS.md](../CONTRIBUTORS.md)) — ein grüner PR kann von jedem mit
-Schreibzugriff gemerged werden, niemand muss vorher extra „approven". Sollte
-der Kreis der Mitwirkenden wachsen, wird dieser Abschnitt um eine echte
-Review-Pflicht ergänzt.
+Ein PR gegen `dev` wird merge-bar, sobald sein **„Quality gate"**-Check
+(`ci.yml`, führt `tools/qa_check.py` aus) grün ist, der Branch auf dem
+aktuellen Stand von `dev` ist, **und mindestens eine Freigabe von jemand
+anderem als der PR-Autorin vorliegt** — GitHub lehnt eine Selbst-Freigabe
+grundsätzlich ab, unabhängig vom Schreibzugriff. Repo-Admins sind für ihre
+eigenen PRs von der Freigabe-Pflicht ausgenommen (nicht vom Quality Gate),
+damit die Projekt-Maintainerin bei Routinearbeit nicht auf eine zweite
+Person warten muss; alle anderen PRs brauchen dieses zweite Augenpaar vor
+dem Merge.
 
 Ein KI-Assistent, der an diesem Repo arbeitet, kann seinen eigenen Pull
 Request nicht stellvertretend freigeben — GitHub lehnt eine Freigabe durch
-denselben Account ab, der den PR eröffnet hat — daher bleibt das Mergen
-auch dann eine menschliche Handlung, wenn ein Assistent den Branch verfasst hat.
+denselben Account ab, der den PR eröffnet hat — daher bleiben Freigabe und
+Mergen auch dann eine menschliche Handlung, wenn ein Assistent den Branch
+verfasst hat.
 
 ## Prüfungen vor einem Pull Request
 

@@ -60,7 +60,7 @@ def ensure_dependencies():
     try:
         import pandas as pd
         try:
-            import odfpy
+            import odf  # noqa: F401 -- the "odfpy" package imports as "odf", not "odfpy"
             return True
         except ImportError:
             # odfpy nicht verfügbar, aber pandas ist da - wir können xlsx verwenden
@@ -191,7 +191,11 @@ class OutbreakExposureExporter(AnalysisExporter):
         tables = {}
         
         # 1. Übersichtstabelle
-        reisen_count = self._extract_number(content, 'Reisen analysiert:')
+        # Der Generator (analyse_outbreak_exposure.py) nannte das Feld
+        # frueher "Reisen analysiert", inzwischen "Aufenthalte analysiert"
+        # -- beide Formulierungen kommen in bestehenden Reports vor.
+        reisen_count = (self._extract_number(content, 'Reisen analysiert:')
+                         or self._extract_number(content, 'Aufenthalte analysiert:'))
         exposure_count = self._extract_number(content, 'Expositions-Treffer:')
         syndromes = self._extract_list(content, r'`([^`]+)`', 'Empfohlene Syndrome')
         
