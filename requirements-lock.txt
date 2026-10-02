@@ -84,7 +84,7 @@ requests==2.34.2
 rpds-py==2026.6.3
 scikit-learn==1.9.1
 scipy==1.18.1
-setuptools==81.0.0
+setuptools==83.0.0
 six==1.17.0
 soundfile==0.14.0
 soupsieve==2.9.2
@@ -94,7 +94,7 @@ typing_extensions==4.16.0
 typing-inspection==0.4.4
 tzdata==2026.4
 ua-generator==2.1.5
-urllib3==2.7.0
+urllib3==2.8.0
 uvicorn==0.53.0
 webencodings==0.6.1
 wfdb==4.3.1
