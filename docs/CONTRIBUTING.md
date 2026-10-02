@@ -76,29 +76,39 @@ LGBTQ+ protections, prohibited uses, and security requirements.
 
 ## Git workflow
 
-`main` is a protected branch: direct pushes are rejected, for every
+This repo has two branches:
+
+- **`dev`** (the default branch) — where all normal work happens. Open your
+  PR against `dev`.
+- **`main`** — the stable release line. Only updated by a maintainer
+  squash-merging `dev` into it when a batch of changes is ready to be "the"
+  released version, tagged as a [GitHub Release](../../releases). Don't
+  target `main` directly with a PR.
+
+Both branches are protected: direct pushes are rejected, for every
 contributor — human or AI-assisted, including repo admins. All changes go
 through a branch and a pull request:
 
 ```bash
-git checkout -b <short-descriptive-branch-name>
+git checkout -b <short-descriptive-branch-name> dev
 # make your changes, commit
 git push -u origin <branch-name>
-gh pr create --base main   # or open the PR on github.com
+gh pr create --base dev   # or open the PR on github.com
 ```
 
-A PR becomes mergeable once its **"Quality gate"** check (`ci.yml`, runs
-`tools/qa_check.py`) is green and the branch is up to date with `main`.
-There is no required-approval count: this is a small, mostly solo/
-AI-assisted project (see [CONTRIBUTORS.md](../CONTRIBUTORS.md)), so a
-green PR can be merged by anyone with write access — nobody else has to
-click "approve" first. If the contributor base grows, this section will be
-updated to describe an actual review requirement instead.
+A PR against `dev` becomes mergeable once its **"Quality gate"** check
+(`ci.yml`, runs `tools/qa_check.py`) is green, the branch is up to date
+with `dev`, **and it has at least one approving review** from someone
+other than the PR's author — GitHub rejects self-approval outright,
+regardless of write access. Repo admins are exempt from the review
+requirement for their own PRs (not from the Quality gate) so the project
+maintainer isn't blocked waiting on a second reviewer for routine work;
+everyone else's PRs need that second pair of eyes before merge.
 
 An AI assistant working in this repo cannot approve its own pull request on
 someone's behalf — GitHub rejects an approval submitted by the same account
-that opened the PR — so merging stays a human action even when an
-assistant authored the branch.
+that opened the PR — so review and merge both stay human actions even when
+an assistant authored the branch.
 
 ## Checks before a pull request
 
