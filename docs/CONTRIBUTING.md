@@ -8,6 +8,9 @@ Before starting, check [OPENSPEC.md](OPENSPEC.md) — the project's architectura
 requirements (pipeline order, DB schema conventions, privacy rules, importer
 pattern) are kept as versioned specs in `openspec/specs/`, alongside this guide.
 
+By participating in this project — in issues, pull requests, discussions,
+or reviews — you agree to follow our [Code of Conduct](../CODE_OF_CONDUCT.md).
+
 ---
 
 ## License and sign-off
