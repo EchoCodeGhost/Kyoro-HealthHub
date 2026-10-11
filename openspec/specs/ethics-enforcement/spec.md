@@ -6,7 +6,9 @@ security/privacy-by-design minimums, and AI-output labelling — as
 reviewable SHALL/scenario requirements, so contributions can be checked
 against an explicit standard instead of only narrative ethics prose. See
 `docs/ETHICS.md`/`ETHICS_DE.md` for the full values framing this is drawn
-from.
+from. How people treat each other in the project's community spaces is
+out of scope for this spec and governed by `CODE_OF_CONDUCT.md`/
+`CODE_OF_CONDUCT_DE.md`.
 ## Requirements
 ### Requirement: Prohibited uses
 The project SHALL prohibit the uses listed in `docs/ETHICS.md` section 4,

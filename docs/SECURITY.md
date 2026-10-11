@@ -29,8 +29,8 @@ resolved.
 > until the repository is public. Until then, please use the fallback
 > below.
 
-**Fallback while unavailable:** open a regular issue with as few technical
-details as possible and ask for a private channel to share the rest.
+**Fallback while unavailable:** send an email to [gramm.zelte.53@icloud.com](mailto:gramm.zelte.53@icloud.com).
+Do not open a public issue for an unpatched vulnerability.
 
 ## Scope
 
@@ -84,4 +84,4 @@ resolvable. Revisit if/when a `neurokit2` release lifts that ceiling.
 GitHub's private vulnerability reporting requires GitHub Advanced Security
 on private repositories, which isn't enabled here. It becomes available at
 no extra cost once this repository is public — until then, please use the
-regular-issue fallback above.
+email fallback above.

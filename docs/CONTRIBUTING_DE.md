@@ -9,6 +9,9 @@ architektonischen Anforderungen des Projekts (Pipeline-Reihenfolge,
 DB-Schema-Konventionen, Privacy-Regeln, Importer-Pattern) liegen als
 versionierte Specs unter `openspec/specs/`, ergänzend zu dieser Anleitung.
 
+Wer sich an diesem Projekt beteiligt – in Issues, Pull Requests, Diskussionen
+oder Reviews –, hält sich an unseren [Verhaltenskodex](../CODE_OF_CONDUCT_DE.md).
+
 ---
 
 ## Lizenz und Sign-off

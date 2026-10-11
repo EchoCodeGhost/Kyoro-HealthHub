@@ -269,6 +269,7 @@ python3 scripts/export_health.py --profile long_covid  --person all --format jso
 → Plugin-Anleitung (DE): [docs/CONTRIBUTING_DE.md](docs/CONTRIBUTING_DE.md)
 → Architectural specs (EN): [docs/OPENSPEC.md](docs/OPENSPEC.md) · [Deutsch](docs/OPENSPEC_DE.md)
 → Security policy (EN): [docs/SECURITY.md](docs/SECURITY.md) · [Deutsch](docs/SECURITY_DE.md)
+→ Code of Conduct (EN): [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [Deutsch](CODE_OF_CONDUCT_DE.md)
 
 ---
 
