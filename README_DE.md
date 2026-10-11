@@ -304,6 +304,7 @@ Benchmark via OpenRouter (P1–P4 + Halluzinations-Fallstrick P6, max. 19 Pkt.; 
 → Plugin guide (EN): [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 → Architektur-Specs (DE): [docs/OPENSPEC_DE.md](docs/OPENSPEC_DE.md) · [English](docs/OPENSPEC.md)
 → Sicherheitsrichtlinie (DE): [docs/SECURITY_DE.md](docs/SECURITY_DE.md) · [English](docs/SECURITY.md)
+→ Verhaltenskodex (DE): [CODE_OF_CONDUCT_DE.md](CODE_OF_CONDUCT_DE.md) · [English](CODE_OF_CONDUCT.md)
 
 ---
 
