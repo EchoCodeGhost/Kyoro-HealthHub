@@ -280,4 +280,9 @@ reviewable version: `openspec/specs/ethics-enforcement/`):
 
 If you observe a use of this software that violates these principles, or
 discover a security or privacy vulnerability, contact the maintainer directly
-before disclosing publicly.
+before disclosing publicly: [gramm.zelte.53@icloud.com](mailto:gramm.zelte.53@icloud.com). For vulnerabilities, see also
+[SECURITY.md](SECURITY.md).
+
+These principles govern the software and its use. How we treat each other in
+this project's issues, pull requests, and discussions is described in the
+[Code of Conduct](../CODE_OF_CONDUCT.md).

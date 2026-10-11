@@ -30,8 +30,8 @@ Maintainer sichtbar ist, bis es behoben ist.
 > erst, sobald das Repository öffentlich ist. Bis dahin bitte den
 > Fallback unten nutzen.
 
-**Fallback bis dahin:** ein reguläres Issue mit möglichst wenig technischen
-Details öffnen und um einen privaten Kanal für den Rest bitten.
+**Fallback bis dahin:** eine E-Mail an [gramm.zelte.53@icloud.com](mailto:gramm.zelte.53@icloud.com) schreiben.
+Für ungepatchte Lücken kein öffentliches Issue eröffnen.
 
 ## Umfang
 
@@ -91,4 +91,4 @@ Obergrenze anhebt.
 GitHubs privates Vulnerability-Reporting braucht bei privaten Repositories
 GitHub Advanced Security, was hier nicht aktiviert ist. Es wird ohne
 Zusatzkosten verfügbar, sobald dieses Repository öffentlich ist — bis dahin
-bitte den regulären Issue-Fallback oben nutzen.
+bitte den E-Mail-Fallback oben nutzen.

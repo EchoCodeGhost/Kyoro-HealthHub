@@ -310,4 +310,9 @@ Beiträge (formale, überprüfbare Fassung: `openspec/specs/ethics-enforcement/`
 
 Wer eine Nutzung dieser Software beobachtet, die gegen diese Grundsätze
 verstößt, oder eine Sicherheits- oder Datenschutzschwachstelle entdeckt,
-wendet sich direkt an die Maintainer — vor jeder öffentlichen Bekanntmachung.
+wendet sich direkt an den Maintainer — vor jeder öffentlichen Bekanntmachung:
+[gramm.zelte.53@icloud.com](mailto:gramm.zelte.53@icloud.com). Für Sicherheitslücken siehe auch [SECURITY_DE.md](SECURITY_DE.md).
+
+Diese Grundsätze regeln die Software und ihre Nutzung. Wie wir in Issues,
+Pull Requests und Diskussionen dieses Projekts miteinander umgehen, beschreibt
+der [Verhaltenskodex](../CODE_OF_CONDUCT_DE.md).
