@@ -250,6 +250,7 @@ scripts/
 
 → Vollständiges Schema: [docs/ARCHITECTURE_DE.md](docs/ARCHITECTURE_DE.md) · [English](docs/ARCHITECTURE.md)  
 → Analyse-Anleitung: [docs/ANALYSEN_DE.md](docs/ANALYSEN_DE.md) · [English](docs/ANALYSEN.md)
+→ PEM-Check-in-Prompt für Gesundheits-Apps mit KI (z. B. Bevel): [docs/PEM_CHECKIN_PROMPT_DE.md](docs/PEM_CHECKIN_PROMPT_DE.md) · [English](docs/PEM_CHECKIN_PROMPT.md)
 
 ### Arzt-Export-Profile
 
