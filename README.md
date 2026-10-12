@@ -250,6 +250,7 @@ scripts/
 
 → Full schema: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/ARCHITECTURE_DE.md](docs/ARCHITECTURE_DE.md)  
 → Analysis guide: [docs/ANALYSEN.md](docs/ANALYSEN.md) · [Deutsch](docs/ANALYSEN_DE.md)
+→ PEM check-in prompt for AI health apps (e.g. Bevel): [docs/PEM_CHECKIN_PROMPT.md](docs/PEM_CHECKIN_PROMPT.md) · [Deutsch](docs/PEM_CHECKIN_PROMPT_DE.md)
 
 ### Doctor export profiles
 
