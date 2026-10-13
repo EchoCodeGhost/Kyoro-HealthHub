@@ -38,7 +38,8 @@ code. How you feel always takes precedence. See also
   not the same as their severity.
 - **Baseline symptoms** are symptoms you usually have anyway because of
   another condition. They only count if they are stronger than usual today,
-  but then they count double, and two or more raise the level. With PEM, it
+  but then they count double. A single one triggers the early-warning note,
+  and two or more raise the level. With PEM, it
   is often exactly the existing symptoms that get worse.
 - **Attacks or episodes** such as migraine come and go. On a day with an
   attack, the symptoms that belong to it don't count as crash signs, and the
@@ -61,6 +62,11 @@ code. How you feel always takes precedence. See also
   without a shared calibration. The point values (12 and 20) are the same.
 - **Mental load:** the "extremely much more" level (+15) and the device
   stress value option are additions of the check-in.
+- **Heart-rate minutes with POTS:** if heart rate rises strongly in everyday
+  life, e.g. when getting up, the minutes above resting heart rate + 15 are
+  skipped, because they then measure circulatory reactions rather than
+  exertion. Kyoro likewise drops the resting heart rate + 15 threshold via
+  the `rhr_baseline_stable` setting.
 - **Not included:** "cardiac cost per step" and elevated heart rate during
   daytime rest, because apps usually don't provide this raw data in the chat.
 - **Supercompensation simplified:** Kyoro additionally considers the
@@ -101,7 +107,7 @@ Devices:
 - Device for exertion (steps, energy, exertion score, daytime heart rate): ______
 - Device for daytime stress: ______ (e.g. Garmin Stress, Oura daytime stress, Whoop Stress, Bevel Stress; empty = Bevel checks whether a value is available)
 Treatment:
-- Resting heart rate under current treatment persistently elevated or strongly fluctuating (e.g. with POTS/dysautonomia)? yes / no
+- Resting heart rate under current treatment persistently elevated, or does your heart rate rise strongly in everyday life, e.g. when getting up or standing (POTS/dysautonomia)? yes / no
 - Heart-rate-lowering medication (e.g. beta blockers, ivabradine)? yes / no
 - Medication affecting heart rate or circulation started, stopped or changed in dose in the last 30 days? no / yes, on ______
 Symptoms:
@@ -170,7 +176,7 @@ Evaluation of (a), in this order:
 4. Base points from the letter: A or B → 0; C → 12; D or E → 20. If I have an attack and say that what isn't possible is mainly due to it: base points 0, note "Symptoms today mainly due to [attack], not counted as a crash".
 5. Raise: If 2 or more baseline symptoms are stronger than usual, raise the points by one level (0 → 12, 12 → 20, at most 20).
 6. Fallback without a letter: If I choose no letter or F, determine the points from the weighted count: 0–2 → 0; 3–4 → 12; 5 or more → 20.
-7. Early-warning note: If I choose A or B, nothing was raised and the weighted count is 3 or more: no points, but write in the assessment "Several symptoms stronger than usual (no. …), even though the day is still manageable – pay particular attention to breaks today."
+7. Early-warning note: If I choose A or B, nothing was raised, and the weighted count is 3 or more or at least 1 baseline symptom is stronger than usual: no points, but write in the assessment "Symptoms stronger than usual (no. …), even though the day is still manageable – pay particular attention to breaks today."
 8. Sleep deficit: If last night's sleep duration is clearly below the 7-night average, add "possibly from the sleep deficit" to no. 1 and no. 8.
 9. Nothing answered (only F and no numbers): no points for symptoms, note "Symptoms not assessed", assessment based on the measurements.
 
@@ -193,7 +199,7 @@ Look at the last 3 completed days; today does not count. Score each day separate
 - Active energy (fixed thresholds): ≥ 200 kcal +5, ≥ 400 kcal +10, ≥ 700 kcal +15. Examples: 150 → 0; 350 → +5; 600 → +10; 750 → +15.
 - Exertion score (Bevel Strain; if not available: training load of the exertion device, e.g. Garmin training load), personal percentiles: compute the median, 75th and 90th percentile only from days with an actually measured value greater than 0 in the 90 days before the respective day. ≥ median +8, ≥ 75th percentile +15, ≥ 90th percentile +20. Fewer than 20 days with a value: 0 points and "–". State the number of days used and the first and last day of the period.
 - Minutes with heart rate above resting heart rate + 15 bpm (aerobic threshold, Workwell rule of thumb): all day if available; otherwise use minutes from recorded workouts instead (mark as "workout-based"). ≥ 15 min +12, ≥ 60 min +20.
-  · Skip (0 points, note "not applicable") if the profile says "resting heart rate persistently elevated or strongly fluctuating: yes".
+  · Skip (0 points, note "not applicable") if the profile answers the question about persistently elevated resting heart rate or strongly rising heart rate in everyday life with yes. The resting heart rate comparison in part 2 is not affected.
   · If "heart-rate-lowering medication: yes": give points, but mark them "possibly underestimated (heart-rate-lowering medication)" and weight steps, energy and exertion score more heavily in the assessment.
 - Mental/emotional/social load from (b), per day
 
