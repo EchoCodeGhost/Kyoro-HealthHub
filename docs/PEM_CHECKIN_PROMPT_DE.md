@@ -50,6 +50,10 @@ zuverlässig als Code. Das eigene Körpergefühl hat immer Vorrang. Siehe auch
 - **(b) Geistige Belastung** wird im Vergleich zur Zeit davor erfragt, nicht
   im Vergleich zu einem „Standardtag“, den viele nicht haben. Alternativ kann
   man den Stress-Wert des eigenen Geräts verwenden lassen.
+- **(c) Weniger Aktivität gestern** wird nur gefragt, wenn der Rückgang
+  Punkte geben würde. Wer bewusst weniger gemacht hat, etwa wegen Pacing
+  oder Wetter, bekommt dafür keine Punkte. Sonst würde gutes Pacing als
+  Crash-Zeichen gewertet.
 
 ## Unterschiede zu Kyoro
 
@@ -70,6 +74,9 @@ zuverlässig als Code. Das eigene Körpergefühl hat immer Vorrang. Siehe auch
   Aufstehen, entfallen die Minuten über Ruhepuls + 15, weil sie dann eher
   Kreislaufreaktionen als Belastung messen. Kyoro verzichtet dann über die
   Einstellung `rhr_baseline_stable` ebenfalls auf die Schwelle Ruhepuls + 15.
+- **Weniger Aktivität:** Kyoro wertet einen Rückgang der Schritte immer als
+  Reaktion, weil die Daten den Grund nicht kennen. Der Check-in fragt nach
+  und wertet bewusstes Pacing nicht als Reaktion.
 - **Nicht enthalten:** die „kardialen Kosten pro Schritt“ und die erhöhte
   Herzfrequenz in Ruhephasen tagsüber, weil die Apps diese Rohdaten im Chat
   meist nicht liefern.
@@ -194,6 +201,14 @@ Auswertung bei A–D, pro Tag: A → 0, B → +5, C → +10, D → +15. Nenne ic
 Auswertung bei E: 0 Punkte, Hinweis "geistige Belastung nicht eingeschätzt".
 Auswertung bei F: Nimm den Stress-Wert pro Tag vom Gerät für Tagesstress (falls leer: von einem verbundenen Gerät, z. B. Garmin Stress-Level, Oura Tagesstress, Whoop Stress, Samsung Stress, Fitbit Stress-Management-Score, Bevel Stress). Bewerte jeden der 3 Tage mit meinen eigenen Perzentilen aus den 90 Tagen davor (nur Tage mit Wert, mindestens 20): ≥ 75. Perzentil +5, ≥ 90. Perzentil +10. Achte auf die Richtung des Werts (bei manchen bedeutet hoch = wenig Stress) und nenne sie in der Ausgabe. Gibt es keinen Stress-Wert oder weniger als 20 Tage: sag mir das und frag, ob ich stattdessen A–E wählen möchte; sonst 0 Punkte mit Hinweis "kein Stress-Wert vom Gerät".
 
+(c) Weniger Aktivität gestern – nur fragen, wenn der Aktivitätsrückgang in Teil 2 Punkte geben würde
+Frag mich:
+"Gestern warst du deutlich weniger aktiv als sonst. Warum?
+A = Es ging nicht anders (Erschöpfung, Beschwerden)
+B = Bewusst weniger (Pacing, Wetter, Pläne, Ruhetag)
+C = Weiß nicht / überspringen"
+Auswertung: A oder C → Punkte wie in Teil 2. B → 0 Punkte, Hinweis "Aktivität bewusst reduziert, nicht als Reaktion gewertet".
+
 TEIL 1 – BELASTUNG (0–40 Punkte)
 Betrachte die letzten 3 abgeschlossenen Tage; heute zählt nicht mit. Bewerte jeden Tag einzeln: Summiere die Punkte dieses Tages, deckle bei 40 und nimm dann den höchsten Tag. Kombiniere nicht die besten Einzelwerte verschiedener Tage.
 - Schritte (feste Schwellen): ≥ 3.000 +5, ≥ 6.000 +10, ≥ 10.000 +15. Beispiele: 2.900 → 0; 4.500 → +5 (≥ 3.000, aber < 6.000); 8.000 → +10; 10.500 → +15.
@@ -211,7 +226,7 @@ Vergleiche die Werte der letzten Nacht jeweils mit dem Durchschnitt der 7 Nächt
 - Schlafeffizienz: Abfall ≥ 8 Prozentpunkte +8
 - Wachanteil im Schlaf: Anstieg ≥ 5 Prozentpunkte +4, ≥ 10 Prozentpunkte +8
 - Atemfrequenz (Nacht): Anstieg ≥ 1,5 /min +5, ≥ 3 /min +10
-- Aktivität gestern, nur wenn gestern nicht der Belastungstag war (also nicht der Tag, der in Teil 1 zählt): Schritte ≥ 30 % unter dem 7-Tage-Schnitt +8, ≥ 50 % darunter +15
+- Aktivität gestern, nur wenn gestern nicht der Belastungstag war (also nicht der Tag, der in Teil 1 zählt): Schritte ≥ 30 % unter dem 7-Tage-Schnitt +8, ≥ 50 % darunter +15; bei Antwort B in (c) 0 Punkte
 - Blutdruck systolisch, falls vorhanden (letzte Messung bis heute Morgen): Anstieg ≥ 10 mmHg +5, ≥ 20 mmHg +10
 - Beschwerden laut Auswertung von (a)
 Begrenze die Summe auf maximal 60.
@@ -230,7 +245,7 @@ AUSGABE (kurz, gut lesbar auf dem Handy)
 1. Erste Zeile: Score, Stufe, Ampel-Emoji (🟢 keine/gering, 🟡 mäßig, 🟠 hoch, 🔴 kritisch) sowie getrennt Reaktion (x/60) und Belastung (x/40); ggf. "HRV in Aufbauphase (x/30 Nächte)"
 2. Synchronisierung: Schlafdauer der letzten Nacht und ob die Nacht vollständig vorliegt
 3. Meine Antworten zu (a): Buchstabe, genannte Nummern, Grundbeschwerden (stärker / wie üblich), Anfall; welche Nummern ausgeklammert wurden und warum; gewichtete Zählung; Punkte und ob angehoben wurde
-4. Geistige Belastung (b): gewählter Buchstabe (mit Tag) und Punkte; bei F zusätzlich Stress-Werte pro Tag mit Gerät, Richtung und Perzentil-Schwellen
+4. Geistige Belastung (b): gewählter Buchstabe (mit Tag) und Punkte; bei F zusätzlich Stress-Werte pro Tag mit Gerät, Richtung und Perzentil-Schwellen; Antwort zu (c), falls gefragt
 5. Tabelle: Signal | Letzte Nacht | 7-Nächte-Schnitt | Abweichung | Punkte
 6. Belastung pro Tag als Tabelle: Datum | Schritte | kcal | Belastungswert | aerobe Minuten (ganztägig oder Workout-basiert) | geistig | Summe, jeweils mit Einzelpunkten; darunter, welcher Tag zählt
 7. Schwellen für den Belastungswert (Median / 75. / 90. Perzentil, Anzahl Tage mit Wert, Zeitraum)

@@ -47,6 +47,9 @@ code. How you feel always takes precedence. See also
 - **(b) Mental load** is asked relative to the time before, not relative to a
   "standard day" that many people don't have. Alternatively, you can let the
   app use your device's stress value.
+- **(c) Less activity yesterday** is only asked if the drop would give
+  points. If you deliberately did less, e.g. because of pacing or weather,
+  it gives no points. Otherwise good pacing would count as a crash sign.
 
 ## Differences from Kyoro
 
@@ -67,6 +70,9 @@ code. How you feel always takes precedence. See also
   skipped, because they then measure circulatory reactions rather than
   exertion. Kyoro likewise drops the resting heart rate + 15 threshold via
   the `rhr_baseline_stable` setting.
+- **Less activity:** Kyoro always counts a drop in steps as a reaction,
+  because the data doesn't know the reason. The check-in asks and doesn't
+  count deliberate pacing as a reaction.
 - **Not included:** "cardiac cost per step" and elevated heart rate during
   daytime rest, because apps usually don't provide this raw data in the chat.
 - **Supercompensation simplified:** Kyoro additionally considers the
@@ -193,6 +199,14 @@ Evaluation for A–D, per day: A → 0, B → +5, C → +10, D → +15. If I don
 Evaluation for E: 0 points, note "mental load not assessed".
 Evaluation for F: Take the stress value per day from the device for daytime stress (if empty: from a connected device, e.g. Garmin stress level, Oura daytime stress, Whoop Stress, Samsung Stress, Fitbit Stress Management Score, Bevel Stress). Score each of the 3 days with my personal percentiles from the 90 days before (only days with a value, at least 20): ≥ 75th percentile +5, ≥ 90th percentile +10. Pay attention to the direction of the value (for some, high = little stress) and state it in the output. If there is no stress value or fewer than 20 days: tell me and ask whether I'd like to choose A–E instead; otherwise 0 points with the note "no stress value from the device".
 
+(c) Less activity yesterday – only ask if the activity drop in part 2 would give points
+Ask me:
+"Yesterday you were clearly less active than usual. Why?
+A = I couldn't do more (exhaustion, symptoms)
+B = Deliberately less (pacing, weather, plans, rest day)
+C = Don't know / skip"
+Evaluation: A or C → points as in part 2. B → 0 points, note "activity deliberately reduced, not counted as a reaction".
+
 PART 1 – EXERTION (0–40 points)
 Look at the last 3 completed days; today does not count. Score each day separately: add up that day's points, cap at 40, then take the highest day. Do not combine the best individual values from different days.
 - Steps (fixed thresholds): ≥ 3,000 +5, ≥ 6,000 +10, ≥ 10,000 +15. Examples: 2,900 → 0; 4,500 → +5 (≥ 3,000 but < 6,000); 8,000 → +10; 10,500 → +15.
@@ -210,7 +224,7 @@ Compare last night's values with the average of the 7 nights before (for activit
 - Sleep efficiency: drop ≥ 8 percentage points +8
 - Awake share during sleep: rise ≥ 5 percentage points +4, ≥ 10 percentage points +8
 - Respiratory rate (night): rise ≥ 1.5 /min +5, ≥ 3 /min +10
-- Activity yesterday, only if yesterday was not the exertion day (i.e. not the day that counts in part 1): steps ≥ 30 % below the 7-day average +8, ≥ 50 % below +15
+- Activity yesterday, only if yesterday was not the exertion day (i.e. not the day that counts in part 1): steps ≥ 30 % below the 7-day average +8, ≥ 50 % below +15; 0 points if I answer B in (c)
 - Systolic blood pressure, if available (latest measurement up to this morning): rise ≥ 10 mmHg +5, ≥ 20 mmHg +10
 - Symptoms from the evaluation of (a)
 Cap the sum at 60.
@@ -229,7 +243,7 @@ OUTPUT (short, easy to read on a phone)
 1. First line: score, level, traffic-light emoji (🟢 none/low, 🟡 moderate, 🟠 high, 🔴 critical) plus reaction (x/60) and exertion (x/40) separately; if applicable "HRV in build-up phase (x/30 nights)"
 2. Sync: last night's sleep duration and whether the night is complete
 3. My answers to (a): letter, numbers named, baseline symptoms (stronger / as usual), attack; which numbers were excluded and why; weighted count; points and whether they were raised
-4. Mental load (b): chosen letter (with day) and points; for F additionally stress values per day with device, direction and percentile thresholds
+4. Mental load (b): chosen letter (with day) and points; for F additionally stress values per day with device, direction and percentile thresholds; answer to (c), if asked
 5. Table: signal | last night | 7-night average | deviation | points
 6. Exertion per day as a table: date | steps | kcal | exertion score | aerobic minutes (all-day or workout-based) | mental | sum, each with individual points; below it, which day counts
 7. Thresholds for the exertion score (median / 75th / 90th percentile, number of days with a value, period)
