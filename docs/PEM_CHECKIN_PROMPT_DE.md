@@ -41,7 +41,8 @@ zuverlässig als Code. Das eigene Körpergefühl hat immer Vorrang. Siehe auch
   Beschwerden ist nicht dasselbe wie ihre Stärke.
 - **Grundbeschwerden** sind Beschwerden, die man wegen einer anderen
   Erkrankung meist ohnehin hat. Sie zählen nur, wenn sie heute stärker sind
-  als üblich, dann aber doppelt, und ab zwei solchen steigt die Stufe. Bei
+  als üblich, dann aber doppelt. Schon eine löst den Frühwarn-Hinweis aus, ab
+  zwei solchen steigt die Stufe. Bei
   PEM verschlimmern sich oft genau die Beschwerden, die man schon hat.
 - **Anfälle oder Episoden** wie Migräne kommen und gehen. An einem Tag mit
   Anfall zählen die dazugehörigen Beschwerden nicht als Crash-Zeichen, und
@@ -65,6 +66,10 @@ zuverlässig als Code. Das eigene Körpergefühl hat immer Vorrang. Siehe auch
   sind dieselben.
 - **Geistige Belastung:** Die Stufe „extrem viel mehr“ (+15) und der Weg
   über den Stress-Wert des Geräts sind eigene Ergänzungen des Check-ins.
+- **Pulsminuten bei POTS:** Steigt der Puls im Alltag stark an, etwa beim
+  Aufstehen, entfallen die Minuten über Ruhepuls + 15, weil sie dann eher
+  Kreislaufreaktionen als Belastung messen. Kyoro verzichtet dann über die
+  Einstellung `rhr_baseline_stable` ebenfalls auf die Schwelle Ruhepuls + 15.
 - **Nicht enthalten:** die „kardialen Kosten pro Schritt“ und die erhöhte
   Herzfrequenz in Ruhephasen tagsüber, weil die Apps diese Rohdaten im Chat
   meist nicht liefern.
@@ -103,7 +108,7 @@ Geräte:
 - Gerät für Belastung (Schritte, Energie, Belastungswert, Herzfrequenz tagsüber): ______
 - Gerät für Tagesstress: ______ (z. B. Garmin Stress, Oura Tagesstress, Whoop Stress, Bevel Stress; leer = Bevel prüft, ob ein Wert vorliegt)
 Behandlung:
-- Ruhepuls unter der aktuellen Behandlung dauerhaft erhöht oder stark schwankend (z. B. bei POTS/Dysautonomie)? ja / nein
+- Ruhepuls unter der aktuellen Behandlung dauerhaft erhöht, oder steigt der Puls im Alltag stark an, z. B. beim Aufstehen oder Stehen (POTS/Dysautonomie)? ja / nein
 - Pulssenkende Medikamente (z. B. Betablocker, Ivabradin)? ja / nein
 - Medikament mit Einfluss auf Puls oder Kreislauf in den letzten 30 Tagen neu angesetzt, abgesetzt oder in der Dosis geändert? nein / ja, am ______
 Beschwerden:
@@ -172,7 +177,7 @@ Auswertung von (a), in dieser Reihenfolge:
 4. Grundpunkte aus dem Buchstaben: A oder B → 0; C → 12; D oder E → 20. Habe ich einen Anfall und sage, dass das, was nicht geht, vor allem daran liegt: Grundpunkte 0, Hinweis "Beschwerden heute vor allem durch [Anfall], nicht als Crash gewertet".
 5. Anhebung: Sind 2 oder mehr Grundbeschwerden stärker als üblich, hebe die Punkte um eine Stufe an (0 → 12, 12 → 20, höchstens 20).
 6. Ersatz ohne Buchstaben: Wähle ich keinen Buchstaben oder F, bestimme die Punkte aus der gewichteten Zählung: 0–2 → 0; 3–4 → 12; 5 oder mehr → 20.
-7. Frühwarn-Hinweis: Wähle ich A oder B, wurde nicht angehoben und ergibt die gewichtete Zählung 3 oder mehr: keine Punkte, aber schreibe in die Einordnung "Mehrere Beschwerden stärker als üblich (Nr. …), auch wenn der Tag noch geht – heute besonders auf Pausen achten."
+7. Frühwarn-Hinweis: Wähle ich A oder B, wurde nicht angehoben, und ergibt die gewichtete Zählung 3 oder mehr oder ist mindestens 1 Grundbeschwerde stärker als üblich: keine Punkte, aber schreibe in die Einordnung "Beschwerden stärker als üblich (Nr. …), auch wenn der Tag noch geht – heute besonders auf Pausen achten."
 8. Schlafdefizit: Liegt die Schlafdauer der letzten Nacht deutlich unter dem 7-Nächte-Schnitt, schreibe bei Nr. 1 und Nr. 8 dazu: "möglicherweise vom Schlafdefizit".
 9. Nichts beantwortet (nur F und keine Nummern): keine Punkte für Beschwerden, Hinweis "Beschwerden nicht eingeschätzt", Einordnung auf Basis der Messwerte.
 
@@ -195,7 +200,7 @@ Betrachte die letzten 3 abgeschlossenen Tage; heute zählt nicht mit. Bewerte je
 - Aktive Energie (feste Schwellen): ≥ 200 kcal +5, ≥ 400 kcal +10, ≥ 700 kcal +15. Beispiele: 150 → 0; 350 → +5; 600 → +10; 750 → +15.
 - Belastungswert (Bevel Strain; falls nicht vorhanden: Trainingsbelastung des Belastungsgeräts, z. B. Garmin Trainingsbelastung), eigene Perzentile: Berechne Median, 75. und 90. Perzentil nur aus den Tagen mit einem tatsächlich gemessenen Wert größer als 0 in den 90 Tagen vor dem jeweiligen Tag. ≥ Median +8, ≥ 75. Perzentil +15, ≥ 90. Perzentil +20. Weniger als 20 Tage mit Wert: 0 Punkte und "–". Nenne die Anzahl der verwendeten Tage und den ersten und letzten Tag des Zeitraums.
 - Minuten mit Herzfrequenz über Ruhepuls + 15 bpm (aerobe Schwelle, Workwell-Faustregel): ganztägig, falls verfügbar; sonst ersatzweise aus aufgezeichneten Workouts (als "Workout-basiert" kennzeichnen). ≥ 15 min +12, ≥ 60 min +20.
-  · Entfällt (0 Punkte, Hinweis "nicht anwendbar"), wenn im Profil "Ruhepuls dauerhaft erhöht oder stark schwankend: ja" steht.
+  · Entfällt (0 Punkte, Hinweis "nicht anwendbar"), wenn im Profil die Frage nach dauerhaft erhöhtem Ruhepuls oder stark ansteigendem Puls im Alltag mit ja beantwortet ist. Der Ruhepuls-Vergleich in Teil 2 bleibt davon unberührt.
   · Bei "Pulssenkende Medikamente: ja": Punkte vergeben, aber als "möglicherweise unterschätzt (pulssenkende Medikamente)" markieren und in der Einordnung Schritte, Energie und Belastungswert stärker gewichten.
 - Geistige/seelische/soziale Belastung laut (b), pro Tag
 
