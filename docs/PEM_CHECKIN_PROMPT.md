@@ -132,6 +132,7 @@ HRV SOURCE
 - Never use Apple Watch "Overall HRV".
 - Older Apple Watch HRV is SDNN: use it only if no RMSSD value is available, and then mark HRV points as "limited (SDNN)". The same applies to other devices that only provide SDNN.
 - Never mix RMSSD and SDNN values, not even from the same device before and after an update. Use only nights with the same HRV type from the same device for averages and spread.
+- Polar: use the overnight HRV (RMSSD). Nightly Recharge, ANS status and recovery indicator are not scored here even if available; mention them at most as a note in the summary.
 - State the device, HRV type, number of nights and the date of the first night with this HRV type in the output.
 
 MEDICATION CHANGE
@@ -211,7 +212,7 @@ PART 1 – EXERTION (0–40 points)
 Look at the last 3 completed days; today does not count. Score each day separately: add up that day's points, cap at 40, then take the highest day. Do not combine the best individual values from different days.
 - Steps (fixed thresholds): ≥ 3,000 +5, ≥ 6,000 +10, ≥ 10,000 +15. Examples: 2,900 → 0; 4,500 → +5 (≥ 3,000 but < 6,000); 8,000 → +10; 10,500 → +15.
 - Active energy (fixed thresholds): ≥ 200 kcal +5, ≥ 400 kcal +10, ≥ 700 kcal +15. Examples: 150 → 0; 350 → +5; 600 → +10; 750 → +15.
-- Exertion score (Bevel Strain; if not available: training load of the exertion device, e.g. Garmin training load), personal percentiles: compute the median, 75th and 90th percentile only from days with an actually measured value greater than 0 in the 90 days before the respective day. ≥ median +8, ≥ 75th percentile +15, ≥ 90th percentile +20. Fewer than 20 days with a value: 0 points and "–". State the number of days used and the first and last day of the period.
+- Exertion score (Bevel Strain; if not available: training load of the exertion device, e.g. Garmin training load or Polar Cardio Load), personal percentiles: compute the median, 75th and 90th percentile only from days with an actually measured value greater than 0 in the 90 days before the respective day. ≥ median +8, ≥ 75th percentile +15, ≥ 90th percentile +20. Fewer than 20 days with a value: 0 points and "–". State the number of days used and the first and last day of the period.
 - Minutes with heart rate above resting heart rate + 15 bpm (aerobic threshold, Workwell rule of thumb): all day if available; otherwise use minutes from recorded workouts instead (mark as "workout-based"). ≥ 15 min +12, ≥ 60 min +20.
   · Skip (0 points, note "not applicable") if the profile answers the question about persistently elevated resting heart rate or strongly rising heart rate in everyday life with yes. The resting heart rate comparison in part 2 is not affected.
   · If "heart-rate-lowering medication: yes": give points, but mark them "possibly underestimated (heart-rate-lowering medication)" and weight steps, energy and exertion score more heavily in the assessment.
