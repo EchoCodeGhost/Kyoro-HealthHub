@@ -9,11 +9,11 @@
     "M02.8"
   ],
   "meldepflicht_de": true,
-  "coinfection_with": [
+  "dbg_2026_lyme_associated": [
     "borreliose"
   ],
   "guidelines": {
-    "dbg_2026": "DBG-Leitlinie Diagnostik und Therapie der Lyme-Borreliose, Frühjahr 2026, Tabelle 5",
+    "dbg_2026": "DBG-Leitlinie Diagnostik und Therapie der Lyme-Borreliose, Frühjahr 2026, Tabelle 5 — https://www.borreliose-gesellschaft.de/files/dbg-leitlinielymeborreliose-versionfruehjahr2026.pdf",
     "rki": "RKI-Ratgeber Yersiniose (§ 7 IfSG meldepflichtig)",
     "awmf": "AWMF-Leitlinie Reaktive Arthritis",
     "cdc": "CDC Yersinia Information"

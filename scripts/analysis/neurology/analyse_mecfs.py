@@ -77,6 +77,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.baseline import get_baseline, baseline_delta_pct
 from modules.db import open_db
 from modules.confidence import label_finding
+from modules.symptom_synonyms import canonical_symptoms, canonicalize
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
 _cfg = _Cfg()
@@ -275,9 +276,12 @@ def load_data(conn, d_from: str, d_to: str) -> dict:
         WHERE date >= ? AND date <= ?
         ORDER BY date
     """, (d_from, d_to)).fetchall()
+    # Kanonische Namen (modules.symptom_synonyms): "Brainfog/Konzentrations-
+    # störungen" oder "konzentrationsstoerungen" treffen ebenfalls.
+    kog_canon = canonicalize(KOGNITIONS_SYMPTOME)
     kog = defaultdict(list)
     for d, s in rows:
-        if s in KOGNITIONS_SYMPTOME:
+        if canonical_symptoms(s or "") & kog_canon:
             kog[d].append(s)
     data["kognition"] = dict(kog)
 
