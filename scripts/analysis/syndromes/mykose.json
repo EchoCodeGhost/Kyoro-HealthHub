@@ -11,11 +11,11 @@
     "J67.9"
   ],
   "meldepflicht_de": false,
-  "coinfection_with": [
+  "dbg_2026_lyme_associated": [
     "borreliose"
   ],
   "guidelines": {
-    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.4 (Pilzinfektionen — Candida bei Antibiotika-induzierter Dysbiose + MCAS-Trigger)",
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.4 (Pilzinfektionen — Candida bei Antibiotika-induzierter Dysbiose + MCAS-Trigger) — https://www.borreliose-gesellschaft.de/files/dbg-leitlinielymeborreliose-versionfruehjahr2026.pdf",
     "ecmm": "ECMM Guidelines on Invasive Candidiasis / Aspergillosis",
     "awmf": "AWMF-Leitlinie Invasive Pilzinfektionen",
     "cirs": "Shoemaker Biotoxin Pathway / CIRS Consensus"

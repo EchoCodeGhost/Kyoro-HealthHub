@@ -29,8 +29,8 @@ Erfordert vorangegangenen compute_acute_events-Lauf. Episoden-Clustering ist heu
 ## Referenzen
 
 - Royal College of Physicians (2017). National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS. RCP, London. https://www.rcp.ac.uk/resources/national-early-warning-score-news-2/ doi: nicht verfügbar (Leitliniendokument)
-- DGN/DSG AWMF 030-046 (Schlaganfall); ESC ACS 2023; WAO/EAACI Anaphylaxis 2020;
-- S3 Sepsis AWMF 079-001; AWMF 013-054 (Borreliose); RKI FSME 2023
+- DGN/DSG AWMF 030-046 (Schlaganfall); ESC ACS 2023; WAO/EAACI Anaphylaxis 2020; S3 Sepsis AWMF 079-001; DDG S2k Kutane Lyme-Borreliose AWMF 013-044
+- (Hofmann et al., Ger Med Sci 2025;23:Doc12, doi:10.3205/000348); RKI FSME 2023
 
 ## Aufruf
 

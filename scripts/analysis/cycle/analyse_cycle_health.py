@@ -83,6 +83,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config, OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import raw_symptom_names
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -106,11 +107,17 @@ PHASE_COLORS = {
     "Luteal":       "#9B59B6",
 }
 
-# Cycle-related symptom LIKE patterns
+# Cycle-related symptoms as canonical names (modules.symptom_synonyms), not
+# substrings: "Schmerz"/"Erschöpf"/"Brust" also matched toothache, sore
+# throat, "Sprachliche Erschöpfung" and chest pain/tightness. Breast pain has
+# its own canonical name ("Brustdrüsenschmerzen"), separate from chest pain
+# ("Brustschmerzen" in the syndrome profiles).
 CYCLE_SYMPTOMS = [
-    "Schmerz", "Krämpf", "Kopfschmerz",
-    "Erschöpf", "Stimmung", "Mood", "Fatigue",
-    "Brust", "Bläh", "Übelkeit",
+    "Kopfschmerzen", "Migräne", "Bauchschmerzen", "Unterleibskrämpfe",
+    "Unterleibsschmerzen", "Beckenschmerzen", "Regelschmerzen", "Krämpfe",
+    "Rückenschmerzen", "Gelenkschmerzen", "Muskelschmerzen", "Körperschmerzen",
+    "Fatigue", "Stimmung", "Stimmungsschwankungen", "Depression",
+    "Blähungen", "Blähbauch", "Übelkeit", "Brustdrüsenschmerzen",
 ]
 
 
@@ -310,17 +317,20 @@ def load_symptoms(conn, d_from, d_to):
 
 
 def load_cycle_symptoms(conn, d_from, d_to):
-    """Load individual symptom rows for cycle-related LIKE patterns."""
-    clauses = " OR ".join(f"symptom LIKE '%{p}%'" for p in CYCLE_SYMPTOMS)
+    """Load individual symptom rows for cycle-related symptoms (all spellings)."""
+    names = raw_symptom_names(conn, CYCLE_SYMPTOMS)
+    if not names:
+        return defaultdict(list)
+    placeholders = ",".join("?" * len(names))
     rows = conn.execute(f"""
         SELECT date, symptom, value_num
         FROM symptoms
         WHERE person = ?
           AND date >= ? AND date <= ?
           AND value_num IS NOT NULL
-          AND ({clauses})
+          AND symptom IN ({placeholders})
         ORDER BY date
-    """, (OWN_PERSON_ID, d_from, d_to)).fetchall()
+    """, (OWN_PERSON_ID, d_from, d_to, *names)).fetchall()
     # date -> list of (symptom, value)
     result = defaultdict(list)
     for d, sym, val in rows:

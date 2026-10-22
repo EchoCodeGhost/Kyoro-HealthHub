@@ -15,7 +15,7 @@ Enables symptom analysis, essential for clinical diagnostics
 
 ## Method
 
-Each label is mapped via the mapping file to canonical DE/EN terms. Unmapped entries are carried over 1:1 (category='other').
+Each label is mapped via the mapping file to canonical DE/EN terms. Unmapped entries are carried over 1:1 (category='other'). A full run (without --update) removes rows whose canonical name no longer matches the current mapping file.
 
 ## Data flow
 

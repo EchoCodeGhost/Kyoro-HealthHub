@@ -54,6 +54,7 @@ _sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import raw_symptom_names
 from modules.prompts.analysis_cardiovascular import (
     SYSTEM_PROMPT_ANALYSE_HRV_FATIGUE_DE as SYSTEM_PROMPT_DE,
     SYSTEM_PROMPT_ANALYSE_HRV_FATIGUE_EN as SYSTEM_PROMPT_EN,
@@ -89,26 +90,26 @@ def load_rhr(conn, d_from, d_to):
 
 
 def load_symptoms(conn, d_from, d_to, symptom_name):
-    """Loads Erschöpfungswerte aus symptoms."""
+    """Loads Erschöpfungswerte aus symptoms.
+
+    Alle Schreibweisen/Synonyme von symptom_name (modules.symptom_synonyms):
+    "Erschöpfung" trifft auch "Erschöpfung/Fatigue" und "Fatigue". Mehrere
+    Einträge am selben Tag → Tagesmaximum (wie das Symptom-Veto in compute_pem)."""
     tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    if "symptoms" in tables:
-        rows = conn.execute("""
-            SELECT date, value_num FROM symptoms
-            WHERE date >= ? AND date <= ?
-              AND symptom = ?
-              AND value_num IS NOT NULL
-            ORDER BY date
-        """, (d_from, d_to, symptom_name)).fetchall()
-    elif "symptoms" in tables:
-        rows = conn.execute("""
-            SELECT date, value_num FROM symptoms
-            WHERE date >= ? AND date <= ?
-              AND symptom = ?
-              AND value_num IS NOT NULL
-            ORDER BY date
-        """, (d_from, d_to, symptom_name)).fetchall()
-    else:
-        rows = []
+    if "symptoms" not in tables:
+        return {}
+    names = raw_symptom_names(conn, [symptom_name])
+    if not names:
+        return {}
+    placeholders = ",".join("?" * len(names))
+    rows = conn.execute(f"""
+        SELECT date, MAX(value_num) FROM symptoms
+        WHERE date >= ? AND date <= ?
+          AND symptom IN ({placeholders})
+          AND value_num IS NOT NULL
+        GROUP BY date
+        ORDER BY date
+    """, (d_from, d_to, *names)).fetchall()
     return {r[0]: r[1] for r in rows}
 
 

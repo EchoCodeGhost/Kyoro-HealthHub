@@ -53,6 +53,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config, OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import FATIGUE_LIKE, canonical_symptoms
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = t(
@@ -386,10 +387,12 @@ def load_symptoms_monthly(conn, date_from, date_to):
     # per-month: all symptoms aggregated as daily mean → monthly mean
     daily_all = defaultdict(list)
     daily_fatigue = defaultdict(list)
-    fatigue_terms = ("Erschöpfung", "Fatigue", "PEM", "Energie")
+    # Kanonische Namen (FATIGUE_LIKE) statt Teilwortsuche: "Erschöpfung" traf
+    # auch "Sprachliche Erschöpfung", "Energie" das Energie-Budget — eine
+    # Ressourcen-Skala (hoch = gut), die den Fatigue-Mittelwert verfälschte.
     for date, symptom, value in rows:
         daily_all[date].append(value)
-        if any(t_str in symptom for t_str in fatigue_terms):
+        if canonical_symptoms(symptom or "") & FATIGUE_LIKE:
             daily_fatigue[date].append(value)
     monthly_all = defaultdict(list)
     monthly_fat = defaultdict(list)

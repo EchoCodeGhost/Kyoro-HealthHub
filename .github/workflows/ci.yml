@@ -69,6 +69,14 @@ jobs:
           done
           exit $failed
 
+      - name: Lock file resolves
+        # README promises a reproducible install via requirements-lock.txt,
+        # but nothing installed it here: a Dependabot bump of aiohttp (needs
+        # a newer yarl) and an older setuptools pin (neurokit2 needs an older
+        # one) left it unresolvable without CI noticing. --dry-run only runs
+        # the resolver, nothing is installed.
+        run: pip install --dry-run --ignore-installed -r requirements-lock.txt
+
       - name: Install unit-test dependencies
         # Deliberately scoped to what tests/unit/ actually imports (numpy,
         # scipy, requests, pytest) rather than the full requirements.txt —
