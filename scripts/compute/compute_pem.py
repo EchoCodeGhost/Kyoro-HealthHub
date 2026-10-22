@@ -134,11 +134,26 @@ PEM Evidence Score — daily multi-signal evidence for post-exertional malaise.
       (weather_station.pressure_hpa, Tag-zu-Tag > PRESSURE_DROP_HPA_THRESHOLD)
       nur sehr sporadisch. Beantwortet nicht "war es
       Sport", sondern macht sichtbar, was SONST noch im Reaktionsfenster
-      dokumentiert war.
+      dokumentiert war. Dazu rest_or_pacing_note (Freitext-Notizen zu
+      Pacing/Ruhe/Wetter/Crash, Oura-Tag "Pacing") und heavy_rain
+      (weather_station.rain_mm >= HEAVY_RAIN_MM) — beide nur Hinweis.
+    day_marker / day_marker_source / react_activity_suppressed: selbst
+      gesetzte Tagesmarker DAY_MARKERS ("Ruhetag", "PEM", "Crashtag", genau
+      diese Woerter, nur als ganzer Eintrag; einzige Ausnahme das
+      SymptomTrack-Ja/Nein-Feld pem_crash_tag=true -> Crashtag, s.
+      MARKER_FIELDS) aus symptoms, user_context
+      (Oura-/Garmin-Lifestyle-/Tracker-Tags) und oura_tags. Ruhetag: der
+      Aktivitaetsabfall dieses Tages zaehlt 0 Punkte (Wert bleibt in
+      react_activity_drop), react_activity_suppressed=1 am Belastungstag.
+      PEM/Crashtag: Symptomsignal wie Check-in-Antwort C/D-E (+12/+20) ueber
+      symptom_d (MARKER_SYMPTOM_VALUE) — hoeherer von Marker und Tagebuchwert
+      zaehlt, auch fuer das Symptom-Veto. Crashtag schlaegt Ruhetag.
+      day_marker/day_marker_source gelten fuer den Tag der Zeile selbst
+      (Marker=Quelle:Art), fuer spaetere Auswertungen und Validierung.
 @reads       measurements, polar_nightly_hrv, daily_stress, sessions,
              session_metrics, symptoms, oura_cycle_insights, oura_tags,
              reproductive_health, air_quality, pollen, weather_station,
-             clinical.reference_devices (config)
+             user_context, clinical.reference_devices (config)
 @writes      pem_evidence_scores (default), pem_evidence_scores_training_only
              (with --training-load-only)
 @limits.de   Heuristische Methode: Proprietärer Multi-Signal-Score, nicht klinisch validiert. Bildet die
@@ -179,8 +194,9 @@ PEM Evidence Score — daily multi-signal evidence for post-exertional malaise.
              genau die chronische Verschlechterung wegglaetten wuerde, die
              gemessen werden soll). Ohne cfg.infection_date oder mit <30
              Vor-Baseline-Naechten bleibt severity_vs_own_baseline NULL.
-             Das Symptom-Veto nutzt Eintraege mit fatigue/erschoepfung/
-             malaise/pem im Namen als Naeherung fuer "PEM" — nicht jeder
+             Das Symptom-Veto nutzt Eintraege, deren kanonischer Name in
+             FATIGUE_LIKE liegt (Fatigue, PEM; modules.symptom_synonyms), als
+             Naeherung fuer "PEM" — nicht jeder
              Erschoepfungs-Eintrag ist zwingend post-exertionell (koennte auch
              Schlafmangel, Zyklus, Stress o.ae. sein); es gibt keine feinere
              Kennzeichnung in den Rohdaten.
@@ -241,14 +257,15 @@ PEM Evidence Score — daily multi-signal evidence for post-exertional malaise.
              Index calculation (Jacobson & Truax 1991) — that would need an
              estimated test-retest reliability for the RMSSD measurement, which
              is unavailable. No single paper covers exactly this method (RMSSD,
-             fixed pre-illness baseline, SD-banding); log-transform is standard
+             fixed pre-onset baseline, SD-banding); log-transform is standard
              practice for right-skewed values (used for RMSSD by Plews 2013, but
              with a rolling rather than fixed baseline there — deliberately NOT
              adopted here, since a rolling baseline would smooth away exactly the
              chronic decline this is meant to detect). Without cfg.infection_date
              or with <30 pre-baseline nights, severity_vs_own_baseline stays NULL.
-             The symptom veto uses entries with fatigue/erschoepfung/malaise/pem
-             in the name as an approximation of "PEM" — not every fatigue entry
+             The symptom veto uses entries whose canonical name is in
+             FATIGUE_LIKE (fatigue, PEM; modules.symptom_synonyms) as an
+             approximation of "PEM" — not every fatigue entry
              is necessarily post-exertional (could also be sleep loss, cycle,
              stress, etc.); there is no finer labelling in the raw data.
              The steps trigger uses a rolling percentile from the preceding
@@ -316,17 +333,22 @@ PEM Evidence Score — daily multi-signal evidence for post-exertional malaise.
                temperatur wegen Stoeranfaelligkeit eher ungeeignet — Design-
                Praezedenzfall fuer die Atemfrequenz- und Aktivitaets-Kanaele
                unten; leitet KEINE konkreten Schwellenwerte her)
+             Zhang X, Alexander L, Hegerl GC, et al. (2011). Indices for monitoring
+               changes in extremes based on daily temperature and precipitation data.
+               WIREs Clim Change 2(6):851-870. doi:10.1002/wcc.147 (ETCCDI R10mm,
+               Tag mit >=10 mm Niederschlag — HEAVY_RAIN_MM, nur Hinweis)
 
 @relevance.de  Ermöglicht die Analyse von Post-Exertioneller Malaise, essentiell für ME/CFS-Diagnostik
 @relevance.en  Enables Post-Exertional Malaise analysis, essential for ME/CFS diagnostics
 @usage
     python compute_pem.py
-    python compute_pem.py --from 2025-01-01 --to 2025-12-31
+    python compute_pem.py --date-from 2025-01-01 --date-to 2025-12-31
     python compute_pem.py --training-load-only --recompute
 """
 
 import argparse
 import math
+import re
 import statistics
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -338,6 +360,7 @@ _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db
 from modules.base import resolve_timezone
+from modules.symptom_synonyms import FATIGUE_LIKE, raw_symptom_names
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
 _cfg = _Cfg()
@@ -460,6 +483,46 @@ ILLNESS_KEYWORDS = [
     "sore throat", "cough", "krank", "sick",
     "migräne", "migraene", "migraine", "kopfschmerz", "kopfweh", "headache",
 ]
+
+# Tagesmarker: selbst gesetzte Kennzeichnung, WARUM die Aktivitaet
+# sank oder ob es ein Crash war. Genau diese drei deutschen Woerter, keine
+# Synonyme/Uebersetzungen/konfigurierbaren Varianten. Treffer nur als ganzer
+# Eintrag (Tag, Lifestyle-Eintrag, Tagebuch-Symptomname oder vollstaendige
+# Notiz), nie als Teilwort laengeren Freitexts ("kein Ruhetag moeglich").
+#   Ruhetag  — bewusst weniger: Aktivitaetsabfall dieses Tages zaehlt 0 Punkte.
+#   PEM      — Symptome spuerbar schlechter: Symptomsignal wie Check-in-Antwort C (+12).
+#   Crashtag — musste langsam machen: starkes Symptomsignal wie D/E (+20);
+#              schlaegt Ruhetag (die Ruhe war nicht freiwillig), der
+#              Aktivitaetsabfall zaehlt dann wie gemessen.
+DAY_MARKERS = ("Ruhetag", "PEM", "Crashtag")
+# Mindest-Symptomwert, der im Reaktionsfenster genau +12 (>=4) bzw. +20 (>=6)
+# ergibt. Ueber symptom_d eingespeist: liegt fuer den Tag schon ein hoeherer
+# Tagebuchwert vor, zaehlt der hoehere (max, nicht Summe), und das Symptom-Veto
+# erkennt die Marker automatisch mit.
+MARKER_SYMPTOM_VALUE = {"PEM": 4.0, "Crashtag": 6.0}
+# Werte, mit denen ein Tracker einen nicht gesetzten Boolean-Marker ablegt.
+_MARKER_FALSE_VALUES = {"false", "0", "nein", "no", "off"}
+# Einzige Ausnahme von "genau diese Woerter" (Projektentscheidung): das
+# Ja/Nein-Feld "Crash-Tag" (pem_crash_tag) der Kyoro-SymptomTrack-App, vom
+# Importer import_kyoro_symptoms.py als value_text 'true'/'false' in symptoms
+# abgelegt. Zaehlt nur mit Wert true —
+# der begleitende user_context-Eintrag mit demselben Namen traegt nur die
+# Notiz und entsteht auch bei false.
+MARKER_FIELDS = {"pem_crash_tag": "Crashtag"}
+_MARKER_TRUE_VALUES = {"true", "1", "ja", "yes"}
+
+# Freitext-Notizen zu Pacing/Ruhe/Wetter/Crash: nur Hinweis, Score unveraendert
+# — Stichwortsuche ist fehleranfaellig (Verneinungen, Komposita), gleiches
+# Prinzip wie ILLNESS_KEYWORDS. Wortgrenzen, damit "Regeneration" nicht als
+# "Regen" zaehlt.
+REST_NOTE_PATTERN = re.compile(
+    r"\b(pacing|ruhetag|ausruhen|ausgeruht|geschont|schonung|crash\w*|"
+    r"regen|regnerisch|wetter)\b", re.IGNORECASE)
+# Starkregen-Hinweis aus weather_station.rain_mm (nur Hinweis: Regen allein
+# heisst nicht, dass man bewusst drinnen blieb). Tag mit >=10 mm Niederschlag =
+# ETCCDI-Index R10mm ("heavy precipitation days"), Zhang et al. 2011, WIREs
+# Clim Change, doi:10.1002/wcc.147.
+HEAVY_RAIN_MM = float(_PEM_CFG.get("heavy_rain_mm", 10.0))
 
 # oura_tags.tag_type_code — Ouras eigene kontrollierte Tag-Liste, exaktes
 # Matching statt Freitextsuche (zuverlaessiger als ILLNESS_KEYWORDS, aber nur
@@ -672,6 +735,75 @@ def _symptom_confidence_and_severity(date: str, symptom_d: dict) -> "tuple[float
     confidence = min(1.0, len(window_vals) / SYMPTOM_CONFIDENCE_TARGET)
     severity   = min(1.0, max(window_vals) / SYMPTOM_SEVERITY_SCALE_MAX)
     return confidence, severity
+
+
+def _collect_day_markers(symptom_rows, context_rows, oura_rows
+                         ) -> "tuple[dict[str, dict[str, list[str]]], set[str]]":
+    """Tagesmarker (DAY_MARKERS) und Freitext-Hinweistage aus den Rohzeilen.
+
+    symptom_rows: (date, symptom, value_num, value_text, note, notes, source)
+    context_rows: (date, tag, note, source)            — user_context
+    oura_rows:    (date, custom_tag_name, comment)     — oura_tags
+    Rueckgabe: ({date: {marker: [quelle, ...]}}, {date mit Ruhe-/Pacing-Notiz}).
+    Marker nur als ganzer Eintrag; Freitext, der ein Stichwort nur enthaelt,
+    landet in den Hinweistagen. Ein Boolean-Eintrag mit Wert false/0 zaehlt nicht.
+    """
+    markers: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+    rest_notes: set[str] = set()
+
+    def hit(date, text, source):
+        if not text:
+            return
+        txt = str(text).strip()
+        if txt in DAY_MARKERS:
+            if source not in markers[date][txt]:
+                markers[date][txt].append(source)
+        elif REST_NOTE_PATTERN.search(txt):
+            rest_notes.add(date)
+
+    for date, sym, vnum, vtext, note, notes, src in symptom_rows:
+        field_marker = MARKER_FIELDS.get((sym or "").strip())
+        if field_marker:
+            if (vtext or "").strip().lower() in _MARKER_TRUE_VALUES or (vnum or 0) > 0:
+                if f"{src or 'symptoms'}:{sym.strip()}" not in markers[date][field_marker]:
+                    markers[date][field_marker].append(f"{src or 'symptoms'}:{sym.strip()}")
+        elif sym and sym.strip() in DAY_MARKERS:
+            if (vtext or "").strip().lower() in _MARKER_FALSE_VALUES or vnum == 0:
+                continue
+            hit(date, sym, f"{src or 'symptoms'}:entry")
+        elif sym and REST_NOTE_PATTERN.search(sym):
+            rest_notes.add(date)
+        for txt in (note, notes):
+            hit(date, txt, f"{src or 'symptoms'}:note")
+    for date, tag, note, src in context_rows:
+        hit(date, tag, f"{src or 'user_context'}:tag")
+        hit(date, note, f"{src or 'user_context'}:note")
+    for date, custom, comment in oura_rows:
+        hit(date, custom, "oura_tags:tag")
+        hit(date, comment, "oura_tags:comment")
+    return markers, rest_notes
+
+
+def _apply_marker_symptoms(symptom_d: dict, day_markers: dict) -> None:
+    """PEM/Crashtag als Symptomsignal in symptom_d: hoeherer Wert zaehlt, keine Summe."""
+    for date, markers in day_markers.items():
+        for marker, value in MARKER_SYMPTOM_VALUE.items():
+            if marker in markers and symptom_d.get(date, 0) < value:
+                symptom_d[date] = value
+
+
+def _activity_drop_points(drop_pct: float, lag_markers: dict) -> "tuple[int, int]":
+    """(Punkte, unterdrueckt) fuer den Aktivitaetsabfall eines Reaktionstags.
+
+    "Ruhetag" = bewusst weniger: 0 Punkte, unterdrueckt=1 wenn der Abfall sonst
+    gezaehlt haette. "Crashtag" schlaegt "Ruhetag" (Ruhe nicht freiwillig).
+    """
+    pts = (15 if drop_pct >= ACTIVITY_DROP_HIGH
+           else 8 if drop_pct >= ACTIVITY_DROP_MOD else 0)
+    rest_day = "Ruhetag" in lag_markers and "Crashtag" not in lag_markers
+    if rest_day and pts:
+        return 0, 1
+    return pts, 0
 
 
 def _rolling_prev(values: dict, date: str, days: int = 7) -> "float | None":
@@ -961,6 +1093,9 @@ def main():
         cycle_phase       TEXT,
         alt_explanation_hint TEXT,
         sleep_duration_min REAL,
+        day_marker        TEXT,
+        day_marker_source TEXT,
+        react_activity_suppressed INTEGER DEFAULT 0,
         PRIMARY KEY (date, person)
     );
     """)
@@ -989,6 +1124,9 @@ def main():
         ("trig_emotional",    "INTEGER"),
         ("trig_social",       "INTEGER"),
         ("boom_bust_overlap", "INTEGER"),
+        ("day_marker",        "TEXT"),
+        ("day_marker_source", "TEXT"),
+        ("react_activity_suppressed", "INTEGER"),
     ]:
         if col not in existing_cols:
             conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} {typedef}")
@@ -1508,17 +1646,20 @@ def main():
     # Abwertungsregel unten (nur mit Symptom-Gegenbeweis abwerten) verhinderte
     # es JEDE Abwertung bei sport_adaptation/supercompensation, weil sym_vals
     # dadurch nie befuellt war.
+    # Ermuedungsartige Eintraege ueber kanonische Namen (FATIGUE_LIKE) statt
+    # Teilwortsuche — '%rsch%pfung%' traf auch "Sprachliche Erschöpfung".
     symptom_d: dict[str, float] = {}
-    for date, val in conn.execute("""
-        SELECT date, MAX(value_num) FROM symptoms
-        WHERE person=? AND value_num IS NOT NULL
-          AND (symptom LIKE '%fatigue%' OR symptom LIKE '%Fatigue%'
-               OR symptom LIKE '%rsch%pfung%' OR symptom LIKE '%malaise%'
-               OR symptom LIKE '%Malaise%' OR symptom LIKE '%pem%')
-          AND date BETWEEN ? AND ?
-        GROUP BY date
-    """, (person, d0, d1)):
-        if val is not None: symptom_d[date] = val
+    fatigue_names = raw_symptom_names(conn, FATIGUE_LIKE)
+    if fatigue_names:
+        placeholders = ",".join("?" * len(fatigue_names))
+        for date, val in conn.execute(f"""
+            SELECT date, MAX(value_num) FROM symptoms
+            WHERE person=? AND value_num IS NOT NULL
+              AND symptom IN ({placeholders})
+              AND date BETWEEN ? AND ?
+            GROUP BY date
+        """, (person, *fatigue_names, d0, d1_extended)):
+            if val is not None: symptom_d[date] = val
 
     # ── Selbstberichtete Belastungsdomaenen (Trigger-Kanal, z.B. blue-ME) ────
     # Schliesst einen Teil der in @limits dokumentierten Luecke: PEM kann laut
@@ -1664,6 +1805,39 @@ def main():
             label = code.replace("tag_generic_", "").replace("tag_sleep_", "sleep_")
             tag_hint_by_date[date].append(label)
 
+    # ── Tagesmarker Ruhetag / PEM / Crashtag (s. DAY_MARKERS) ────────────────
+    # Quellen: Symptomtagebuecher (symptoms: Eintragsname oder ganze Notiz),
+    # user_context (Oura-/Garmin-Lifestyle-/Tracker-Tags oder ganze Notiz) und
+    # oura_tags (eigener Tag-Name oder ganzer Kommentar). Freitext, der einen
+    # Marker nur enthaelt, ergibt hoechstens den Hinweis rest_or_pacing_note.
+    # note/notes stehen nicht im Basisschema (create_schema.py), sondern
+    # kommen erst mit einzelnen Importern dazu — fehlende Spalte = NULL.
+    _sym_cols = {r[1] for r in conn.execute("PRAGMA table_info(symptoms)")}
+    _note_cols = ", ".join(c if c in _sym_cols else "NULL" for c in ("note", "notes"))
+    day_markers, rest_note_dates = _collect_day_markers(
+        conn.execute(f"""
+            SELECT date, symptom, value_num, value_text, {_note_cols}, source
+            FROM symptoms WHERE person=? AND date BETWEEN ? AND ?
+        """, (person, d0, d1_extended)),
+        conn.execute("""
+            SELECT date, tag, note, source FROM user_context
+            WHERE person=? AND date BETWEEN ? AND ?
+        """, (person, d0, d1_extended)),
+        conn.execute("""
+            SELECT start_day, custom_tag_name, comment FROM oura_tags
+            WHERE start_day BETWEEN ? AND ?
+        """, (d0, d1_extended)),
+    )
+    heavy_rain_dates: set[str] = {
+        date for (date,) in conn.execute("""
+            SELECT date FROM weather_station
+            WHERE person=? AND date BETWEEN ? AND ? AND rain_mm >= ?
+        """, (person, d0, d1, HEAVY_RAIN_MM))
+    }
+
+    # PEM/Crashtag als Symptomsignal: hoeherer Wert zaehlt, keine Summe
+    _apply_marker_symptoms(symptom_d, day_markers)
+
     # Medikations-Nebenwirkungen (z.B. Shotsy-Injektions-App): jeder Eintrag
     # mit source='shotsy' ist unabhaengig vom konkreten Symptomnamen ein
     # plausibler Confound (Uebelkeit/Fatigue/Diarrhoe/Stimmungsschwankungen
@@ -1762,6 +1936,10 @@ def main():
                     hints.append(label)
             if wd in pressure_drop_dates and "pressure_drop" not in hints:
                 hints.append("pressure_drop")
+            if wd in rest_note_dates and "rest_or_pacing_note" not in hints:
+                hints.append("rest_or_pacing_note")
+            if wd in heavy_rain_dates and "heavy_rain" not in hints:
+                hints.append("heavy_rain")
         return ",".join(hints) if hints else None
 
     all_dates = sorted(
@@ -1933,6 +2111,8 @@ def main():
         best_bp_rise    = None
         best_wake_rise  = None
         reaction_data_seen = False
+        activity_suppressed = 0
+        suppressed_drop = None   # gemessener, wegen Ruhetag nicht gezaehlter Abfall
 
         for lag in range(1, 8):
             lag_date = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=lag))\
@@ -1988,13 +2168,21 @@ def main():
             # und erzeugte am Folgetag schon bei voellig normaler Aktivitaet einen
             # Schein-"Abfall" (Regression zur Mitte). Trigger und Reaktion waren
             # dadurch mechanisch gekoppelt statt unabhaengig gemessen.
+            #
+            # Tagesmarker: "Ruhetag" = bewusst weniger, der Abfall ist dann keine
+            # Reaktion (0 Punkte, Wert bleibt gespeichert). "Crashtag" schlaegt
+            # "Ruhetag" — die Ruhe war nicht freiwillig, der Abfall zaehlt.
             if lag_date in steps_d:
                 ref = _rolling_prev(steps_d, date, days=7)
                 if ref and ref > 0:
                     drop_pct = (ref - steps_d[lag_date]) / ref * 100
                     act_drop = round(drop_pct, 1)
-                    if   drop_pct >= ACTIVITY_DROP_HIGH: r += 15
-                    elif drop_pct >= ACTIVITY_DROP_MOD:  r += 8
+                    act_pts, suppressed = _activity_drop_points(
+                        drop_pct, day_markers.get(lag_date, {}))
+                    r += act_pts
+                    if suppressed:
+                        activity_suppressed = 1
+                        suppressed_drop = max(suppressed_drop or 0.0, act_drop)
 
             # Atemfrequenz (Nacht-Fenster, wie hrv_sdnn_d) — erst ab Apple Watch
             # Series 9 (22.09.2025) nennenswert verfuegbar, s. @limits.
@@ -2068,6 +2256,9 @@ def main():
             elif p75 is not None and rest_excess >= p75: rest_r = 10
 
         react = min(best_react + rest_r, 60)
+        # Wegen Ruhetag nicht gezaehlter Abfall bleibt als Messwert sichtbar
+        if best_activity_drop is None and suppressed_drop is not None:
+            best_activity_drop = suppressed_drop
 
         # — Boom-Bust-Overlap: neue Belastung, bevor die Erholung von DIESEM
         # Trigger die RECOVERY_RATIO-Schwelle erreicht hat (s. _classify_recovery
@@ -2133,6 +2324,11 @@ def main():
 
         sym_score = 1 if date in symptom_d else 0
         level = _level(score)
+        markers_today = day_markers.get(date, {})
+        day_marker = ",".join(m for m in DAY_MARKERS if m in markers_today) or None
+        day_marker_source = ";".join(
+            f"{m}={'+'.join(markers_today[m])}" for m in DAY_MARKERS if m in markers_today
+        ) or None
         if score >= 10:
             n_signals += 1
 
@@ -2163,6 +2359,7 @@ def main():
             ),
             trig_physical_subjective, trig_cognitive, trig_emotional, trig_social,
             boom_bust_overlap,
+            day_marker, day_marker_source, activity_suppressed,
         ))
 
     conn.executemany(f"""
@@ -2177,8 +2374,8 @@ def main():
          react_wake_pct_rise,severity_vs_own_baseline_experimental,
          cycle_phase,alt_explanation_hint,sleep_duration_min,
          trig_physical_subjective,trig_cognitive,trig_emotional,trig_social,
-         boom_bust_overlap)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+         boom_bust_overlap,day_marker,day_marker_source,react_activity_suppressed)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """, results)
     conn.commit()
 
@@ -2282,6 +2479,19 @@ def main():
                 f"  Symptom veto with effect >0: {n_dense_veto} days "
                 f"(confidence × severity in ±{SYMPTOM_WINDOW_DAYS}d window, target "
                 f"{SYMPTOM_CONFIDENCE_TARGET} entries for confidence=1.0)"))
+
+    # Tagesmarker: welcher Marker woher, und was er bewirkt hat (r[37]..r[39])
+    marker_rows = [r for r in results if r[37]]
+    n_suppressed = sum(1 for r in results if r[39])
+    if marker_rows or n_suppressed:
+        print(t("\n── Tagesmarker (Ruhetag / PEM / Crashtag) ───────────────────",
+                "\n── Day markers (Ruhetag / PEM / Crashtag) ───────────────────"))
+        for r in marker_rows:
+            print(f"  {r[0]}  {r[37]:<20} {r[38]}")
+        print(t(f"  Belastungstage, deren Aktivitätsabfall wegen Ruhetag nicht zählte: {n_suppressed}",
+                f"  Trigger days whose activity drop was not counted (Ruhetag): {n_suppressed}"))
+        print(t("  PEM/Crashtag zählen als Symptomsignal (+12/+20) für die Belastungstage davor.",
+                "  PEM/Crashtag count as a symptom signal (+12/+20) for the trigger days before."))
 
     top = sorted([r for r in results if r[2] >= 30], key=lambda r: -r[2])[:10]
     if top:

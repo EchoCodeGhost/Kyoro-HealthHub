@@ -106,7 +106,7 @@
       "Medical Diagnoses: 'disease '",
       "Medical Diagnoses: 'illness '"
     ],
-    "docstring_hash": "6984abf438fc981bf5e23a0b90a0510532a6db85118fa7f5bca344b1eab45a8d"
+    "docstring_hash": "a93220122f6553201007e59fccb443bec15ea93fcb01d665e0d15dd8744571a4"
   },
   "scripts/analysis/infectious/analyse_background_infection_activity.py": {
     "approved": [

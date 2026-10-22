@@ -8,11 +8,11 @@
     "B34.1"
   ],
   "meldepflicht_de": false,
-  "coinfection_with": [
+  "dbg_2026_lyme_associated": [
     "borreliose"
   ],
   "guidelines": {
-    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen — systemisch verschlechternd bei Borrelia-Immundefizit)",
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen — systemisch verschlechternd bei Borrelia-Immundefizit) — https://www.borreliose-gesellschaft.de/files/dbg-leitlinielymeborreliose-versionfruehjahr2026.pdf",
     "rki": "RKI-Ratgeber Enterovirus-Infektionen",
     "cdc": "CDC Enterovirus D68 and Non-Polio Enterovirus"
   },

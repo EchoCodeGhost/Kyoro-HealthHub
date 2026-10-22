@@ -85,10 +85,25 @@ config_backup.py — Backup and chain-of-custody commit for local config files
     commit_config_dir(KYORO_CONFIG_DIR, "auto: external change detected")
 """
 
+import os
 import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+
+
+def _git(config_dir: Path, *args: str, **kwargs) -> subprocess.CompletedProcess:
+    """Run git on `config_dir`'s own repo, never on whatever repo the caller
+    is running in. git exports GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE to hooks;
+    health_config.py's import-time sweep runs inside the Kyoro pre-commit
+    hook (via qa_check.py), and with those variables inherited, `git add -A`
+    and `git commit` with cwd=config_dir staged the config directory into
+    the Kyoro repo being committed instead. Strip every GIT_* variable and
+    pin --git-dir/--work-tree explicitly."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    return subprocess.run(
+        ["git", f"--git-dir={config_dir / '.git'}", f"--work-tree={config_dir}", *args],
+        cwd=config_dir, env=env, **kwargs)
 
 
 def backup_before_write(path: Path) -> None:
@@ -118,14 +133,11 @@ def ensure_git_repo(config_dir: Path) -> None:
     if (config_dir / ".git").exists():
         return
     try:
-        subprocess.run(["git", "init", "-q"], cwd=config_dir,
-                        check=True, capture_output=True)
-        subprocess.run(["git", "branch", "-q", "-m", "main"], cwd=config_dir,
-                        capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Kyoro Config"],
-                        cwd=config_dir, capture_output=True)
-        subprocess.run(["git", "config", "user.email", "kyoro-config@localhost"],
-                        cwd=config_dir, capture_output=True)
+        _git(config_dir, "init", "-q", check=True, capture_output=True)
+        _git(config_dir, "branch", "-q", "-m", "main", capture_output=True)
+        _git(config_dir, "config", "user.name", "Kyoro Config", capture_output=True)
+        _git(config_dir, "config", "user.email", "kyoro-config@localhost",
+             capture_output=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
 
@@ -139,12 +151,11 @@ def _stage_and_commit(config_dir: Path, add_args: list[str], message: str) -> No
     if not (config_dir / ".git").exists():
         return
     try:
-        subprocess.run(["git", "add", *add_args], cwd=config_dir, capture_output=True)
-        staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=config_dir)
+        _git(config_dir, "add", *add_args, capture_output=True)
+        staged = _git(config_dir, "diff", "--cached", "--quiet")
         if staged.returncode == 0:
             return
-        subprocess.run(["git", "commit", "-q", "-m", message], cwd=config_dir,
-                        capture_output=True)
+        _git(config_dir, "commit", "-q", "-m", message, capture_output=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
 

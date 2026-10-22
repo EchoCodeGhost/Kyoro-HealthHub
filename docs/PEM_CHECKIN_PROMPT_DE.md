@@ -134,6 +134,7 @@ HRV-QUELLE
 - Apple Watch "Overall HRV" nie verwenden.
 - Ältere Apple-Watch-HRV ist SDNN: nur nutzen, wenn kein RMSSD-Wert verfügbar ist. Dann HRV-Punkte als "eingeschränkt (SDNN)" markieren. Dasselbe gilt für andere Geräte, die nur SDNN liefern.
 - Mische nie RMSSD- und SDNN-Werte, auch nicht vom selben Gerät vor und nach einem Update. Nutze für Schnitt und Schwankung nur Nächte mit derselben HRV-Art vom selben Gerät.
+- Polar: Verwende die nächtliche HRV (RMSSD). Nightly Recharge, ANS-Status und Recovery-Indikator werden hier nicht gewertet, auch wenn sie vorliegen; nenne sie höchstens als Hinweis in der Einordnung.
 - Nenne in der Ausgabe Gerät, HRV-Art, Anzahl der Nächte und das Datum der ersten Nacht mit dieser HRV-Art.
 
 MEDIKAMENTENÄNDERUNG
@@ -213,7 +214,7 @@ TEIL 1 – BELASTUNG (0–40 Punkte)
 Betrachte die letzten 3 abgeschlossenen Tage; heute zählt nicht mit. Bewerte jeden Tag einzeln: Summiere die Punkte dieses Tages, deckle bei 40 und nimm dann den höchsten Tag. Kombiniere nicht die besten Einzelwerte verschiedener Tage.
 - Schritte (feste Schwellen): ≥ 3.000 +5, ≥ 6.000 +10, ≥ 10.000 +15. Beispiele: 2.900 → 0; 4.500 → +5 (≥ 3.000, aber < 6.000); 8.000 → +10; 10.500 → +15.
 - Aktive Energie (feste Schwellen): ≥ 200 kcal +5, ≥ 400 kcal +10, ≥ 700 kcal +15. Beispiele: 150 → 0; 350 → +5; 600 → +10; 750 → +15.
-- Belastungswert (Bevel Strain; falls nicht vorhanden: Trainingsbelastung des Belastungsgeräts, z. B. Garmin Trainingsbelastung), eigene Perzentile: Berechne Median, 75. und 90. Perzentil nur aus den Tagen mit einem tatsächlich gemessenen Wert größer als 0 in den 90 Tagen vor dem jeweiligen Tag. ≥ Median +8, ≥ 75. Perzentil +15, ≥ 90. Perzentil +20. Weniger als 20 Tage mit Wert: 0 Punkte und "–". Nenne die Anzahl der verwendeten Tage und den ersten und letzten Tag des Zeitraums.
+- Belastungswert (Bevel Strain; falls nicht vorhanden: Trainingsbelastung des Belastungsgeräts, z. B. Garmin Trainingsbelastung oder Polar Cardio Load), eigene Perzentile: Berechne Median, 75. und 90. Perzentil nur aus den Tagen mit einem tatsächlich gemessenen Wert größer als 0 in den 90 Tagen vor dem jeweiligen Tag. ≥ Median +8, ≥ 75. Perzentil +15, ≥ 90. Perzentil +20. Weniger als 20 Tage mit Wert: 0 Punkte und "–". Nenne die Anzahl der verwendeten Tage und den ersten und letzten Tag des Zeitraums.
 - Minuten mit Herzfrequenz über Ruhepuls + 15 bpm (aerobe Schwelle, Workwell-Faustregel): ganztägig, falls verfügbar; sonst ersatzweise aus aufgezeichneten Workouts (als "Workout-basiert" kennzeichnen). ≥ 15 min +12, ≥ 60 min +20.
   · Entfällt (0 Punkte, Hinweis "nicht anwendbar"), wenn im Profil die Frage nach dauerhaft erhöhtem Ruhepuls oder stark ansteigendem Puls im Alltag mit ja beantwortet ist. Der Ruhepuls-Vergleich in Teil 2 bleibt davon unberührt.
   · Bei "Pulssenkende Medikamente: ja": Punkte vergeben, aber als "möglicherweise unterschätzt (pulssenkende Medikamente)" markieren und in der Einordnung Schritte, Energie und Belastungswert stärker gewichten.

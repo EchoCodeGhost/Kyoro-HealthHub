@@ -56,6 +56,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.baseline import get_baseline, baseline_delta_pct
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import FATIGUE_LIKE, raw_symptom_names
 from modules.metric_loader import load_metric_daily, DEFAULT_SOURCE_GROUPS
 _cfg = _Cfg()
 
@@ -221,19 +222,19 @@ def _load_symptoms(conn, d_from, d_to):
     Returns dict: date → average symptom score.
     Also returns dict of available symptom names and their counts.
     """
-    PEM_SYMPTOMS = [
-        # DB-Keys (lowercase/underscore — aktuelles Import-Format)
-        "erschoepfung_fatigue", "aktivitaetsniveau", "energie_morgens", "energie_abends",
-        # Lesbare Namen (älteres Import-Format)
-        "Erschöpfung/Fatigue", "Erschöpfung", "Fatigue", "PEM",
-        "Kraftlosigkeit", "Müdigkeit", "Energie-Budget Morgens", "Energie-Budget Abends",
-        # blue-ME-Rohfeldname (import_blue_me.py, unveraendert uebernommen)
-        "fatigue",
-    ]
+    # Kanonische Namen (modules.symptom_synonyms) — alle Schreibweisen und
+    # Import-Formate (erschoepfung_fatigue, "Erschöpfung/Fatigue", blue-ME
+    # "fatigue", ...) werden ueber die gemeinsame Zuordnung gefunden.
+    # Energie-Budget und Aktivitaetsniveau bewusst nicht: Ressourcen-Skala
+    # (hoch = gut), ihr Mittelwert mit Fatigue (hoch = schlecht) hob sich auf.
     symptom_data = {}
     found_symptoms = {}
 
     try:
+        PEM_SYMPTOMS = raw_symptom_names(
+            conn, [*FATIGUE_LIKE, "Kraftlosigkeit", "Müdigkeit"])
+        if not PEM_SYMPTOMS:
+            return {}, found_symptoms
         # Discover which PEM symptoms are available
         placeholders = ",".join("?" * len(PEM_SYMPTOMS))
         available = conn.execute(f"""
