@@ -15,7 +15,7 @@ Ermöglicht die Symptomanalyse, essentiell für die klinische Diagnostik
 
 ## Methode
 
-Jede Bezeichnung wird über die Mapping-Datei auf kanonische DE/EN- Begriffe abgebildet. Nicht gemappte Einträge werden 1:1 übernommen (category='other').
+Jede Bezeichnung wird über die Mapping-Datei auf kanonische DE/EN- Begriffe abgebildet. Nicht gemappte Einträge werden 1:1 übernommen (category='other'). Ein voller Lauf (ohne --update) entfernt Zeilen, deren kanonischer Name nicht mehr zur aktuellen Mapping-Datei passt.
 
 ## Datenfluss
 

@@ -8,11 +8,11 @@
     "A07.1"
   ],
   "meldepflicht_de": true,
-  "coinfection_with": [
+  "dbg_2026_lyme_associated": [
     "borreliose"
   ],
   "guidelines": {
-    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.3 (Parasiten — Metronidazol-CAVE bei kardialer Komorbidität)",
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Abschn. 3.5.3 (Parasiten — Metronidazol-CAVE bei kardialer Komorbidität) — https://www.borreliose-gesellschaft.de/files/dbg-leitlinielymeborreliose-versionfruehjahr2026.pdf",
     "rki": "RKI-Ratgeber Giardiasis (§ 7 IfSG meldepflichtig)",
     "who": "WHO Giardiasis Factsheet",
     "cdc": "CDC Giardia Clinical Information"

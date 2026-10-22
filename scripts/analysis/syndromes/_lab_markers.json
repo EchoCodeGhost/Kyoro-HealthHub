@@ -6,7 +6,8 @@
     "IgA":    {"elevated": 1.0,  "negative": -0.3},
     "PCR":    {"elevated": 3.0,  "negative": -1.5},
     "Antigen":{"elevated": 2.0,  "negative": -1.0},
-    "Kultur": {"elevated": 2.0,  "negative": -0.5}
+    "Kultur": {"elevated": 2.0,  "negative": -0.5},
+    "Ausstrich": {"elevated": 3.0, "negative": -0.5}
   },
 
   "post_covid": [
@@ -125,12 +126,15 @@
 
   "anaplasmose": [
     {"parameter": "Anaplasma", "type": "IgG", "label": "Anaplasma IgG"},
-    {"parameter": "Anaplasma", "type": "PCR", "label": "Anaplasma-PCR"}
+    {"parameter": "Anaplasma", "type": "PCR", "label": "Anaplasma-PCR"},
+    {"parameter": "Anaplasma IgM", "type": "IgM", "label": "Anaplasma IgM"}
   ],
 
   "babesiose": [
     {"parameter": "Babesia", "type": "IgG", "label": "Babesia IgG"},
-    {"parameter": "Babesia", "type": "PCR", "label": "Babesia-PCR"}
+    {"parameter": "Babesia", "type": "PCR", "label": "Babesia-PCR"},
+    {"parameter": "Babesia IgM", "type": "IgM", "label": "Babesia IgM"},
+    {"parameter": "Babesi%usstrich", "type": "Ausstrich", "label": "Babesien im Blutausstrich (Giemsa)"}
   ],
 
   "giardiose": [

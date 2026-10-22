@@ -75,6 +75,7 @@ _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import raw_symptom_names
 from modules import device_registry as _dr
 from modules.sensor_confidence import grade_for as _grade_for
 from modules import ppi_provenance as _ppi_prov
@@ -588,7 +589,11 @@ def _load_respiration(conn, person, d0, d1) -> dict:
 def _load_symptoms(conn, person, d0, d1) -> dict:
     """date → {'pts': 10, 'symptoms': str}"""
     out = {}
-    placeholders = ",".join("?" * len(CARDIAC_SYMPTOMS))
+    # Alle Schreibweisen/Synonyme (modules.symptom_synonyms), z. B. "Tachykardie"
+    names = raw_symptom_names(conn, CARDIAC_SYMPTOMS)
+    if not names:
+        return out
+    placeholders = ",".join("?" * len(names))
     for d, n, syms in conn.execute(f"""
         SELECT date, COUNT(*), GROUP_CONCAT(symptom)
         FROM symptoms
@@ -596,7 +601,7 @@ def _load_symptoms(conn, person, d0, d1) -> dict:
           AND value_num > 0
           AND symptom IN ({placeholders})
         GROUP BY date
-    """, (person, d0, d1, *CARDIAC_SYMPTOMS)):
+    """, (person, d0, d1, *names)):
         if n:
             out[d] = {"pts": 10, "symptoms": syms}
     return out

@@ -108,6 +108,7 @@ _sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID, KYORO_CONFIG_DIR
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import canonical_symptoms, raw_symptom_names
 from modules.confidence import label_finding
 from modules.prompts.analysis_internal_medicine import (
     SYSTEM_PROMPT_ANALYSE_MEDICATION_EFFECTS_DE as SYSTEM_PROMPT_DE,
@@ -288,16 +289,24 @@ def _load_symptoms(conn, d_from, d_to, symptome_list=None) -> list[tuple[str, st
     """Konfigurierbare Symptome aus der symptoms-Tabelle."""
     if symptome_list is None:
         symptome_list = DEFAULT_SYMPTOME
-    placeholders = ",".join("?" * len(symptome_list))
+    # Alle Schreibweisen/Synonyme (modules.symptom_synonyms), zurueckgegeben
+    # unter dem Namen aus symptome_list ("Nausea" -> "Übelkeit").
+    display = {c: name for name in symptome_list for c in canonical_symptoms(name)}
     try:
-        return conn.execute(
+        names = raw_symptom_names(conn, symptome_list)
+        if not names:
+            return []
+        placeholders = ",".join("?" * len(names))
+        rows = conn.execute(
             f"SELECT date, symptom, value_num FROM symptoms "
             f"WHERE symptom IN ({placeholders}) AND date >= ? AND date <= ? "
             f"AND value_num IS NOT NULL ORDER BY date",
-            (*symptome_list, d_from, d_to),
+            (*names, d_from, d_to),
         ).fetchall()
     except Exception:
         return []
+    return [(date, display[c], val) for date, raw, val in rows
+            for c in canonical_symptoms(raw) if c in display]
 
 
 def _load_hrv(conn, d_from, d_to, person) -> "tuple[dict, dict[str, int], str]":

@@ -23,7 +23,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
-from modules.config_backup import backup_before_write, ensure_git_repo, commit_config_change
+from modules.config_backup import (
+    backup_before_write, commit_config_change, commit_config_dir, ensure_git_repo,
+)
 
 
 def test_noop_when_file_does_not_exist_yet(tmp_path):
@@ -146,3 +148,39 @@ def test_commit_config_change_only_touches_the_given_file(tmp_path):
 
     log = _git(tmp_path, "log", "--oneline", "--", "travel_history.json").stdout
     assert log.strip() == ""
+
+
+def test_sweep_inside_another_repos_hook_stays_in_config_repo(tmp_path, monkeypatch):
+    """health_config.py's import-time sweep runs inside the Kyoro pre-commit
+    hook (via qa_check.py). git exports GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE
+    to hooks; inherited, they made the sweep stage and commit the config
+    directory into the Kyoro repo (a git worktree) being committed."""
+    outer = tmp_path / "outer"
+    outer.mkdir()
+    _git(outer, "init", "-q")
+    _git(outer, "config", "user.name", "Outer")
+    _git(outer, "config", "user.email", "outer@localhost")
+    (outer / "code.py").write_text("x = 1\n", encoding="utf-8")
+    _git(outer, "add", "code.py")
+    _git(outer, "commit", "-q", "-m", "outer: initial")
+
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "health_config.json").write_text("{}", encoding="utf-8")
+
+    # What git sets for a hook in the outer repo.
+    monkeypatch.setenv("GIT_DIR", str(outer / ".git"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(outer / ".git" / "index"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(outer))
+    commit_config_dir(config_dir, "auto: sweep")
+    for var in ("GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"):
+        monkeypatch.delenv(var)
+
+    outer_log = _git(outer, "log", "--oneline").stdout.strip().splitlines()
+    assert outer_log == [outer_log[0]] and "outer: initial" in outer_log[0]
+    assert _git(outer, "ls-files").stdout.split() == ["code.py"]
+    assert _git(outer, "status", "--porcelain").stdout.strip() == ""
+
+    config_log = _git(config_dir, "log", "--oneline").stdout
+    assert "auto: sweep" in config_log
+    assert "health_config.json" in _git(config_dir, "ls-files").stdout

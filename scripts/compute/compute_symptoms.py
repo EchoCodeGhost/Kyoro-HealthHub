@@ -11,9 +11,12 @@ Symptom canonicalisation: symptoms -> symptoms_canonical.
              canonical vocabulary. Pure vocabulary mapping.
 @method.de   Jede Bezeichnung wird über die Mapping-Datei auf kanonische DE/EN-
              Begriffe abgebildet. Nicht gemappte Einträge werden 1:1 übernommen
-             (category='other').
+             (category='other'). Ein voller Lauf (ohne --update) entfernt Zeilen,
+             deren kanonischer Name nicht mehr zur aktuellen Mapping-Datei passt.
 @method.en   Each label is mapped via the mapping file to canonical DE/EN terms.
-             Unmapped entries are carried over 1:1 (category='other').
+             Unmapped entries are carried over 1:1 (category='other'). A full run
+             (without --update) removes rows whose canonical name no longer
+             matches the current mapping file.
 @reads       symptoms
 @writes      symptoms_canonical
 @limits.de   Bewusst keine ICD-10-Kodierung — Symptom-Mapping-Dateien werden
@@ -137,6 +140,25 @@ def compute(conn, update_only: bool = False) -> tuple[int, int, list[str]]:
             inserted += 1
         else:
             skipped += 1
+
+    # Voller Lauf: Zeilen entfernen, deren kanonischer Name nicht mehr zur
+    # aktuellen symptom_map passt (z. B. "breast pain" jetzt
+    # "Brustdrüsenschmerzen" statt "Brustschmerzen"). symptom_de ist Teil des
+    # Primaerschluessels, INSERT OR IGNORE legt den neuen Namen sonst NEBEN
+    # dem alten an. Abgeleitete Tabelle — die Rohdaten in symptoms bleiben.
+    stale = 0
+    if not update_only:
+        for raw_name, symptom_de in conn.execute(
+                "SELECT DISTINCT raw_name, symptom_de FROM symptoms_canonical").fetchall():
+            entry = symptom_map.get(_normalize_key(raw_name or ""))
+            expected = entry["de"] if entry else raw_name
+            if symptom_de != expected:
+                stale += conn.execute(
+                    "DELETE FROM symptoms_canonical WHERE raw_name=? AND symptom_de=?",
+                    (raw_name, symptom_de)).rowcount
+        if stale:
+            print(t(f"  {stale} veraltete Zeilen entfernt (Zuordnung geändert)",
+                    f"  {stale} stale rows removed (mapping changed)"))
 
     conn.commit()
     return inserted, skipped, sorted(unmapped)

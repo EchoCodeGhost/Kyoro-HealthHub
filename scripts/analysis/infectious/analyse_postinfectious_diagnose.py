@@ -88,6 +88,7 @@ from modules.db import open_db, open_medicine_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.baseline import get_baseline, baseline_delta_pct
 from modules.confidence import label_finding
+from modules.symptom_synonyms import canonicalize, count_symptom_days
 from modules.endemic_matching import (
     geo_dist_km as _geo_dist_km, resolve_radius_km, since_floor_ok,
 )
@@ -202,6 +203,9 @@ def _load_syndromes():
             "meldepflicht_de": rec.get("meldepflicht_de", False),
             "guidelines":      rec.get("guidelines", {}),
             "symptoms":        rec.get("symptoms", []),
+            # Vollständiger Literaturkatalog (z. B. post_covid: Davis 2021) —
+            # nur Kontext, zählt nicht für Score und IDF in vermute_syndrome().
+            "symptoms_extended": rec.get("symptoms_extended", []),
         }
         syndrome_sero[key] = {
             "seroprevalence_de": rec.get("seroprevalence_de"),
@@ -232,6 +236,9 @@ _LAB_BOOST: dict[str, dict] = {
     "PCR":     {"elevated": 3.0,  "negative": -1.5},
     "Antigen": {"elevated": 2.0,  "negative": -1.0},
     "Kultur":  {"elevated": 2.0,  "negative": -0.5},
+    # Blutausstrich (z. B. Babesien): positiver Direktnachweis so stark wie PCR,
+    # negativer Befund schwach — niedrige Parasitämie wird leicht übersehen.
+    "Ausstrich": {"elevated": 3.0, "negative": -0.5},
 }
 
 _STATUS_ELEVATED = {"hoch", "H", "high", "pathologisch", "auffällig", "erhöht",
@@ -280,10 +287,21 @@ _EXPOSURE_MARKERS = (
     "wellensittich", "barthelmarkt", "bauernhof", "coxiella", "psittaci",
 )
 
-# Tier → score boost (on the scale of IDF symptom scores, which reach ~90+)
+# Tier → score boost (on the scale of IDF symptom scores, which reach ~90+;
+# see _SYMPTOM_SCORE_SCALE)
 _BOOST_CONFIRMED  = 20.0   # confirmed past infection (lab/clinical)
 _BOOST_EXPOSURE   = 14.0   # documented high-risk exposure (event name contains exposure marker)
 _BOOST_SUSPECTED  =  6.0   # uncertain / suspected (uncertainty markers present)
+
+# Symptom score in vermute_syndrome(): log-IDF per matched profile symptom,
+# divided by sqrt(profile size), times this factor. The linear IDF
+# (n_syndromes / symptom_in_n) let a symptom that appears in only one profile
+# count ~100x as much as a common one, so a single synonym match decided the
+# ranking; and long profiles collected more matches. The factor keeps the
+# symptom score on the scale the boosts above and below were set for: with
+# every profile symptom matched once, the median over all profiles is ~100
+# with both formulas (linear IDF: 104, log-IDF/sqrt(n): 8.5 x 12).
+_SYMPTOM_SCORE_SCALE = 12.0
 
 
 def _exposure_slug_boosts() -> dict[str, tuple[float, str, str]]:
@@ -814,7 +832,9 @@ def load_symptoms_kognitiv(conn, lc_start: str, d_to: str) -> dict:
 def load_symptoms_syndrom(conn, lc_start: str, d_to: str) -> dict:
     """Gleicht alle dokumentierten Symptome gegen das Syndrom-Symptomprofil ab."""
     codes = SYNDROME_CODES.get(_SYNDROME_CFG["slug"], {})
-    syndrom_symptome = set(codes.get("symptoms", []))
+    # Kanonische Namen (modules.symptom_synonyms): "Myalgie" im Profil trifft
+    # "Muskelschmerzen" im Tagebuch.
+    syndrom_symptome = canonicalize(codes.get("symptoms", []))
     if not syndrom_symptome:
         return {"treffer": [], "alle_dokumentiert": [], "n_treffer": 0, "n_gesamt": 0}
 
@@ -826,9 +846,24 @@ def load_symptoms_syndrom(conn, lc_start: str, d_to: str) -> dict:
     """, (lc_start, d_to)).fetchall()
 
     alle = [(s, n) for s, n in rows]
-    treffer = [(s, n) for s, n in rows if s in syndrom_symptome]
+    tage = count_symptom_days(conn.execute("""
+        SELECT DISTINCT symptom, date FROM symptoms WHERE date >= ? AND date <= ?
+    """, (lc_start, d_to)).fetchall())
+    treffer = sorted(((s, n) for s, n in tage.items() if s in syndrom_symptome),
+                     key=lambda x: -x[1])
+    # Erweiterter Katalog: dokumentierte Symptome, die nicht im Kernprofil
+    # stehen, aber im Literaturkatalog — nur fürs Prompt, nicht für den Score.
+    erweitert = {}
+    for e in codes.get("symptoms_extended", []):
+        for name in canonicalize([e["name"]]):
+            if name not in syndrom_symptome:
+                erweitert.setdefault(name, e)
+    treffer_erweitert = sorted(
+        ((s, n, erweitert[s]) for s, n in tage.items() if s in erweitert),
+        key=lambda x: -x[1])
     return {
         "treffer":          treffer,
+        "treffer_erweitert": treffer_erweitert,
         "alle_dokumentiert": alle,
         "n_treffer":        len(treffer),
         "n_gesamt":         len(alle),
@@ -944,17 +979,18 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
     """Differenzialdiagnose: rankt alle Syndrome nach gewichtetem Symptom-Match.
 
     Scoring:
-    - IDF-gewichteter Symptom-Score: seltene Symptome zählen mehr
+    - IDF-gewichteter Symptom-Score: seltene Symptome zählen mehr (log-IDF),
+      normiert auf die Profilgröße (siehe _SYMPTOM_SCORE_SCALE)
     - Biomarker-Bonus: syndromspezifische Biomarkermuster
     - Seropr.-Prior: hohe Seropr. → "assume prior, is it active?" (gedämpft)
     - Reise-Boost: Überschneidung mit endemic_regions aus travel_history
     """
-    rows = conn.execute("""
-        SELECT symptom, COUNT(DISTINCT date) as n
+    # Tage pro kanonischem Symptom (modules.symptom_synonyms) — Synonyme am
+    # selben Tag zaehlen einmal.
+    dok_symptome = count_symptom_days(conn.execute("""
+        SELECT DISTINCT symptom, date
         FROM symptoms WHERE date >= ? AND date <= ?
-        GROUP BY symptom
-    """, (lc_start, d_to)).fetchall()
-    dok_symptome = {s: n for s, n in rows}
+    """, (lc_start, d_to)).fetchall())
 
     if not dok_symptome:
         return []
@@ -966,7 +1002,7 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
     for slug, codes in SYNDROME_CODES.items():
         if slug == "generic":
             continue
-        for sym in codes.get("symptoms", []):
+        for sym in canonicalize(codes.get("symptoms", [])):
             symptom_in_n[sym] += 1
     n_syndromes = sum(1 for s in SYNDROME_CODES if s != "generic")
 
@@ -974,7 +1010,7 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
     for slug, codes in SYNDROME_CODES.items():
         if slug == "generic":
             continue
-        profil = set(codes.get("symptoms", []))
+        profil = canonicalize(codes.get("symptoms", []))
         if not profil:
             continue
 
@@ -983,15 +1019,16 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
         sero_cat   = sero.get("sero_category", "unbekannt")
         endemisch  = set(sero.get("endemic_regions", []))
 
-        # IDF-gewichteter Symptom-Score
+        # IDF-gewichteter Symptom-Score (log-IDF, normiert auf Profilgröße)
         score = 0.0
         matched = []
         for sym in profil:
             if sym in dok_symptome:
-                idf = n_syndromes / max(symptom_in_n[sym], 1)
+                idf = 1 + math.log(n_syndromes / max(symptom_in_n[sym], 1))
                 tage_boost = min(dok_symptome[sym] / 10, 2.0)
                 score += idf * (1 + tage_boost)
                 matched.append((sym, dok_symptome[sym]))
+        score *= _SYMPTOM_SCORE_SCALE / math.sqrt(len(profil))
 
         coverage_pct = round(len(matched) / len(profil) * 100, 1) if profil else 0.0
 
@@ -1083,8 +1120,7 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
                 score += 0.8
                 biomarker_hints.append("Aktivitäts-Einbruch passend")
 
-        arthr_dok = any(s in dok_symptome for s in
-                        ("Gelenkschmerzen", "Arthralgie", "Arthritis"))
+        arthr_dok = any(s in dok_symptome for s in ("Gelenkschmerzen", "Arthritis"))
         if arthr_dok and slug in ("chikungunya", "parvovirus", "yersiniose",
                                    "borreliose", "anaplasmose", "brucellose"):
             score += 1.0
@@ -1144,7 +1180,8 @@ def build_differential_report(ranking: list, infection_date: str,
     lines = [
         "## Differenzialdiagnose — Syndrom-Vermutung (automatisch)\n",
         f"Infektionsdatum: **{infection_date}**  | Fenster: **{lc_start} – {d_to}**\n",
-        "Methode: IDF-gewichteter Symptom-Abgleich + Biomarker-Bonus.  \n"
+        "Methode: IDF-gewichteter Symptom-Abgleich (log-IDF, normiert auf "
+        "Profilgröße) + Biomarker-Bonus.  \n"
         "⚠ Kein Ersatz für klinische Diagnostik — nur Hinweisgeber.\n",
     ]
 
@@ -2083,6 +2120,13 @@ def build_report(data, autonome, pem, kardio, schlaf, aktivitaet, respiration,
                      if s not in {t[0] for t in syndrom_symptome["treffer"]}]
         if nicht_dok:
             lines.append(f"\n  Nicht im Tagebuch: {', '.join(nicht_dok)}")
+        if syndrom_symptome.get("treffer_erweitert"):
+            lines.append("\n  **Außerhalb des Kernprofils, aber im erweiterten "
+                         "Literaturkatalog (zählt nicht für das Ranking):**")
+            for sym, n, e in syndrom_symptome["treffer_erweitert"]:
+                prev = (f", {e['prevalence_pct']:.0f} % in der Quelle"
+                        if e.get("prevalence_pct") is not None else "")
+                lines.append(f"  - {sym} ({n} Tage; {e['system']}{prev})")
         lines.append("")
 
     # ── Symptomtagebuch nach Kategorie ────────────────────────────────────────

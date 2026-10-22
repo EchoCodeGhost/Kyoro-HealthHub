@@ -70,6 +70,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.symptom_synonyms import canonical_symptoms, canonicalize
 
 _cfg = _Cfg()
 OUT_DIR = _cfg.analyses_dir / "immunology"
@@ -277,9 +278,12 @@ def load_symptoms(conn, d_from, d_to) -> dict:
         WHERE date >= ? AND date <= ?
         ORDER BY date
     """, (d_from, d_to)).fetchall()
+    # Kanonische Namen (modules.symptom_synonyms): alle Schreibweisen und
+    # Synonyme ("Nausea", "Trockener Mund" -> "Mundtrockenheit", ...) treffen.
+    canon = canonicalize(MCAS_SYMPTOME)
     result = defaultdict(list)
     for d, s in rows:
-        if s in MCAS_SYMPTOME:
+        if canonical_symptoms(s or "") & canon:
             result[d].append(s)
     return dict(result)
 
