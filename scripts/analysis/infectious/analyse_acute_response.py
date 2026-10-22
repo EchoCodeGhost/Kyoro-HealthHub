@@ -33,7 +33,8 @@ analyse_acute_response.py — Retrospektive Analyse akuter Systemreaktionen
              sepsis/tick bite) → Tier 2 (chief complaint) → Tier 3 (modules).
 @refs        Royal College of Physicians (2017). National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS. RCP, London. https://www.rcp.ac.uk/resources/national-early-warning-score-news-2/ doi: nicht verfügbar (Leitliniendokument)
              DGN/DSG AWMF 030-046 (Schlaganfall); ESC ACS 2023; WAO/EAACI Anaphylaxis 2020;
-             S3 Sepsis AWMF 079-001; AWMF 013-054 (Borreliose); RKI FSME 2023
+             S3 Sepsis AWMF 079-001; DDG S2k Kutane Lyme-Borreliose AWMF 013-044
+             (Hofmann et al., Ger Med Sci 2025;23:Doc12, doi:10.3205/000348); RKI FSME 2023
 @relevance.de Ermöglicht die frühzeitige Erkennung und systematische Dokumentation
              akuter gesundheitlicher Verschlechterungen, essentiell für die
              Früherkennung von Notfällen und die retrospektive Analyse von
@@ -128,7 +129,7 @@ LEITLINIEN_DIAGNOSTIK = {
     },
     'borreliose': {
         'titel': 'Lyme-Borreliose',
-        'leitlinie': 'S3-Leitlinie Lyme-Borreliose (AWMF 013-054, 2023)',
+        'leitlinie': 'S2k-Leitlinie Kutane Lyme-Borreliose (DDG, AWMF 013-044)',
         'stadium_i': [
             'Wanderröte ist KLINISCHE Diagnose — kein Labortest erforderlich!',
             'Sofort Therapie beginnen: Doxycyclin 100 mg 2×/Tag × 14–21 Tage',
@@ -534,7 +535,7 @@ def _rf_zeckenstich_gate(answers: dict) -> list[str]:
    → Sag: "Ich hatte einen Zeckenstich und habe eine Wanderröte."
    → Serologie in Stadium I oft noch negativ — nicht abwarten.
 
-   Grundlage: S3-Leitlinie Lyme-Borreliose AWMF 013-054""")
+   Grundlage: S2k-Leitlinie Kutane Lyme-Borreliose (DDG, AWMF 013-044)""")
 
     modules = ['borreliose']
     from datetime import datetime

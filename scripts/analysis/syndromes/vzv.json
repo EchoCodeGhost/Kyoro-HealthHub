@@ -10,11 +10,11 @@
     "G53.0"
   ],
   "meldepflicht_de": false,
-  "coinfection_with": [
+  "dbg_2026_lyme_associated": [
     "borreliose"
   ],
   "guidelines": {
-    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen — Herpesviren)",
+    "dbg_2026": "DBG-Leitlinie Lyme-Borreliose Frühjahr 2026, Tabelle 6 (virale Co-Infektionen — Herpesviren) — https://www.borreliose-gesellschaft.de/files/dbg-leitlinielymeborreliose-versionfruehjahr2026.pdf",
     "stiko": "STIKO-Empfehlung Herpes-Zoster-Impfung (Shingrix) ab 60 J.",
     "awmf": "AWMF-Leitlinie Herpes Zoster und post-herpetische Neuralgie",
     "escmid": "ESCMID Herpes Zoster Management Guidelines"
