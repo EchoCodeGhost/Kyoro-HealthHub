@@ -46,14 +46,14 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 
 _cfg = _Cfg()
 DB_PATH  = _cfg.db_path
 # Keine Default-Koordinaten — Standort muss aus health_config.json (location.lat/lon)
 # kommen oder per --lat/--lon übergeben werden.
 HOME_LAT, HOME_LON = (
-    round_coords(_cfg.home_lat, _cfg.home_lon)
+    for_external_api(_cfg.home_lat, _cfg.home_lon)
     if _cfg.home_lat is not None and _cfg.home_lon is not None
     else (_cfg.home_lat, _cfg.home_lon)
 )
@@ -202,7 +202,7 @@ def _missing(conn: sqlite3.Connection, table: str, d_from: str, d_to: str,
     @returns Liste von fehlenden Datumsstrings im ISO-Format
     """
     if lat is not None and lon is not None:
-        lat_r, lon_r = round_coords(lat, lon)
+        lat_r, lon_r = for_external_api(lat, lon)
         existing = {r[0] for r in conn.execute(
             f"SELECT date FROM {table} WHERE date >= ? AND date <= ? AND lat=? AND lon=?",
             (d_from, d_to, lat_r, lon_r)
@@ -377,7 +377,7 @@ def import_airquality(conn: sqlite3.Connection,
     @returns Tuple aus (anzahl_air_quality, anzahl_pollen) importierter Datensätze
     """
     _person = person or _OWN_PERSON_ID
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     today = date.today().isoformat()
     start = date_from or AQ_START
     end   = date_to   or today
@@ -508,7 +508,7 @@ def import_biometeo(conn: sqlite3.Connection,
     @returns Anzahl der importierten Biometeo-Datensätze
     """
     _person = person or _OWN_PERSON_ID
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     today = date.today().isoformat()
     start = date_from or BIOMETEO_START
     end   = date_to   or today
@@ -584,7 +584,7 @@ def main():
             "Standort fehlt: --lat/--lon übergeben oder location.lat/lon in health_config.json setzen.",
             "Missing location: pass --lat/--lon or set location.lat/lon in health_config.json."))
 
-    lat_r, lon_r = round_coords(args.lat, args.lon)
+    lat_r, lon_r = for_external_api(args.lat, args.lon)
     conn = open_db()
     print(t(
         f"Importiere Umweltdaten für ({lat_r:.2f}, {lon_r:.2f}) ...",

@@ -100,7 +100,10 @@ jobs:
         # imports Pillow at module level, the PDF and OCR tests use the rest.
         # -c pins them to requirements-lock.txt; pytesseract is optional in
         # requirements.txt and not in the lock, so it is pinned here.
-        run: pip install numpy scipy requests pillow pikepdf pdf2image pytesseract==0.3.13 -r requirements-dev.txt -c requirements-lock.txt
+        # pydicom: import_fundus loads modules/dicom_utils (pydicom at module
+        # level) also for JPEG input; test_import_fundus_fibricheck_no_location
+        # runs a real JPEG import.
+        run: pip install numpy scipy requests pillow pikepdf pdf2image pydicom pytesseract==0.3.13 -r requirements-dev.txt -c requirements-lock.txt
 
       - name: Unit tests
         # This step existed as a local-only pytest suite for months without

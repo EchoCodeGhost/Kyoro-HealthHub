@@ -62,10 +62,11 @@ ORIGINALE_DIR = PDF_DIR / "originals"
 def _archive_original(pdf_path: Path, ziel: Path, person: str | None = None) -> None:
     """Entfernt PII-Metadaten (Info/XMP/eingebettete EXIF) und archiviert nach originals/.
 
-    GPS-Funde aus eingebetteten Fotos werden vor dem Strippen (gerundet)
-    in health.db::photo_locations gespeichert, nicht verworfen.
+    GPS-Funde aus eingebetteten Fotos werden NUR gespeichert wenn die Policy
+    es erlaubt. Standard für import_lab_results ist store: none.
+    Speicherung erfolgt in location.db via location_store.record().
     """
-    from modules.imaging_utils import record_photo_location
+    from modules.location_store import record, file_sha256
 
     person = resolve_person(person)
     _, locations = _scrub_pdf_metadata(pdf_path, ziel)
@@ -73,16 +74,33 @@ def _archive_original(pdf_path: Path, ziel: Path, person: str | None = None) -> 
 
     dated_locations = [loc for loc in locations if loc["date"]]
     if dated_locations:
-        health_conn = open_db()
-        try:
-            for loc in dated_locations:
-                record_photo_location(
-                    health_conn, loc["date"], loc["gps"],
-                    "import_lab_results", person,
-                )
-            health_conn.commit()
-        finally:
-            health_conn.close()
+        # GPS-Daten via location_store speichern (Policy wird automatisch geprüft)
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat() if ziel.exists() else None
+        for loc in dated_locations:
+            if not isinstance(loc["gps"], (tuple, list)) or len(loc["gps"]) != 2:
+                continue
+            lat, lon = loc["gps"]
+            date_str = loc["date"]
+            # Hash der originalen und gespeicherten PDF
+            original_hash = file_sha256(pdf_path) if pdf_path.exists() else None
+            stored_hash = file_sha256(ziel)
+            # Speichern in location.db (wird übersprungen wenn Policy store: none ist)
+            record(
+                importer="import_lab_results",
+                file_type=".pdf",
+                lat=lat,
+                lon=lon,
+                ts=now,
+                date=date_str,
+                original_sha256=original_hash,
+                stored_sha256=stored_hash,
+                source_file=str(pdf_path.name),
+                ref_db=None,
+                ref_table=None,
+                ref_id=None,
+                person=person
+            )
 
 _cfg = _Cfg()
 DB_PATH = _cfg.db_path

@@ -658,18 +658,29 @@ def _scrub_for_cloud(text: str) -> tuple[str, int, int, int, int]:
 
     Gibt (bereinigter Text, Anzahl Adressen, Anzahl Namen, Anzahl Nummern, Anzahl
     Orte/Koordinaten) zurueck. Die Zaehler nennen nie den entfernten Text.
+    
+    Location-Bereinigung: Nutzt jetzt filter_prompt_text() aus location_store
+    für die Location-Privacy-Policy. Adressen/Namen/Nummern werden weiter
+    unconditional entfernt.
     """
+    from modules.location_store import filter_prompt_text, get_caller_name
+    
     if not text:
         return text, 0, 0, 0, 0
-    n_locs = len(find_location_spans(text))
-    text = redact_locations(text)
+    
+    # Adressen, Nummern und Namen immer entfernen (unconditional)
     n_ids = len(find_identifier_spans(text))
     text = redact_identifiers(text)
     n_addr = len(find_address_spans(text))
     text = redact_addresses(text)
     n_names = len(find_name_spans(text))
     text = redact_names(text)
-    return text, n_addr, n_names, n_ids, n_locs
+    
+    # Location-Bereinigung: filter_prompt_text mit Caller "analyse_synthesis"
+    # dieser ersetzt den alten redact_locations-Aufruf
+    filtered_text, n_locs = filter_prompt_text(text, "analyse_synthesis")
+    
+    return filtered_text, n_addr, n_names, n_ids, n_locs
 
 
 # ── OpenRouter-Aufruf ─────────────────────────────────────────────────────────

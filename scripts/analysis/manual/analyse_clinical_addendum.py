@@ -268,6 +268,12 @@ What remains open, what is now clearer?
 
 
 def _call_llm(prompt: str, lang: str) -> str:
+    from modules.location_store import filter_prompt_text
+    
+    # Location-Filter auf Prompt anwenden (für Remote-Provider)
+    # Caller ist "analyse_clinical_addendum"
+    prompt, _ = filter_prompt_text(prompt, "analyse_clinical_addendum")
+    
     api_key = _cfg._cfg.get("openrouter_api_key", "")
     model   = _cfg._cfg.get("openrouter_model", "anthropic/claude-opus-4-8")
     system  = SYSTEM_DE if lang == "de" else SYSTEM_EN

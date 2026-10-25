@@ -156,3 +156,28 @@ readers — the only breaking part, done last and with a dry run.
   coordinates are skipped with a warning (no online geocoding).
 - Whether `location_stays_geocoded` place names are needed at all after
   the migration, or only the region.
+
+## Inventory of Results (Section 4.1)
+
+**Scripts that send prompts/images to external models:**
+
+| Script | Type | Images | Status |
+|--------|-----|--------|--------|
+| `scripts/modules/llm.py::call_llm` | Central path | Yes | ✅ all ~100 users automatically covered |
+| `analyse_synthesis.py` | Direct OpenRouter | No | ✅ adapted (filter_prompt_text) |
+| `analyse_clinical_addendum.py` | Direct OpenRouter | No | ✅ adapted (filter_prompt_text) |
+| `import_medical_motion.py` | Direct OpenRouter | Yes | ✅ adapted (filter + metadata) |
+| `llm_benchmark.py` | Direct OpenRouter | No | ✅ adapted (filter_prompt_text) |
+
+**External API calls (non-LLM):**
+- fetch_daily, import_pollen_dwd, import_pollen_google, import_airquality, import_dwd_brightsky, import_aemet, import_homeassistant: ✅ all now use for_external_api()
+
+**Can location data reach the prompt?**
+- Yes - Analysis scripts may contain session data with coordinates
+- Yes - Synthesis reports may contain aggregated data with location references
+- No - Most image importers already remove GPS from metadata
+
+**Mitigation:**
+- filter_prompt_text() removes/rounds/replaces all coordinates and configured place names
+- _strip_image_metadata() removes GPS/EXIF from images before sending
+- for_external_api() applies external_api.precision to coordinates for weather APIs
