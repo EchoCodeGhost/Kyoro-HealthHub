@@ -77,6 +77,14 @@ jobs:
         # the resolver, nothing is installed.
         run: pip install --dry-run --ignore-installed -r requirements-lock.txt
 
+      - name: Install OCR and PDF tools
+        # The OCR and PDF tests in test_media_redaction.py skip without these.
+        # A silently broken OCR path would let an address through on scanned
+        # documents, so CI runs them instead of skipping.
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends tesseract-ocr tesseract-ocr-deu poppler-utils
+
       - name: Install unit-test dependencies
         # Deliberately scoped to what tests/unit/ actually imports (numpy,
         # scipy, requests, pytest) rather than the full requirements.txt —
@@ -87,8 +95,12 @@ jobs:
         # missing (a guard meant for someone running the script without it
         # installed), which crashes pytest's collection for the whole suite
         # the moment any test imports one of those modules — not just a
-        # failure in that one test file.
-        run: pip install numpy scipy requests -r requirements-dev.txt
+        # failure in that one test file. pillow/pikepdf/pdf2image/pytesseract
+        # are what test_media_redaction.py needs: modules/media_redaction.py
+        # imports Pillow at module level, the PDF and OCR tests use the rest.
+        # -c pins them to requirements-lock.txt; pytesseract is optional in
+        # requirements.txt and not in the lock, so it is pinned here.
+        run: pip install numpy scipy requests pillow pikepdf pdf2image pytesseract==0.3.13 -r requirements-dev.txt -c requirements-lock.txt
 
       - name: Unit tests
         # This step existed as a local-only pytest suite for months without

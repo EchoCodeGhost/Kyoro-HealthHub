@@ -1212,6 +1212,8 @@ _DISEASE_CANONICAL: dict[str, str] = {
     "leptospirose":                           "leptospirose",
     "tularaemie":                             "tularaemie",
     "tularämie":                              "tularaemie",
+    "shamonda":                               "shamonda",
+    "schamonda":                              "shamonda",
 }
 
 

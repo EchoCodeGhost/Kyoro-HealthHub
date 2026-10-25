@@ -15,7 +15,7 @@ Ermöglicht die Gesundheitsdatenanalyse, essentiell für die medizinische Diagno
 
 ## Methode
 
-Liest die aktuellsten Markdown-Berichte aus analyses/ und laesst das LLM alle Einzelbefunde unvoreingenommen im Gesamtkontext bewerten: uebergreifende Muster, wahrscheinliche Zusammenhaenge, naechste Schritte, Prioritaeten. Das LLM erhaelt keine Vordiagnosen — es leitet alles aus den Daten ab. Optional: Mehr-Modell-Panel (Konsil-Modus) — mehrere LLMs bewerten unabhängig (jeweils mit dem vollen Analyse-Prompt). Der Vorsitz liest die Rohdaten danach kategorienweise (eine Runde pro medizinischer Kategorie unter scripts/analysis/, z.B. cardiovascular, sleep, infectious) statt alles auf einmal, um Kontextfenster- Grenzen einzuhalten; jede Kategorie-Runde bekommt alle vier vollständigen Panel-Meinungen plus alle bisherigen Kategorie-Notizen (unveraendert, nie ueberschrieben) und schreibt eine eigene, abgeschlossene Notiz. Eine Abschlussrunde liest alle Kategorie-Notizen + alle Panel-Meinungen nochmal und schreibt die finale Synthese. Alle Kategorie-Notizen bleiben als eigenstaendige Artefakte im Anhang erhalten (Chain of Custody). Aktiviert ueber synthesis_panel.enabled=true in health_config.json.
+Liest die aktuellsten Markdown-Berichte aus analyses/ und laesst das LLM alle Einzelbefunde unvoreingenommen im Gesamtkontext bewerten: uebergreifende Muster, wahrscheinliche Zusammenhaenge, naechste Schritte, Prioritaeten. Das LLM erhaelt keine Vordiagnosen — es leitet alles aus den Daten ab. Optional: Mehr-Modell-Panel (Konsil-Modus) — mehrere LLMs bewerten unabhängig (jeweils mit dem vollen Analyse-Prompt). Der Vorsitz liest die Rohdaten danach kategorienweise (eine Runde pro medizinischer Kategorie unter scripts/analysis/, z.B. cardiovascular, sleep, infectious) statt alles auf einmal, um Kontextfenster- Grenzen einzuhalten; jede Kategorie-Runde bekommt alle vollständigen Panel-Meinungen plus alle bisherigen Kategorie-Notizen (unveraendert, nie ueberschrieben) und schreibt eine eigene, abgeschlossene Notiz. Eine Abschlussrunde liest alle Kategorie-Notizen + alle Panel-Meinungen nochmal und schreibt die finale Synthese. Alle Kategorie-Notizen bleiben als eigenstaendige Artefakte im Anhang erhalten (Chain of Custody). Aktiviert ueber synthesis_panel.enabled=true in health_config.json. Vor jedem Cloud-Aufruf werden Postadressen, Personennamen, Telefon- und Versichertennummern sowie GPS-Koordinaten und persönliche Ortsnamen (aus der lokalen Konfiguration) aus Prompt und System-Text entfernt (modules.address_redaction, name_redaction, identifier_redaction, location_redaction); abschaltbar mit --no-scrub oder synthesis_panel.scrub_before_send=false. Das Log nennt nur Zaehler.
 
 ## Berechnung
 
@@ -30,7 +30,7 @@ Synthese-Score basierend auf Konsistenz, Schweregrad und zeitlicher Persistenz d
 
 ## Grenzen
 
-Heuristische Methode: Heuristische LLM-Analyse. Keine medizinische Diagnose.
+Heuristische Methode: Heuristische LLM-Analyse. Keine medizinische Diagnose. Die Bereinigung vor dem Senden ist heuristisch und entfernt keine anderen Identifikatoren (z. B. Bankdaten, Patientennummern anderer Systeme).
 
 ## Referenzen
 

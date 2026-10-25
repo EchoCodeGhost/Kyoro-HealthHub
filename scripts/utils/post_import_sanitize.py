@@ -7,16 +7,20 @@
               ohne PII zu leaken.
 @purpose.en  Called automatically by import_all.py and import_staged.py after each successful import
               so that the database can always be shared with Cloud-LLMs without leaking PII.
-@method.de   Führt drei Schritte nacheinander aus:
+@method.de   Führt vier Schritte nacheinander aus:
               1. scrub_pii: Bereinigt bekannte PII-Muster in Text-Spalten
               2. pseudonymize_devices: Ersetzt echte Seriennummern durch SN-Pseudonyme
-              3. check_anonymization: Prüft GPS-Präzision, Seriennummern, Person-IDs
+              3. pseudonymize_providers: Ersetzt Arztpraxis-/Labornamen durch Pseudonyme und
+                 entfernt Adressen aus Laborfreitext (lokal, Zuordnung nur in identity.db)
+              4. check_anonymization: Prüft GPS-Präzision, Seriennummern, Person-IDs
               Kein Schritt blockiert - bei Fehlern wird nur eine Warnung ausgegeben.
               Protokolliert alle Änderungen in import_log.
-@method.en   Executes three steps sequentially:
+@method.en   Executes four steps sequentially:
               1. scrub_pii: Cleans known PII patterns in text columns
               2. pseudonymize_devices: Replaces real serial numbers with SN pseudonyms
-              3. check_anonymization: Checks GPS precision, serial numbers, person IDs
+              3. pseudonymize_providers: Replaces medical practice/lab names with pseudonyms and
+                 removes addresses from lab free text (local, mapping only in identity.db)
+              4. check_anonymization: Checks GPS precision, serial numbers, person IDs
               No step is blocking - errors only generate warnings.
               Logs all changes to import_log.
 @reads       health.db (alle Tabellen für PII-Prüfung)
@@ -50,6 +54,7 @@ def run(errors: list | None = None) -> None:
     print("\n── Post-Import: PII-Bereinigung ─────────────────────────────────────")
     _scrub()
     _pseudonymize_devices()
+    _pseudonymize_providers()
     _check()
     print("── Post-Import: abgeschlossen ────────────────────────────────────────\n")
 
@@ -125,6 +130,19 @@ def _pseudonymize_devices() -> None:
 
     except Exception as exc:
         print(f"  ⚠ Geräte-Pseudonymisierung fehlgeschlagen (nicht blockierend): {exc}")
+
+
+def _pseudonymize_providers() -> None:
+    """Pseudonymisiert Praxis-/Labornamen und entfernt Adressen aus Laborfreitext (lokal)."""
+    try:
+        from utils.pseudonymize_providers import run_all
+        stats = run_all()
+        names = sum(s["names"] for s in stats.values())
+        texts = sum(s["texts"] for s in stats.values())
+        if names or texts:
+            print(f"  ✓ Praxis-/Labor-Pseudonymisierung: {names} Name(n), {texts} Freitext-Feld(er)")
+    except Exception as exc:
+        print(f"  ⚠ Praxis-/Labor-Pseudonymisierung fehlgeschlagen (nicht blockierend): {exc}")
 
 
 def _check() -> None:
