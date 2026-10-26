@@ -52,12 +52,12 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 
 _cfg = _Cfg()
 DB_PATH  = _cfg.db_path
 HOME_LAT, HOME_LON = (
-    round_coords(_cfg.home_lat, _cfg.home_lon)
+    for_external_api(_cfg.home_lat, _cfg.home_lon)
     if _cfg.home_lat is not None and _cfg.home_lon is not None
     else (_cfg.home_lat, _cfg.home_lon)
 )

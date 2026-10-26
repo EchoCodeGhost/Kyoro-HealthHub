@@ -21,7 +21,8 @@ create_identity_schema.py — Identity-Datenbank erstellen/aktualisieren
              outside health.db so that the health database alone cannot be de-anonymized.
 @method.de   Tabellen: device_serial_map (Geräte-Seriennummern),
              account_pseudo_map (Account-IDs).
-@method.en   Tables: device_serial_map (device serials), account_pseudo_map (account IDs).
+@method.en   Tables: device_serial_map (device serials), account_pseudo_map (account IDs),
+             person_name_map (person names), provider_pseudonym_map (practices and labs).
 @reads       KYORO_CONFIG_DIR/identity.db
 @writes      KYORO_CONFIG_DIR/identity.db
 @limits.de   Einmalig aufrufen. Wiederholte Ausfuehrung ist idempotent (CREATE IF NOT EXISTS).
@@ -74,6 +75,13 @@ CREATE TABLE IF NOT EXISTS person_name_map (
     alias3         TEXT,
     created_at     TEXT
 );
+
+CREATE TABLE IF NOT EXISTS provider_pseudonym_map (
+    pseudo_id  TEXT PRIMARY KEY,
+    kind       TEXT NOT NULL,
+    name_real  TEXT NOT NULL,
+    created_at TEXT
+);
 """
 
 
@@ -104,6 +112,12 @@ def show(db_path: pathlib.Path = _IDENTITY_DB) -> None:
     for row in con.execute("SELECT person_pseudo, name_real, alias1, alias2, alias3 FROM person_name_map ORDER BY person_pseudo"):
         aliases = ", ".join(a for a in (row[2], row[3], row[4]) if a)
         print(f"  {row[0]}  ({row[1]})  aliases: {aliases}")
+    print("=== provider_pseudonym_map ===")
+    try:
+        for row in con.execute("SELECT pseudo_id, kind, name_real FROM provider_pseudonym_map ORDER BY pseudo_id"):
+            print(f"  {row[0]}  ({row[2]})")
+    except sqlite3.OperationalError:
+        print("  (Tabelle fehlt - create_or_upgrade ausfuehren)")
     con.close()
 
 

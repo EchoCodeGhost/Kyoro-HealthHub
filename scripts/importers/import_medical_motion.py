@@ -407,6 +407,8 @@ def extract_region_scores_vlm(pdf_path: Path) -> dict[str, int]:
         return {}
 
     import base64, io, json as _json, re, urllib.request, urllib.error
+    from modules.location_store import filter_prompt_text
+    from modules.llm import ImageMetadataError, _strip_image_metadata
 
     api_key = _cfg._cfg.get("llm", {}).get("openrouter_api_key", "")
     model   = _cfg._cfg.get("llm", {}).get("openrouter_model",
@@ -419,7 +421,12 @@ def extract_region_scores_vlm(pdf_path: Path) -> dict[str, int]:
                  / "Bildschirmfoto 2026-07-05 um 16.52.33.png"
     if not scale_path.exists():
         return {}
-    scale_b64 = base64.b64encode(scale_path.read_bytes()).decode()
+    # Bilder gehen an einen Cloud-Anbieter: nur ohne Metadaten, sonst gar nicht
+    try:
+        scale_png, _ = _strip_image_metadata(scale_path.read_bytes(), "image/png")
+    except ImageMetadataError:
+        return {}
+    scale_b64 = base64.b64encode(scale_png).decode()
 
     # Seiten 3–4 (Index 2–3) als Bilder
     try:
@@ -432,7 +439,11 @@ def extract_region_scores_vlm(pdf_path: Path) -> dict[str, int]:
     for page_img in pages:
         buf = io.BytesIO()
         page_img.save(buf, format="PNG")
-        page_b64 = base64.b64encode(buf.getvalue()).decode()
+        try:
+            page_png, _ = _strip_image_metadata(buf.getvalue(), "image/png")
+        except ImageMetadataError:
+            continue
+        page_b64 = base64.b64encode(page_png).decode()
 
         prompt = (
             "Bild 1 zeigt die Farbskala für Schmerzintensität: "
@@ -445,6 +456,8 @@ def extract_region_scores_vlm(pdf_path: Path) -> dict[str, int]:
             "Antworte NUR als JSON-Array ohne Text davor/danach:\n"
             '[{"region": "Körperteil auf Deutsch", "score": N}]'
         )
+        # Direkter Cloud-Aufruf ohne call_llm: Ortsfilter hier selbst anwenden
+        prompt, _ = filter_prompt_text(prompt, "import_medical_motion")
 
         payload = _json.dumps({
             "model": model,

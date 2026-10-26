@@ -132,6 +132,49 @@ python3 scripts/utils/scrub_emails.py [--dry-run] [--remove]
 python3 scripts/utils/pseudonymize_existing_devices.py [--dry-run]
 ```
 
+### 4b. Medien-Scrubber (Bilder und PDFs, lokal)
+
+**Zweck**: Meldet und entfernt Metadaten (EXIF inkl. GPS, PDF-Info/XMP, Anhänge, JavaScript)
+und schwärzt Postadressen im sichtbaren Inhalt von Bildern und PDFs. Originale werden nie
+überschrieben.
+
+**Verwendung**:
+```bash
+python -m utils.scrub_media report befund.pdf foto.jpg [--show-values] [--json-out report.json]
+python -m utils.scrub_media scrub befund.pdf sauber.pdf [--address "Musterstraße 12, 12345 Musterstadt"]
+python -m utils.scrub_media scrub-dir eingang/ ausgang/ --strict
+python -m utils.scrub_media check ordner/
+```
+
+Adress- und Namenserkennung sind heuristisch (`modules/address_redaction.py`, `modules/name_redaction.py`).
+Namen werden mit Anrede/Titel (`Frau X`, `Dr. med. X`), Feldbezeichnern (`Name:`) oder aus den
+bekannten Namen erkannt: `privacy_check.patient_names` in `health_config.json`, `person_name_map`
+in `identity.db` und `--name`. Bekannte Adressen stehen unter `privacy_check.patient_addresses`.
+Telefon-/Faxnummern (auch kurze Durchwahlen), Versichertennummern (Kranken- und Rentenversicherung),
+Bankdaten (IBAN mit Prüfziffer, BIC, Kontonummer) und Kennnummern anderer Systeme (Patienten-, Fall-,
+Auftrags-, Kassen- und Arztnummern sowie jede ungebrochene Ziffernfolge mit 7 bis 15 Ziffern ohne
+Einheit) werden ebenfalls entfernt (`modules/identifier_redaction.py`). Mit `--no-redact-names`, `--no-redact-addresses`
+oder `--no-redact-ids` lässt sich jedes davon abschalten.
+
+GPS-Koordinaten im Text (Dezimalgrad, Grad/Minuten/Sekunden) und **persönliche Ortsnamen** werden
+ebenfalls entfernt (`modules/location_redaction.py`, `--no-redact-places`). Ortsnamen kommen nur
+aus deiner lokalen Konfiguration: `privacy_check.patient_places` in `health_config.json`, der Ort in
+`privacy_check.patient_addresses` und `--place`. Ein allgemeines Ortsverzeichnis gibt es bewusst nicht,
+damit Bundesländer, Länder, Reiseziele und Endemiegebiete für die Auswertung erhalten bleiben.
+Koordinaten in Bild-Metadaten entfernt weiterhin das Metadaten-Scrubbing; die gerundeten
+`photo_locations`-Einträge der Importer bleiben unverändert. Scans
+werden per OCR geprüft (optional: `pytesseract` + `tesseract` mit Sprache `deu`; Textebene und
+Rendering brauchen `poppler`). Betroffene PDF-Seiten werden durch Bildseiten ersetzt, sodass
+keine Textebene zurückbleibt. Die PDF-Importer für Laborwerte und FibriCheck nutzen dieselbe
+Funktion und fallen bei fehlenden Werkzeugen mit Warnung auf reine Metadaten-Bereinigung zurück.
+
+### 4c. Praxis- und Labor-Pseudonymisierung
+
+`post_import_sanitize` führt zusätzlich `utils/pseudonymize_providers.py` aus: Praxis- und
+Labornamen (z. B. `lab_manual.labor`) werden zu stabilen Pseudonymen (`Labor-1A2B3C4D`); die
+Zuordnung liegt nur in `identity.db` (`provider_pseudonym_map`). Postadressen werden aus
+Laborfreitext entfernt. Probelauf: `python -m utils.pseudonymize_providers --dry-run`.
+
 ### 5. GPS-Präzisionsreduzierung
 
 **Zweck**: Rundet nachträglich zu hochauflösende GPS-Punkte in `session_tracks` (>5 Nachkommastellen)

@@ -53,6 +53,8 @@ pdf2image
 # paddlepaddle
 # paddleocr
 pikepdf       # PDF-Metadaten-Scrubbing (Info/XMP + eingebettete EXIF)
+# pytesseract   — OPTIONAL: OCR fuer Adress-Schwaerzung in Scans (zusaetzlich System-Pakete
+#                 tesseract-ocr + tesseract-ocr-deu sowie poppler-utils; ohne sie nur Metadaten-Scrub)
 pyexiv2       # RAW-Metadaten-Scrubbing (NEF/CR2/CR3/ARW/DNG/...) ohne Pixel-Dekodierung
 rawpy         # RAW → Vorschau-JPEG dekodieren (LibRaw-Wrapper)
 

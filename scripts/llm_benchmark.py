@@ -270,6 +270,11 @@ def _score_p6(response: str) -> tuple[int, str, bool]:
 # ── OpenRouter-Aufruf ─────────────────────────────────────────────────────────
 
 def _call_llm(prompt: str, model: str) -> str:
+    from modules.location_store import filter_prompt_text
+    
+    # Location-Filter auf Prompt anwenden (für Remote-Provider)
+    prompt, _ = filter_prompt_text(prompt, "llm_benchmark")
+    
     api_key = _cfg._cfg.get("llm", {}).get("openrouter_api_key", "")
     if not api_key:
         raise RuntimeError(t("openrouter_api_key in llm-Config nicht gesetzt",

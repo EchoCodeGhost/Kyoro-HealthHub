@@ -46,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db, open_medicine_db, DB_OPERATIONAL_ERRORS
 from modules.i18n import t, set_lang
+from modules.location_store import region_of, round_coords
 _cfg = _Cfg()
 
 DB_PATH      = _cfg.db_path
@@ -60,6 +61,176 @@ EXPORTS_DIR  = _cfg.data_root.parent / "exports"
 MEDICINE_DB_TABLES = {"lab_manual", "lab_results", "medications", "assessments"}
 
 _FROM_TABLE_RE = re.compile(r"\bFROM\s+([A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE)
+
+# Ortsspalten-Muster für die Location-Privacy
+# Erkennt: lat, lon, latitude, longitude, sowie jede Spalte die auf _lat, _lon, .lat oder .lon endet
+LOCATION_COLUMN_PATTERNS = [
+    r"^(?:lat|lon|latitude|longitude)$",
+    r"(?:^|_)lat$", r"(?:^|_)lon$",
+    r"\.lat$", r"\.lon$",
+]
+
+LOCATION_COLUMN_RE = re.compile("|".join(LOCATION_COLUMN_PATTERNS))
+
+
+def _get_location_columns(rows: list[dict]) -> set[str]:
+    """Finde alle Spalten mit Ortsdaten in den Zeilen."""
+    if not rows:
+        return set()
+    # Sammle alle Spaltennamen aus allen Zeilen
+    all_columns = set()
+    for row in rows:
+        all_columns.update(row.keys())
+    return {col for col in all_columns if LOCATION_COLUMN_RE.search(col)}
+
+
+_LAT_LON_SUFFIXES = (("latitude", "longitude"), ("lat", "lon"))
+
+
+def _location_column_pairs(location_columns: set[str]) -> list[tuple[str, str, str]]:
+    """Ordnet Breiten- und Längenspalten gleicher Herkunft einander zu.
+
+    Returns:
+        Liste von (lat_spalte, lon_spalte, region_spalte), z.B.
+        ("lat", "lon", "region") oder ("start_lat", "start_lon", "start_region")
+    """
+    pairs = []
+    for col in sorted(location_columns):
+        for lat_sfx, lon_sfx in _LAT_LON_SUFFIXES:
+            if col.endswith(lat_sfx):
+                prefix = col[: -len(lat_sfx)]
+                partner = prefix + lon_sfx
+                if partner in location_columns:
+                    base = prefix.rstrip("_.")
+                    pairs.append((col, partner, f"{base}_region" if base else "region"))
+                break
+    return pairs
+
+
+def _load_exports_allow() -> dict:
+    """Lädt die exports.allow Konfiguration aus location_privacy.json."""
+    location_privacy = _cfg.location_privacy
+    exports_cfg = location_privacy.get("exports", {})
+    allow_cfg = exports_cfg.get("allow", {})
+    
+    # Schlüssel die mit _ beginnen sind Kommentare und werden ignoriert
+    return {k: v for k, v in allow_cfg.items() if not k.startswith("_")}
+
+
+def _resolve_profile_alias(profile_name: str) -> str:
+    """Löst Aliase für Profil-Namen auf."""
+    profile_path = PROFILES_DIR / f"{profile_name}.json"
+    if profile_path.exists():
+        return profile_name
+    
+    # Aliase prüfen
+    for p in sorted(PROFILES_DIR.glob("*.json")):
+        try:
+            data = json.loads(p.read_text())
+            if profile_name in data.get("aliases", []):
+                return p.stem
+        except Exception:
+            pass
+    return profile_name
+
+
+def _get_allowed_location_level(profile_name: str) -> str | int | None:
+    """Gibt die erlaubte Location-Stufe für ein Profil zurück.
+    
+    Returns:
+        "region" für Region
+        int (0-5) für gerundete Koordinaten
+        None wenn das Profil nicht erlaubt ist
+    """
+    exports_allow = _load_exports_allow()
+    
+    # Aliase prüfen
+    effective_name = _resolve_profile_alias(profile_name)
+    
+    if effective_name in exports_allow:
+        return exports_allow[effective_name]
+    
+    # Originalen Namen prüfen
+    if profile_name in exports_allow:
+        return exports_allow[profile_name]
+    
+    return None
+
+
+def _redact_location_columns(rows: list[dict], profile_name: str) -> tuple[list[dict], int]:
+    """Entfernt oder ersetzt Ortsspalten basierend auf der Profil-Konfiguration.
+    
+    Args:
+        rows: Liste von Dicts mit den Zeilen
+        profile_name: Name des Export-Profils
+    
+    Returns:
+        (redigierte Zeilen, Anzahl der entfernten/ersetzten Spalten)
+    """
+    location_columns = _get_location_columns(rows)
+    
+    if not location_columns:
+        return rows, 0
+    
+    allowed_level = _get_allowed_location_level(profile_name)
+    
+    # Keine Erlaubnis → alle Ortsspalten entfernen
+    if allowed_level is None:
+        removed_count = 0
+        for row in rows:
+            for col in location_columns:
+                if col in row:
+                    del row[col]
+                    removed_count += 1
+        return rows, removed_count
+    
+    # Region-Stufe → Ortsspalten durch eine region-Spalte ersetzen
+    if allowed_level == "region":
+        removed_count = 0
+        pairs = _location_column_pairs(location_columns)
+        for row in rows:
+            # Region nur aus einem echten Paar (lat + lon derselben Herkunft);
+            # einzelne Spalten ohne Partner werden nur entfernt
+            for lat_col, lon_col, region_col in pairs:
+                try:
+                    row[region_col] = region_of(float(row[lat_col]), float(row[lon_col]))
+                except (KeyError, ValueError, TypeError):
+                    row[region_col] = t("Unbekannt", "Unknown")
+
+            # Alte Ortsspalten entfernen
+            for col in location_columns:
+                if col in row:
+                    del row[col]
+                    removed_count += 1
+        
+        return rows, removed_count
+    
+    # Numerische Stufe → Koordinaten runden
+    if isinstance(allowed_level, int) and not isinstance(allowed_level, bool):
+        precision = min(max(0, allowed_level), 5)
+        removed_count = 0
+        
+        for row in rows:
+            for col in location_columns:
+                if col in row:
+                    try:
+                        val = float(row[col])
+                        row[col] = round(val, precision)
+                    except (ValueError, TypeError):
+                        # Kann nicht konvertiert werden → entfernen
+                        del row[col]
+                        removed_count += 1
+        
+        return rows, removed_count
+    
+    # Unbekannte Stufe → als "none" behandeln
+    removed_count = 0
+    for row in rows:
+        for col in location_columns:
+            if col in row:
+                del row[col]
+                removed_count += 1
+    return rows, removed_count
 
 
 def query_targets_medicine_db(sql: str) -> bool:
@@ -169,6 +340,9 @@ def export_profile(profile: dict, args, out_dir: Path) -> dict:
     errors = 0
     rows_by_query = {}
 
+    # Track total removed location columns for summary
+    total_location_cols_removed = 0
+    
     for table_name, query_def in profile.get("queries", {}).items():
         if isinstance(query_def, str):
             sql = query_def
@@ -183,6 +357,12 @@ def export_profile(profile: dict, args, out_dir: Path) -> dict:
         if isinstance(counts[table_name], dict):
             errors += 1
         
+        # Location-Privacy: Ortsspalten entfernen/ersetzen
+        if rows:
+            profile_name = profile.get("name", args.profile)
+            rows, removed_count = _redact_location_columns(rows, profile_name)
+            total_location_cols_removed += removed_count
+        
         # Für FHIR-Export alle Zeilen sammeln
         if args.format == "fhir":
             rows_by_query[table_name] = rows
@@ -193,6 +373,12 @@ def export_profile(profile: dict, args, out_dir: Path) -> dict:
             
         row_count = rows.__len__() if rows else 0
         print(f"  {table_name:<30} {row_count:>8,} {t('Zeilen', 'rows')}")
+    
+    # Location-Privacy Summary ausgeben
+    if total_location_cols_removed > 0:
+        profile_name = profile.get("name", args.profile)
+        print(t(f"  ⚠ Location-Privacy: {total_location_cols_removed} Ortsspalten entfernt (Profil: {profile_name})",
+                f"  ⚠ Location-Privacy: {total_location_cols_removed} location columns removed (profile: {profile_name})"))
 
     # FHIR-Export verarbeiten
     if args.format == "fhir":

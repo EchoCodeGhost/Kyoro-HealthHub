@@ -58,11 +58,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from health_config import Config as _Cfg, KYORO_CONFIG_DIR
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 
 _cfg = _Cfg()
 HOME_LAT, HOME_LON = (
-    round_coords(_cfg.home_lat, _cfg.home_lon)
+    for_external_api(_cfg.home_lat, _cfg.home_lon)
     if _cfg.home_lat is not None and _cfg.home_lon is not None
     else (_cfg.home_lat, _cfg.home_lon)
 )
@@ -89,7 +89,7 @@ def _location_from_stays(target_date: str) -> tuple[float, float] | None:
         ).fetchone()
         conn.close()
         if row:
-            return round_coords(row[0], row[1])
+            return for_external_api(row[0], row[1])
     except Exception:
         pass
     return None
@@ -177,7 +177,7 @@ def fetch_airquality(staging_day: Path, lat: float, lon: float,
         ARCHIVE_API_URL, BIOMETEO_DAILY_VARS, BIOMETEO_HOURLY_VARS,
         _fetch,
     )
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     results = {}
 
     aq_url = (f"{AQ_API_URL}?latitude={lat}&longitude={lon}"
@@ -477,7 +477,7 @@ def main():
     # Determine actual location for the target date (travel-aware)
     from importers.import_aemet import _is_spain
     fetch_lat, fetch_lon, is_home = _location_for_date(str(target_date))
-    fetch_lat, fetch_lon = round_coords(fetch_lat, fetch_lon)
+    fetch_lat, fetch_lon = for_external_api(fetch_lat, fetch_lon)
     is_spain = _is_spain(fetch_lat, fetch_lon)
     location_label = "Zuhause" if is_home else ("Spanien" if is_spain else "Reise")
     print(t(

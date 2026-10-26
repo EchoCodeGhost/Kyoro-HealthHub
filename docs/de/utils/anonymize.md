@@ -15,12 +15,12 @@ Ermöglicht die Anonymisierung von Gesundheitsdaten, essentiell für den Datensc
 
 ## Methode
 
-Bietet Funktionen für: GPS-Koordinaten-Rundung (Standard: 2 Dezimalstellen ≈ 1,1 km Raster), Geräte-Seriennummern-Pseudonymisierung (SN-XXXXXXXX Format mit SHA-256 Hash in identity.db), E-Mail-Adressen-Ersetzung, Telefon/Fax-Nummern-Erkennung und Pseudonymisierung, Versicherungsnummern und -namen Pseudonymisierung, Geburtsdaten-Ersetzung, Namen-Pseudonymisierung (Vorname, Nachname), Adressen- und Stadtnamen-Ersetzung, Compliance-Checks für die Datenbank, Apple Health sourceName-Bereinigung und HealthKit <Me> Attribut-Scrubbing. Speichert alle Pseudonymisierungen in einer separaten identity.db für Konsistenz.
+Bietet Funktionen für: GPS-Koordinaten-Rundung (Standard: 2 Dezimalstellen ≈ 1,1 km Raster), Geräte-Seriennummern-Pseudonymisierung (SN-XXXXXXXX Format mit SHA-256 Hash in identity.db), E-Mail-Adressen-Ersetzung, Telefon/Fax-Nummern-Erkennung und Pseudonymisierung, Versicherungsnummern und -namen Pseudonymisierung, Geburtsdaten-Ersetzung, Namen-Pseudonymisierung (Vorname, Nachname), Entfernen von Postadressen (Straße mit Hausnummer, PLZ mit Ort; siehe modules.address_redaction), Arztpraxis- und Labornamen-Pseudonymisierung (Präfix Labor-/Arztpraxis-Kennung), Stadtnamen-Ersetzung, Compliance-Checks für die Datenbank, Apple Health sourceName-Bereinigung und HealthKit <Me> Attribut-Scrubbing. Speichert alle Pseudonymisierungen in einer separaten identity.db für Konsistenz.
 
 ## Datenfluss
 
-- **Liest:** `identity.db.device_serial_map`
-- **Schreibt:** `identity.db.device_serial_map`
+- **Liest:** `identity.db.device_serial_map`, `identity.db.provider_pseudonym_map`
+- **Schreibt:** `identity.db.device_serial_map, identity.db.provider_pseudonym_map`
 
 ## Grenzen
 

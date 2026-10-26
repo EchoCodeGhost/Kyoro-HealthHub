@@ -15,7 +15,7 @@ Bietet Hilfsfunktionen für die Datenverarbeitung, essentiell für die Systemfun
 
 ## Methode
 
-Führt drei Schritte nacheinander aus: 1. scrub_pii: Bereinigt bekannte PII-Muster in Text-Spalten 2. pseudonymize_devices: Ersetzt echte Seriennummern durch SN-Pseudonyme 3. check_anonymization: Prüft GPS-Präzision, Seriennummern, Person-IDs Kein Schritt blockiert - bei Fehlern wird nur eine Warnung ausgegeben. Protokolliert alle Änderungen in import_log.
+Führt vier Schritte nacheinander aus: 1. scrub_pii: Bereinigt bekannte PII-Muster in Text-Spalten 2. pseudonymize_devices: Ersetzt echte Seriennummern durch SN-Pseudonyme 3. pseudonymize_providers: Ersetzt Arztpraxis-/Labornamen durch Pseudonyme und entfernt Adressen aus Laborfreitext (lokal, Zuordnung nur in identity.db) 4. check_anonymization: Prüft GPS-Präzision, Seriennummern, Person-IDs Kein Schritt blockiert - bei Fehlern wird nur eine Warnung ausgegeben. Protokolliert alle Änderungen in import_log.
 
 ## Datenfluss
 
