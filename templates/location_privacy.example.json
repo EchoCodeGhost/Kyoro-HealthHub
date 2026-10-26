@@ -1,0 +1,148 @@
+{
+  "_comment": "Location Privacy Configuration for Kyoro-HealthHub.\n  This file controls how GPS and location data is stored and shared.\n  Copy this file to ~/.config/kyoro/location_privacy.json and adjust as needed.\n  Missing file = store nothing (safe default).",
+  "_important": "ALL COORDINATES IN THIS FILE MUST BE FICTITIOUS FOR REPO SAFETY.\n  Use only example coordinates like 48.12345, 11.54321. Never use real addresses or locations.",
+
+  "default": {
+    "_comment": "Default policy applied when no specific importer/file-type rule matches.\n    store: 'none' = no location data stored at all (safe default)\n    store: 'region' = store only federal state/country, no coordinates\n    precision: 0-5 = decimal places for latitude/longitude (0~111km, 1~11km, 2~1.1km, 3~110m, 4~11m, 5~1m)",
+    "store": "none",
+    "precision": 0
+  },
+
+  "importers": {
+    "_comment": "Per-importer and per-file-type policies. Resolution order: importer+file_type -> importer '*' -> default.\n    Example: import_skin: { \"*\": { \"precision\": 2 }, \".dng\": { \"precision\": 1 } }\n    For file types, use lower-case extension including the dot (e.g. '.pdf', '.jpg', '.dng').",
+
+    "import_skin": {
+      "_comment": "Skin photos: default precision 2 (~1km). Override per file type if needed.",
+      "*": {"precision": 2}
+    },
+
+    "import_lab_results": {
+      "_comment": "Lab report PDFs and screenshots: no location storage (contains embedded photos with GPS).",
+      "*": {"store": "none"}
+    },
+
+    "import_fundus": {
+      "_comment": "Fundus images: no location storage.",
+      "*": {"store": "none"}
+    },
+
+    "import_fibricheck": {
+      "_comment": "FibriCheck PDFs: no location storage.",
+      "*": {"store": "none"}
+    },
+
+    "import_hilo_pdf": {
+      "_comment": "Hilo PDF importer: no location storage.",
+      "*": {"store": "none"}
+    },
+
+    "import_hilo_screenshots": {
+      "_comment": "Hilo screenshot importer: no location storage.",
+      "*": {"store": "none"}
+    },
+
+    "import_tracks": {
+      "_comment": "Sport tracks (GPX): precision 5 (~1m) with privacy zones enabled.",
+      "*": {"precision": 5}
+    },
+
+    "import_garmin": {
+      "_comment": "Garmin activity details: precision 5 (~1m) with privacy zones.",
+      "*": {"precision": 5}
+    },
+
+    "import_oura_csv": {
+      "_comment": "Oura CSV (stays/travel): precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "import_travel_environment": {
+      "_comment": "Travel environment data: precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "import_homeassistant": {
+      "_comment": "Home Assistant environment data: precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "import_ecowitt_csv": {
+      "_comment": "Ecowitt weather station: precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "fetch_daily": {
+      "_comment": "Daily weather/pollen/air quality fetch: precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "import_pollen_dwd": {
+      "_comment": "DWD Pollen data importer: precision 2.",
+      "*": {"precision": 2}
+    },
+
+    "import_pollen_google": {
+      "_comment": "Google Pollen data importer: precision 2.",
+      "*": {"precision": 2}
+    },
+
+    "import_airquality": {
+      "_comment": "Air quality data importers: precision 2.",
+      "*": {"precision": 2}
+    },
+
+    "import_dwd_brightsky": {
+      "_comment": "DWD Brightsky weather: precision 2.",
+      "*": {"precision": 2}
+    },
+
+    "import_aemet": {
+      "_comment": "AEMET weather: precision 2.",
+      "*": {"precision": 2}
+    },
+
+    "import_medical_motion": {
+      "_comment": "Medical motion analysis: no location storage by default.",
+      "*": {"store": "none"}
+    }
+  },
+
+  "zones": {
+    "_comment": "Privacy zones around sensitive locations. Points within the radius are stored at zone_precision, even if the source policy is finer.",
+    "enabled": true,
+    "radius_m": 500,
+    "zone_precision": 2,
+    "_centres_comment": "Zone centres from privacy_check.patient_places and privacy_check.patient_addresses.\n    Add optional coordinates per place name below. Places without coordinates are skipped with a warning.\n    NO REAL COORDINATES - use example values only.",
+    "centres": {
+      "_example_home": {
+        "_comment": "Example: home location zone centre. REPLACE with fictitious coordinates.",
+        "lat": 48.12345,
+        "lon": 11.54321
+      }
+    }
+  },
+
+  "external_api": {
+    "_comment": "Precision for coordinates sent to external non-LLM services (weather, pollen, air quality APIs).",
+    "precision": 2
+  },
+
+  "llm": {
+    "_comment": "Location data in prompts to remote LLM providers.\n    default: level applied to any caller not explicitly listed in 'allow'.\n    allow: map of caller script names to their allowed level.\n    Levels: 'none' (remove all), 'region' (federal state/country only), N (raster precision, e.g. 2), 'token' (location token).",
+    "default": "none",
+    "allow": {
+      "_comment": "Add script names (without .py extension) that are allowed to receive location data.\n      Example: {\"analyse_travel\": \"region\", \"analyse_exposure\": 2, \"analyse_location_correlation\": \"token\"}",
+      "_example_analyse_travel": "region",
+      "_example_analyse_exposure": 2,
+      "_example_analyse_location": "token"
+    }
+  },
+
+  "exports": {
+    "_comment": "Location fields in export profiles. Only profiles listed in 'allow' include location data.",
+    "allow": {
+      "_comment": "Add export profile names that are allowed to include location data.\n      Example: {\"travel_analysis\": \"region\", \"full_medical\": 2}",
+      "_example_profile": "region"
+    }
+  }
+}

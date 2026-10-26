@@ -30,9 +30,13 @@ class _FakeProvider:
     and returns a fixed reply, so tests can assert on both without a real
     network call or a real health_config.json."""
 
-    def __init__(self, reply="stub reply", name="FakeProvider (stub-model)"):
+    def __init__(self, reply="stub reply", name="FakeProvider (stub-model)",
+                 is_local=True):
         self.reply = reply
         self.name = name
+        # Local by default: these tests cover labeling, not the remote
+        # location filter / image re-encoding (test_location_store_prompt_filter).
+        self.is_local = is_local
         self.chat_calls = []
         self.vision_calls = []
 

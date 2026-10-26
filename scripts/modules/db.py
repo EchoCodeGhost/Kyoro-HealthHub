@@ -404,3 +404,16 @@ def open_medicine_imaging_db(path: "str | Path | None" = None) -> sqlite3.Connec
     from health_config import Config
     db_path = str(Path(path) if path is not None else Config().medicine_imaging_db_path)
     return _open_encrypted(db_path)
+
+
+def open_location_db(path: "str | Path | None" = None) -> sqlite3.Connection:
+    """Öffnet location.db — zentrale GPS/Ortsdaten-Registrierung.
+
+    Jeder Ort wird nur hier gespeichert, nie in health.db oder medicine.db.
+    Verschlüsselt via SQLCipher wenn db_key konfiguriert ist. Das Schema legt
+    utils.create_location_schema.ensure_location_schema() an.
+    """
+    from health_config import Config
+    db_path = Path(path) if path is not None else Config().location_db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return _open_encrypted(str(db_path))

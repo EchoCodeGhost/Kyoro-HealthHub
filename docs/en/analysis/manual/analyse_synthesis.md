@@ -15,7 +15,7 @@ Enables health data analysis, essential for medical diagnostics
 
 ## Method
 
-Reads the latest markdown reports from analyses/ and has the LLM evaluate all individual findings impartially in the overall context: cross-cutting patterns, likely connections, next steps, priorities. The LLM does not receive any pre-diagnoses — it derives everything from the data. Optional: Multi-model panel (consult mode) — multiple LLMs assess independently (each given the full analysis prompt). The chair then reads the raw data category by category (one round per medical category under scripts/analysis/, e.g. cardiovascular, sleep, infectious) instead of all at once, to stay within context-window limits; each category round gets all four complete panel opinions plus all prior category notes (unchanged, never overwritten) and writes its own, final note. A final round reads all category notes + all panel opinions again and writes the final synthesis. All category notes remain as standalone artifacts in the appendix (chain of custody). Enabled via synthesis_panel.enabled=true in health_config.json.
+Reads the latest markdown reports from analyses/ and has the LLM evaluate all individual findings impartially in the overall context: cross-cutting patterns, likely connections, next steps, priorities. The LLM does not receive any pre-diagnoses — it derives everything from the data. Optional: Multi-model panel (consult mode) — multiple LLMs assess independently (each given the full analysis prompt). The chair then reads the raw data category by category (one round per medical category under scripts/analysis/, e.g. cardiovascular, sleep, infectious) instead of all at once, to stay within context-window limits; each category round gets all complete panel opinions plus all prior category notes (unchanged, never overwritten) and writes its own, final note. A final round reads all category notes + all panel opinions again and writes the final synthesis. All category notes remain as standalone artifacts in the appendix (chain of custody). Enabled via synthesis_panel.enabled=true in health_config.json. Before every cloud call, postal addresses, person names, phone/insurance numbers as well as GPS coordinates and personal place names (from the local configuration) are removed from the prompt and system text (modules.address_redaction, name_redaction, identifier_redaction, location_redaction); can be switched off with --no-scrub or synthesis_panel.scrub_before_send=false. The log shows counts only.
 
 ## Scoring
 
@@ -30,7 +30,7 @@ Synthese-Score basierend auf Konsistenz, Schweregrad und zeitlicher Persistenz d
 
 ## Limitations
 
-Heuristic method: Heuristic LLM analysis. No medical diagnosis.
+Heuristic method: Heuristic LLM analysis. No medical diagnosis. The scrubbing before sending is heuristic and does not remove other identifiers (e.g. bank details, ID numbers of other systems).
 
 ## References
 

@@ -15,12 +15,12 @@ Enables anonymization of health data, essential for data privacy and compliance 
 
 ## Method
 
-Provides functions for: GPS coordinate rounding (default: 2 decimal places ≈ 1.1km grid), device serial number pseudonymization (SN-XXXXXXXX format with SHA-256 hash in identity.db), email address replacement, phone/fax number detection and pseudonymization, insurance number and name pseudonymization, birthdate replacement, name pseudonymization (first name, last name), address and city name replacement, database compliance checks, Apple Health sourceName scrubbing and HealthKit <Me> attribute scrubbing. Stores all pseudonymizations in a separate identity.db for consistency.
+Provides functions for: GPS coordinate rounding (default: 2 decimal places ≈ 1.1km grid), device serial number pseudonymization (SN-XXXXXXXX format with SHA-256 hash in identity.db), email address replacement, phone/fax number detection and pseudonymization, insurance number and name pseudonymization, birthdate replacement, name pseudonymization (first name, last name), removal of postal addresses (street with house number, postal code with town; see modules.address_redaction), medical practice and laboratory name pseudonymization, city name replacement, database compliance checks, Apple Health sourceName scrubbing and HealthKit <Me> attribute scrubbing. Stores all pseudonymizations in a separate identity.db for consistency.
 
 ## Data flow
 
-- **Reads:** `identity.db.device_serial_map`
-- **Writes:** `identity.db.device_serial_map`
+- **Reads:** `identity.db.device_serial_map`, `identity.db.provider_pseudonym_map`
+- **Writes:** `identity.db.device_serial_map, identity.db.provider_pseudonym_map`
 
 ## Limitations
 

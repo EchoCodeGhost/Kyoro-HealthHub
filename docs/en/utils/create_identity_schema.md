@@ -15,7 +15,7 @@ Enables creation of database schemas, essential for data organization and struct
 
 ## Method
 
-Tables: device_serial_map (device serials), account_pseudo_map (account IDs).
+Tables: device_serial_map (device serials), account_pseudo_map (account IDs), person_name_map (person names), provider_pseudonym_map (practices and labs).
 
 ## Data flow
 

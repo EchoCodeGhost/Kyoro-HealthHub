@@ -128,6 +128,7 @@ def call_llm(
     temperature: float = 0.1,   # note: temperature is set per-provider in llm_provider.py
     require_grounding: bool = True,
     label_output: bool = True,
+    caller: str | None = None,  # Name des aufrufenden Skripts (für Location-Filter)
 ) -> str:
     """Send a prompt to the configured LLM or VLM provider.
 
@@ -142,15 +143,37 @@ def call_llm(
     labeled as AI-generated wherever displayed). Pass False when the
     return value is parsed structurally instead of shown as prose (JSON
     extraction, regex-matched triage markers) — label at the point it is
-    actually rendered to a person instead."""
+    actually rendered to a person instead.
+
+    caller: name of the calling script for the location filter
+    (location_store.filter_prompt_text); defaults to the stem of sys.argv[0].
+    For a remote provider (is_local false; unknown counts as remote) the
+    prompt and system text pass through the filter and an image is
+    re-encoded without metadata. If the image cannot be cleaned, nothing
+    is sent.
+    """
+    from modules.location_store import filter_prompt_text, get_caller_name
+
+    effective_caller = caller if caller is not None else get_caller_name()
+    provider = _vision_provider() if image_b64 else _text_provider()
+    is_remote = not getattr(provider, "is_local", False)
+
+    if is_remote:
+        prompt, _ = filter_prompt_text(prompt, effective_caller)
+        if system:
+            system, _ = filter_prompt_text(system, effective_caller)
+
     if require_grounding:
         system = (system or "") + _GROUNDING_SUFFIX
+
     if image_b64:
-        provider = _vision_provider()
+        image_data = base64.standard_b64decode(image_b64)
+        if is_remote:
+            image_data, image_mime = _strip_image_metadata(image_data, image_mime)
         ext = {"image/jpeg": ".jpg", "image/png": ".png",
                "image/webp": ".webp"}.get(image_mime, ".jpg")
         with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
-            tmp.write(base64.standard_b64decode(image_b64))
+            tmp.write(image_data)
             tmp_path = Path(tmp.name)
         try:
             text = provider.vision(tmp_path, prompt, max_tokens=max_tokens)
@@ -158,8 +181,57 @@ def call_llm(
             tmp_path.unlink(missing_ok=True)
         return text + "\n\n" + ai_label(provider.name) if label_output else text
     else:
-        text = _text_provider().chat(system or "", prompt, max_tokens=max_tokens)
-        return text + "\n\n" + ai_label(_text_provider().name) if label_output else text
+        text = provider.chat(system or "", prompt, max_tokens=max_tokens)
+        return text + "\n\n" + ai_label(provider.name) if label_output else text
+
+
+class ImageMetadataError(RuntimeError):
+    """Raised when an image cannot be re-encoded without metadata."""
+
+
+def _strip_image_metadata(image_data: bytes, mime_type: str) -> tuple[bytes, str]:
+    """Re-encode an image from its pixels only, dropping EXIF/XMP/GPS/ICC/text.
+
+    The pixels are copied into a fresh image object, which carries no
+    metadata; a palette is kept. Formats JPEG cannot hold (alpha, palette)
+    are sent as PNG instead, so the returned MIME type may differ from the
+    input. The result is re-opened and checked for leftover EXIF.
+
+    Fails closed: on any error ImageMetadataError is raised and the caller
+    must not send the image. Returns (clean bytes, MIME type).
+    """
+    from PIL import Image
+
+    try:
+        with Image.open(io.BytesIO(image_data)) as img:
+            img.load()
+            clean = Image.frombytes(img.mode, img.size, img.tobytes())
+            if img.mode == "P" and img.getpalette():
+                clean.putpalette(img.getpalette())
+
+        out_mime = mime_type if mime_type in ("image/png", "image/webp") else "image/jpeg"
+        if out_mime == "image/jpeg" and clean.mode not in ("RGB", "L", "CMYK"):
+            out_mime = "image/png"
+        fmt = {"image/png": "PNG", "image/webp": "WEBP", "image/jpeg": "JPEG"}[out_mime]
+
+        buf = io.BytesIO()
+        if fmt == "JPEG":
+            clean.save(buf, format=fmt, quality=95)
+        else:
+            clean.save(buf, format=fmt)
+        cleaned = buf.getvalue()
+
+        with Image.open(io.BytesIO(cleaned)) as check:
+            if len(check.getexif()) or "xmp" in check.info or "icc_profile" in check.info:
+                raise ImageMetadataError("metadata survived re-encoding")
+        return cleaned, out_mime
+    except ImageMetadataError:
+        raise
+    except Exception as e:
+        raise ImageMetadataError(
+            t(f"Bild konnte nicht ohne Metadaten neu kodiert werden, wird nicht gesendet: {e}",
+              f"Image could not be re-encoded without metadata, not sending it: {e}")
+        ) from e
 
 
 class _Tee(io.TextIOBase):

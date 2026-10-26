@@ -197,6 +197,8 @@ DISEASE_SLUG_MAP: dict[str, str] = {
     "west nile": "west_nile", "wnv": "west_nile",
     # Usutu-Virus
     "usutu": "usutu",
+    # Shamonda-Virus
+    "shamonda": "shamonda", "schamonda": "shamonda",
     # Sindbis-Virus
     "sindbis": "sindbis_virus", "ockelbo": "sindbis_virus", "pogosta": "sindbis_virus",
     # Echinokokkose

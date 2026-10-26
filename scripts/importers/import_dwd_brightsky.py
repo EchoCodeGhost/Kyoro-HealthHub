@@ -39,7 +39,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg
 from modules.db import open_db
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 from modules.base import ImportResult, log_import
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
@@ -77,7 +77,7 @@ def fetch_brightsky(lat: float, lon: float, date_from: str, date_to: str) -> dic
     Teil-Erfolg zählt: schlägt ein Fenster fehl, werden die übrigen trotzdem
     geliefert; None nur, wenn kein einziges Fenster durchkam.
     """
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     start, end = date.fromisoformat(date_from), date.fromisoformat(date_to)
 
     merged: dict = {"sources": [], "weather": []}

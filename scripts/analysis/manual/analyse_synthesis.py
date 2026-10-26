@@ -25,13 +25,18 @@ analyse_synthesis.py — LLM-basierte Synthese aller Einzelanalysen
              (jeweils mit dem vollen Analyse-Prompt). Der Vorsitz liest die Rohdaten danach
              kategorienweise (eine Runde pro medizinischer Kategorie unter scripts/analysis/,
              z.B. cardiovascular, sleep, infectious) statt alles auf einmal, um Kontextfenster-
-             Grenzen einzuhalten; jede Kategorie-Runde bekommt alle vier vollständigen
+             Grenzen einzuhalten; jede Kategorie-Runde bekommt alle vollständigen
              Panel-Meinungen plus alle bisherigen Kategorie-Notizen (unveraendert, nie
              ueberschrieben) und schreibt eine eigene, abgeschlossene Notiz. Eine
              Abschlussrunde liest alle Kategorie-Notizen + alle Panel-Meinungen nochmal und
              schreibt die finale Synthese. Alle Kategorie-Notizen bleiben als eigenstaendige
              Artefakte im Anhang erhalten (Chain of Custody).
              Aktiviert ueber synthesis_panel.enabled=true in health_config.json.
+             Vor jedem Cloud-Aufruf werden Postadressen, Personennamen, Telefon- und
+             Versichertennummern sowie GPS-Koordinaten und persönliche Ortsnamen (aus der
+             lokalen Konfiguration) aus Prompt und System-Text entfernt (modules.address_redaction,
+             name_redaction, identifier_redaction, location_redaction);
+             abschaltbar mit --no-scrub oder synthesis_panel.scrub_before_send=false. Das Log nennt nur Zaehler.
 @method.en   Reads the latest markdown reports from analyses/ and has the LLM evaluate all
              individual findings impartially in the overall context: cross-cutting patterns,
              likely connections, next steps, priorities.
@@ -40,16 +45,25 @@ analyse_synthesis.py — LLM-basierte Synthese aller Einzelanalysen
              (each given the full analysis prompt). The chair then reads the raw data
              category by category (one round per medical category under scripts/analysis/,
              e.g. cardiovascular, sleep, infectious) instead of all at once, to stay within
-             context-window limits; each category round gets all four complete panel
+             context-window limits; each category round gets all complete panel
              opinions plus all prior category notes (unchanged, never overwritten) and
              writes its own, final note. A final round reads all category notes + all panel
              opinions again and writes the final synthesis. All category notes remain as
              standalone artifacts in the appendix (chain of custody).
              Enabled via synthesis_panel.enabled=true in health_config.json.
+             Before every cloud call, postal addresses, person names, phone/insurance numbers as
+             well as GPS coordinates and personal place names (from the local configuration)
+             are removed from the prompt and system text (modules.address_redaction,
+             name_redaction, identifier_redaction, location_redaction); can be switched
+             off with --no-scrub or synthesis_panel.scrub_before_send=false. The log shows counts only.
 @reads       Alle Analyse-Berichte aus analyses/
 @writes      Synthese-Bericht als Markdown (mit Anhang: Einzelmeinungen bei Panel-Modus)
 @limits.de   Heuristische Methode: Heuristische LLM-Analyse. Keine medizinische Diagnose.
+             Die Bereinigung vor dem Senden ist heuristisch und entfernt keine anderen
+             Identifikatoren (z. B. Bankdaten, Patientennummern anderer Systeme).
 @limits.en   Heuristic method: Heuristic LLM analysis. No medical diagnosis.
+             The scrubbing before sending is heuristic and does not remove other identifiers
+             (e.g. bank details, ID numbers of other systems).
 @scoring Synthese-Score basierend auf Konsistenz, Schweregrad und zeitlicher Persistenz der Befunde
 @prompt-classification LLM:Analysis
 @prompt.de    SYSTEM_DE, SYSTEM_EN
@@ -90,6 +104,10 @@ from health_config import Config, OWN_PERSON_ID
 from modules.db import open_db, open_lab_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.llm import ai_label
+from modules.address_redaction import find_address_spans, redact_addresses
+from modules.identifier_redaction import find_identifier_spans, redact_identifiers
+from modules.location_redaction import find_location_spans, redact_locations
+from modules.name_redaction import find_name_spans, redact_names
 from modules.prompts.analysis_manual import (
     SYSTEM_PROMPT_ANALYSE_SYNTHESIS_DE_STR as SYSTEM_DE,
     SYSTEM_PROMPT_ANALYSE_SYNTHESIS_EN_STR as SYSTEM_EN
@@ -613,6 +631,58 @@ def _build_prompt(reports: list[dict], since: date, lang: str) -> str:
     return header + _build_sections(reports) + _final_task_text(lang)
 
 
+# ── Bereinigung vor dem Senden ────────────────────────────────────────────────
+
+# Per CLI (--no-scrub) gesetzt; None = Konfiguration entscheidet
+_SCRUB_OVERRIDE: bool | None = None
+
+_NUM_DE = {2: "zwei", 3: "drei", 4: "vier", 5: "fünf", 6: "sechs", 7: "sieben", 8: "acht"}
+_NUM_EN = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight"}
+
+
+def _num_word(n: int, lang: str) -> str:
+    """Zahlwort fuer die Panelgroesse in den Prompts (Ziffer ab 9)."""
+    return (_NUM_EN if lang == "en" else _NUM_DE).get(n, str(n))
+
+
+def _scrub_enabled() -> bool:
+    """Standard: an. Abschaltbar per --no-scrub oder synthesis_panel.scrub_before_send=false."""
+    if _SCRUB_OVERRIDE is not None:
+        return _SCRUB_OVERRIDE
+    return bool(_cfg.synthesis_panel.get("scrub_before_send", True))
+
+
+def _scrub_for_cloud(text: str) -> tuple[str, int, int, int, int]:
+    """Entfernt Postadressen, Personennamen, Telefon- und Versichertennummern sowie
+    GPS-Koordinaten und persoenliche Ortsnamen aus Text, der an einen Cloud-Anbieter geht.
+
+    Gibt (bereinigter Text, Anzahl Adressen, Anzahl Namen, Anzahl Nummern, Anzahl
+    Orte/Koordinaten) zurueck. Die Zaehler nennen nie den entfernten Text.
+    
+    Location-Bereinigung: Nutzt jetzt filter_prompt_text() aus location_store
+    für die Location-Privacy-Policy. Adressen/Namen/Nummern werden weiter
+    unconditional entfernt.
+    """
+    from modules.location_store import filter_prompt_text, get_caller_name
+    
+    if not text:
+        return text, 0, 0, 0, 0
+    
+    # Adressen, Nummern und Namen immer entfernen (unconditional)
+    n_ids = len(find_identifier_spans(text))
+    text = redact_identifiers(text)
+    n_addr = len(find_address_spans(text))
+    text = redact_addresses(text)
+    n_names = len(find_name_spans(text))
+    text = redact_names(text)
+    
+    # Location-Bereinigung: filter_prompt_text mit Caller "analyse_synthesis"
+    # dieser ersetzt den alten redact_locations-Aufruf
+    filtered_text, n_locs = filter_prompt_text(text, "analyse_synthesis")
+    
+    return filtered_text, n_addr, n_names, n_ids, n_locs
+
+
 # ── OpenRouter-Aufruf ─────────────────────────────────────────────────────────
 
 def _call_llm(prompt: str, system: str, model: str | None = None,
@@ -633,6 +703,17 @@ def _call_llm(prompt: str, system: str, model: str | None = None,
     if not api_key:
         raise RuntimeError(t("openrouter_api_key nicht konfiguriert",
                              "openrouter_api_key not configured"))
+
+    if _scrub_enabled():
+        system, a1, n1, i1, l1 = _scrub_for_cloud(system)
+        prompt, a2, n2, i2, l2 = _scrub_for_cloud(prompt)
+        print(t(f"  → Bereinigt vor dem Senden: {a1 + a2} Adresse(n), {n1 + n2} Name(n), "
+                f"{i1 + i2} Telefon-/Versichertennr., {l1 + l2} Ort(e)/Koordinaten entfernt",
+                f"  → Scrubbed before sending: {a1 + a2} address(es), {n1 + n2} name(s), "
+                f"{i1 + i2} phone/insurance number(s), {l1 + l2} place(s)/coordinate(s) removed"))
+    else:
+        print(t("  ⚠ Bereinigung vor dem Senden ist AUS (--no-scrub / scrub_before_send=false)",
+                "  ⚠ Scrubbing before sending is OFF (--no-scrub / scrub_before_send=false)"))
 
     payload = json.dumps({
         "model": model,
@@ -769,14 +850,15 @@ def _opinions_block(opinions: list[dict], lang: str) -> str:
 
 
 def _build_chair_category_prompt(category: str, category_reports: list[dict],
-                                   prior_notes: list[dict], lang: str) -> str:
+                                   prior_notes: list[dict], lang: str,
+                                   n_members: int = 4) -> str:
     """Prompt fuer eine Kategorie-Runde des Vorsitzes: NUR die reinen
     Rohdaten dieser Kategorie (Klinische-Interpretation-Abschnitte der
     Fachaerzte per _strip_ai_interpretation entfernt) + die eigenen
     bisherigen Kategorie-Notizen — bewusst OHNE Panel-Meinungen UND ohne
     jede KI-generierte Zwischeninterpretation. Der Vorsitz soll sich hier
     ein unabhaengiges, unbeeinflusstes Urteil rein aus Zahlen/Tabellen
-    bilden; die vier Panel-Meinungen (die selbst schon die Fachaerzte
+    bilden; die Panel-Meinungen (die selbst schon die Fachaerzte
     gelesen und bewertet haben) kommen dazu erst in der Abschlussrunde
     (_build_chair_final_prompt). Panel-Mitglieder bekommen dagegen den
     vollstaendigen Bericht inkl. Interpretation — s. _build_member_category_prompt.
@@ -831,14 +913,14 @@ def _build_chair_category_prompt(category: str, category_reports: list[dict],
         f"eigenstaendige, in sich verstaendliche Notiz NUR zu dieser "
         f"Kategorie — deine eigene vorlaeufige fachliche Einschaetzung, mit "
         f"Belegen aus den Rohdaten. Diese Notiz wird in der Abschlussrunde "
-        f"gegen die vier Panel-Meinungen abgewogen; ueberschreibe sie hier "
+        f"gegen die {_num_word(n_members, 'de')} Panel-Meinungen abgewogen; ueberschreibe sie hier "
         f"nicht vorwegnehmend im Hinblick auf ein Panel, das du noch gar "
         f"nicht gesehen hast.\n",
         f"\n\n## Task for this round\n\n"
         f"Read the raw data for category **{category}**. Write a "
         f"standalone, self-contained note ONLY for this category — your "
         f"own preliminary assessment, backed by the raw data. This note "
-        f"will be weighed against the four panel opinions in the final "
+        f"will be weighed against the {_num_word(n_members, 'en')} panel opinions in the final "
         f"round; don't pre-shape it around a panel you haven't seen yet.\n",
     )
 
@@ -846,17 +928,19 @@ def _build_chair_category_prompt(category: str, category_reports: list[dict],
 
 
 def _build_chair_final_prompt(category_notes: list[dict], opinions: list[dict],
-                                lang: str) -> str:
+                                lang: str, n_members: int | None = None) -> str:
     """Letzte Vorsitz-Runde: liest alle eigenen Kategorie-Notizen (einzeln,
     keine davon zusammengefuehrt) + alle vollstaendigen Panel-Meinungen
     nochmal, und schreibt die finale Synthese im Standard-Format."""
     ctx = _patient_context(lang)
+    n_de = _num_word(n_members if n_members is not None else len(opinions), "de")
+    n_en = _num_word(n_members if n_members is not None else len(opinions), "en")
 
     header = t(
         f"Du bist der Vorsitz eines Konsils. Du hast die Datenbasis bereits "
         f"kategorienweise gelesen und pro Kategorie eine eigenstaendige "
         f"Notiz geschrieben. Hier sind all deine Notizen sowie nochmal alle "
-        f"vier vollstaendigen Panel-Einzelmeinungen. Waege die vier "
+        f"{n_de} vollstaendigen Panel-Einzelmeinungen. Waege die {n_de} "
         f"Einzelmeinungen gegeneinander ab (wo stimmen sie ueberein, wo "
         f"widersprechen sie sich, wessen Argument ist staerker begruendet — "
         f"anhand deiner eigenen Notizen zur Datenlage) und schreibe jetzt "
@@ -872,8 +956,8 @@ def _build_chair_final_prompt(category_notes: list[dict], opinions: list[dict],
         f"**Patientenkontext:**\n{ctx}\n\n",
         f"You are chairing a consult. You've already read the data basis "
         f"category by category and written a standalone note per category. "
-        f"Here are all your notes plus all four complete panel opinions "
-        f"again. Weigh the four opinions against each other (where do they "
+        f"Here are all your notes plus all {n_en} complete panel opinions "
+        f"again. Weigh the {n_en} opinions against each other (where do they "
         f"agree, where do they conflict, whose reasoning is stronger — "
         f"based on your own notes on the data) and now write the final, "
         f"consolidated synthesis. On disagreement: state both positions, "
@@ -907,24 +991,27 @@ def _build_chair_final_prompt(category_notes: list[dict], opinions: list[dict],
 
 
 def _build_member_category_prompt(category: str, category_reports: list[dict],
-                                    prior_notes: list[dict], lang: str) -> str:
+                                    prior_notes: list[dict], lang: str,
+                                    n_members: int = 4) -> str:
     """Prompt fuer eine Kategorie-Runde EINES Panel-Mitglieds: Rohdaten NUR
     dieser Kategorie + die eigenen bisherigen Kategorie-Notizen dieses
-    Mitglieds. Bewusst OHNE die Meinungen der anderen drei Mitglieder — die
-    Unabhaengigkeit der vier Facharzt-Sichten ist der Zweck des Panels
+    Mitglieds. Bewusst OHNE die Meinungen der anderen Mitglieder — die
+    Unabhaengigkeit der Facharzt-Sichten ist der Zweck des Panels
     (Cross-Model-Redundanz), das soll eine Kategorie-Runde nicht aufweichen.
     Analog zu _build_chair_category_prompt, aber ohne opinion_block."""
     ctx = _patient_context(lang)
+    others_de = _num_word(max(n_members - 1, 1), "de")
+    others_en = _num_word(max(n_members - 1, 1), "en")
 
     header = t(
         f"Du bist ein Mitglied eines Konsils (unabhaengig von den anderen "
-        f"drei Mitgliedern — du siehst deren Meinungen nicht). Um "
+        f"{others_de} Mitgliedern — du siehst deren Meinungen nicht). Um "
         f"Kontextfenster-Grenzen einzuhalten, liest du die Datenbasis "
         f"kategorienweise statt auf einmal. Dies ist Kategorie "
         f"**{category}**.\n\n"
         f"**Patientenkontext:**\n{ctx}\n\n",
         f"You are a member of a consult panel (independent of the other "
-        f"three members — you don't see their opinions). To stay within "
+        f"{others_en} members — you don't see their opinions). To stay within "
         f"context-window limits, you're reading the data basis category by "
         f"category instead of all at once. This is category "
         f"**{category}**.\n\n"
@@ -1196,12 +1283,12 @@ def _run_panel(reports: list[dict], system: str, members: list[str],
 
     Reihenfolge ist bewusst: JEDES Panel-Mitglied bildet sich seine
     Kategorie-Notizen UND seine finale Einzelmeinung ausschliesslich aus den
-    Facharzt-Rohdaten — nie aus den Notizen/Meinungen der anderen drei
+    Facharzt-Rohdaten — nie aus den Notizen/Meinungen der anderen
     Mitglieder oder des Vorsitzes (Unabhaengigkeit = der Zweck des Panels).
     Der Vorsitz macht in seinen Kategorie-Runden dasselbe: nur Rohdaten,
     keine Panel-Meinungen — bildet sich also ebenfalls ein unabhaengiges,
     unverankertes Urteil. Erst in der allerletzten Runde (Vorsitz-
-    Abschlussrunde) treffen die eigene Lesung des Vorsitzes und alle vier
+    Abschlussrunde) treffen die eigene Lesung des Vorsitzes und alle
     fertigen Panel-Einzelmeinungen ueberhaupt zum ersten Mal aufeinander.
 
     einzelmeinungen: Liste von {"model": str, "response": str, "error": str|None} —
@@ -1259,7 +1346,8 @@ def _run_panel(reports: list[dict], system: str, members: list[str],
                     f"  → Panel member {model} reading category '{category}' "
                     f"({len(category_reports)} reports) …"))
             member_prompt = _build_member_category_prompt(
-                category, category_reports, prior_notes_for_model, lang)
+                category, category_reports, prior_notes_for_model, lang,
+                n_members=len(members))
             try:
                 note = _call_llm_retry(
                     member_prompt, system, model, lang,
@@ -1311,7 +1399,8 @@ def _run_panel(reports: list[dict], system: str, members: list[str],
                 f"  → Consult chair ({chair_model}) reading category '{category}' "
                 f"({len(category_reports)} reports) …"))
         cat_prompt = _build_chair_category_prompt(
-            category, category_reports, category_notes, lang)
+            category, category_reports, category_notes, lang,
+            n_members=len(members))
         try:
             note = _call_llm_retry(
                 cat_prompt, system, chair_model, lang,
@@ -1399,6 +1488,12 @@ def run(since: date, top_lines: int, bottom_lines: int,
         print(t("\n=== DRY RUN — Prompt (gekürzt) ===\n",
                 "\n=== DRY RUN — Prompt (truncated) ===\n"))
         print(prompt[:3000])
+        if _scrub_enabled():
+            _, d_addr, d_names, d_ids, d_locs = _scrub_for_cloud(prompt)
+            print(t(f"\n[Bereinigung vor dem Senden: {d_addr} Adresse(n), {d_names} Name(n), "
+                    f"{d_ids} Telefon-/Versichertennr., {d_locs} Ort(e)/Koordinaten würden entfernt]",
+                    f"\n[Scrubbing before sending: {d_addr} address(es), {d_names} name(s), "
+                    f"{d_ids} phone/insurance number(s), {d_locs} place(s)/coordinate(s) would be removed]"))
         print(t(f"\n[… {max(0, len(prompt)-3000)} weitere Zeichen …]",
                 f"\n[… {max(0, len(prompt)-3000)} more characters …]"))
         print(t(f"\nPrompt gesamt: {len(prompt):,} Zeichen | {len(reports)} Analysen",
@@ -1509,12 +1604,18 @@ def main() -> None:
     ap.add_argument("--no-panel", action="store_true",
                     help=t("Panel-Modus deaktivieren, auch wenn konfiguriert",
                            "Disable panel mode even if configured"))
+    ap.add_argument("--no-scrub", action="store_true",
+                    help=t("Adressen/Namen NICHT vor dem Senden entfernen (nicht empfohlen)",
+                           "Do NOT remove addresses/names before sending (not recommended)"))
     ap.add_argument("--yes", action="store_true",
                     help=t("Kostenbestaetigung ueberspringen", "Skip cost confirmation"))
     add_lang_arg(ap)
     args = ap.parse_args()
     apply_lang_from_args(args)
     lang = getattr(args, "lang", "de")
+    global _SCRUB_OVERRIDE
+    if args.no_scrub:
+        _SCRUB_OVERRIDE = False
 
     if args.since:
         since = date.fromisoformat(args.since)

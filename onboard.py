@@ -67,6 +67,8 @@ CONFIG_SRC  = REPO_ROOT / "templates" / "health_config.example.json"
 # onboarding a patient instance would silently write into the operator's
 # own real config instead of the instance's.
 CONFIG_DEST = KYORO_CONFIG_DIR / "health_config.json"
+LOCATION_PRIVACY_SRC = REPO_ROOT / "templates" / "location_privacy.example.json"
+LOCATION_PRIVACY_DEST = KYORO_CONFIG_DIR / "location_privacy.json"
 REQ_FILE    = REPO_ROOT / "requirements.txt"
 INIT_DB_SCRIPT      = REPO_ROOT / "scripts" / "utils" / "init_db.py"
 MEDICINE_SCHEMA_SCRIPT = REPO_ROOT / "scripts" / "utils" / "create_medicine_schema.py"
@@ -256,6 +258,17 @@ else:
         ok(t(f"Beispielkonfiguration kopiert nach {CONFIG_DEST}", f"Copied example config to {CONFIG_DEST}"))
     warn(t("Diese Datei muss vor dem ersten Pipeline-Lauf bearbeitet werden.",
            "You must edit this file before running the pipeline."))
+
+# Location privacy config
+if LOCATION_PRIVACY_DEST.exists():
+    ok(t(f"Ortsdaten-Konfiguration vorhanden: {LOCATION_PRIVACY_DEST}",
+         f"Location privacy config already exists: {LOCATION_PRIVACY_DEST}"))
+else:
+    shutil.copy(LOCATION_PRIVACY_SRC, LOCATION_PRIVACY_DEST)
+    ok(t(f"Ortsdaten-Konfiguration kopiert nach {LOCATION_PRIVACY_DEST}",
+         f"Copied location privacy config to {LOCATION_PRIVACY_DEST}"))
+    warn(t("Standard: KEINE Ortsdaten werden gespeichert. Bearbeiten Sie die Datei, um das zu ändern.",
+           "Default: NO location data will be stored. Edit the file to change this."))
 
 
 # ── 5. Directories ───────────────────────────────────────────────────────────

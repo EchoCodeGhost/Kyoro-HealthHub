@@ -83,6 +83,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID, KYORO_CONFIG_DIR
 from modules.db import open_db, DB_OPERATIONAL_ERRORS
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from utils.anonymize import round_coords
 from modules.endemic_matching import (
     geo_dist_km as _geo_dist_km, resolve_radius_km, since_floor_ok as _endemic_since_floor_ok,
     TIMELESS_SOURCES,
@@ -395,8 +396,14 @@ def _save_geocache(cache: dict) -> None:
                              encoding="utf-8")
 
 
+# Zoomstufe 8 liefert nur Land/Bundesland/Kreisebene; dafür reicht ~11 km
+NOMINATIM_PRECISION = 1
+
+
 def _nominatim(lat: float, lon: float, cache: dict) -> dict:
-    key = f"{round(lat,2)},{round(lon,2)}"
+    # Nur gerundete Koordinaten verlassen den Rechner
+    lat, lon = round_coords(lat, lon, NOMINATIM_PRECISION)
+    key = f"{lat},{lon}"
     if key in cache:
         return cache[key]
     params = urllib.parse.urlencode(
@@ -1212,6 +1219,8 @@ _DISEASE_CANONICAL: dict[str, str] = {
     "leptospirose":                           "leptospirose",
     "tularaemie":                             "tularaemie",
     "tularämie":                              "tularaemie",
+    "shamonda":                               "shamonda",
+    "schamonda":                              "shamonda",
 }
 
 

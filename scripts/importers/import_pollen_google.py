@@ -43,12 +43,12 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 
 _cfg = _Cfg()
 DB_PATH  = _cfg.db_path
 HOME_LAT, HOME_LON = (
-    round_coords(_cfg.home_lat, _cfg.home_lon)
+    for_external_api(_cfg.home_lat, _cfg.home_lon)
     if _cfg.home_lat is not None and _cfg.home_lon is not None
     else (_cfg.home_lat, _cfg.home_lon)
 )
@@ -67,7 +67,7 @@ def _get_api_key() -> str | None:
 
 
 def _fetch_google(api_key: str, lat: float, lon: float, days: int) -> dict:
-    rlat, rlon = round_coords(lat, lon)
+    rlat, rlon = for_external_api(lat, lon)
     url = (f"{API_BASE}?key={api_key}"
            f"&location.latitude={rlat}&location.longitude={rlon}"
            f"&days={days}&languageCode=de")
@@ -156,7 +156,7 @@ def main():
             "Standort fehlt: --lat/--lon übergeben oder location.lat/lon in health_config.json setzen.",
             "Missing location: pass --lat/--lon or set location.lat/lon in health_config.json."))
 
-    lat_r, lon_r = round_coords(args.lat, args.lon)
+    lat_r, lon_r = for_external_api(args.lat, args.lon)
     conn = open_db()
     print(t(
         f"Google Pollen API für ({lat_r:.2f}, {lon_r:.2f}), {args.days} Tage ...",

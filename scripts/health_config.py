@@ -168,6 +168,7 @@ DEFAULTS = {
         "db":                str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "health.db"),
         "medicine_db":       str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "medicine.db"),
         "medicine_imaging_db": str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "medicine_imaging.db"),
+        "location_db":       str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "location.db"),
         "data_root":         str(_BASE_HOME / "Kyoro-HealthHub" / "imports"),
         "analyses":     str(_BASE_HOME / "Kyoro-HealthHub" / "analyses"),
         "manual":       str(_BASE_HOME / "Kyoro-HealthHub" / "imports" / "manual"),
@@ -405,6 +406,11 @@ class Config:
             str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "medicine_imaging.db"))).expanduser()
 
     @property
+    def location_db_path(self) -> Path:
+        return Path(self._cfg["paths"].get("location_db",
+            str(_BASE_HOME / "Kyoro-HealthHub" / "data" / "location.db"))).expanduser()
+
+    @property
     def data_root(self) -> Path:
         return Path(self._cfg["paths"]["data_root"]).expanduser()
 
@@ -512,6 +518,36 @@ class Config:
                 return entry.get("name", ""), entry.get("lat"), entry.get("lon")
         loc = self._cfg.get("location", {})
         return loc.get("name", ""), loc.get("lat"), loc.get("lon")
+
+    @property
+    def location_privacy(self) -> dict:
+        """Location privacy configuration from ~/.config/kyoro/location_privacy.json.
+        Returns empty dict when file is missing (safe default: store nothing)."""
+        if not hasattr(self, "_location_privacy_cache"):
+            from modules.i18n import t
+            location_privacy_path = KYORO_CONFIG_DIR / "location_privacy.json"
+            if not location_privacy_path.exists():
+                import warnings
+                warnings.warn(
+                    t(f"Location privacy config fehlend: {location_privacy_path}. Kopiere templates/location_privacy.example.json um Location-Speicherung zu aktivieren. Aktuelles Verhalten: Es werden keine Location-Daten gespeichert.",
+                      f"Location privacy config missing: {location_privacy_path}. Copy from templates/location_privacy.example.json to enable location storage. Current behavior: no location data will be stored."),
+                    stacklevel=3,
+                )
+                self._location_privacy_cache = {}
+            else:
+                try:
+                    self._location_privacy_cache = json.loads(
+                        location_privacy_path.read_text(encoding="utf-8")
+                    )
+                except Exception as e:
+                    import warnings
+                    warnings.warn(
+                        t(f"Fehler beim Laden von location_privacy.json ({e}). Verwende leere Konfiguration (keine Location-Speicherung).",
+                          f"Failed to load location_privacy.json ({e}). Using empty config (no location storage)."),
+                        stacklevel=3,
+                    )
+                    self._location_privacy_cache = {}
+        return self._location_privacy_cache
 
     # Devices (importer enable/disable flags)
     def has_device(self, device: str) -> bool:
