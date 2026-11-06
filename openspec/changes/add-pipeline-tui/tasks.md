@@ -13,6 +13,9 @@
 - [ ] 1.11 Add `ON_DEMAND_ANALYSE_SCRIPTS` with preview flags per script, and `analyse_all.py --on-demand STEM -- ARGS` with inherited stdio and `analysis_log` entries
 - [ ] 1.12 Tests: on-demand analysis forwarding and logging, preview flags not logged, a prompt works on a real pseudo-terminal, unknown stem rejected, a full run excludes on-demand scripts
 - [ ] 1.13 Test that all three orchestrators import cleanly with an empty config directory; move any config access out of import time if this fails
+- [x] 1.14 Change `analyse_all.run_script()`: stdout and stderr to `<stem>.output.txt`, run metadata only in `<stem>.log`, both with mode `600` also on existing files; failure output read from the output file; update the docstring and regenerate docs
+- [x] 1.15 Tests with a real child script: output and tracebacks reach only the output file, a marker in an argument value does not reach the log, modes are `600` after a repeat run, a script with only an output file counts as no report, a failure prints the end of the output
+- [x] 1.16 Add a cleanup step for old `<stem>.log` files that lists the count first and deletes only after explicit confirmation; test that nothing is deleted without it
 
 ## 2. Foundation
 
@@ -25,7 +28,7 @@
 - [ ] 2.7 Add a read-only opener to `modules/db.py` that installs no triggers, and implement `status.py` on it with `PRAGMA query_only=ON`, reading all three log tables; test locked, missing and undecryptable databases and missing log tables
 - [ ] 2.8 Tests for `status.py`: timestamps in both formats compare correctly as UTC, `post_import_*` rows are ignored, on-demand rows do not make compute or analysis look current
 - [ ] 2.9 Implement the job log widget with a line limit and ANSI handling, the field-driven flag form, and the confirmation dialog
-- [ ] 2.10 Show elapsed time in the job view during every run, and offer the per-script log files after an `analyse_all.py` run, read-only
+- [ ] 2.10 Show elapsed time in the job view during every run, and offer the per-script output files after an `analyse_all.py` run, read-only
 
 ## 3. Manifest and drift checks
 
@@ -55,7 +58,7 @@
 - [ ] 5.8 Resolve the open question on empty-inbox behaviour of `process_inbox --import`, then implement the daily workflow with mandatory preview and pause on failure
 - [ ] 5.9 Resolve the open question on the person field by checking `identity_resolver`
 - [ ] 5.10 Pilot tests per screen: expected argument list per action, disabled states, keyboard-only navigation, quit confirmation with a running job
-- [ ] 5.11 Results browser: scripts from `ANALYSE_SCRIPTS`, runs newest first, Markdown reports, logs, plots through `xdg-open` or `open` with the path as fallback, the no-report state, and the output locations of on-demand scripts
+- [ ] 5.11 Results browser: scripts from `ANALYSE_SCRIPTS`, runs newest first, Markdown reports, output files including old `.log` files, plots through `xdg-open` or `open` with the path as fallback, the no-report state, and the output locations of on-demand scripts
 
 ## 6. Verification against real data
 
@@ -66,6 +69,7 @@
 - [ ] 6.5 Cancel a real importer mid-run, and confirm that a re-run gives a consistent result
 - [ ] 6.6 Confirm that a session leaves no new files apart from those the scripts themselves create
 - [ ] 6.7 Verify on a macOS host, including `Terminal.app`, and over SSH on Linux
+- [ ] 6.8 Run `analyse_all.py --only-exact` on real data with a known date as argument, and confirm by count only that the new log contains no output and not that date
 
 ## 7. Docs and compliance
 

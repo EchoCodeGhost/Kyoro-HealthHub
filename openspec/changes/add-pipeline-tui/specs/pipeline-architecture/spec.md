@@ -107,6 +107,33 @@
 - **WHEN** an entry is missing, or a dependency appears later in `COMPUTE_SCRIPTS`
 - **THEN** the test suite fails
 
+### Requirement: Analysis output is separate from run logs
+`analyse_all.py` SHALL write each script's stdout and stderr to `<stem>.output.txt` in the run's output directory. `<stem>.log` SHALL contain run metadata only: script file name, start time, duration, exit code, output file name and names of skipped flags. It SHALL NOT contain script output, tracebacks or argument values. Both files SHALL be readable by the owner only. Old log files SHALL NOT be deleted without explicit user confirmation.
+
+#### Scenario: Script prints health data
+- **WHEN** a script prints a line to stdout or stderr during an `analyse_all.py` run
+- **THEN** the line is in `<stem>.output.txt` and not in `<stem>.log`
+
+#### Scenario: Script fails
+- **WHEN** a script ends with a traceback
+- **THEN** the log records the exit code, the traceback is only in the output file, and the terminal shows the end of the output file
+
+#### Scenario: Argument values stay out of the log
+- **WHEN** a script is run with a date as a flag value
+- **THEN** that date does not appear in `<stem>.log`
+
+#### Scenario: Repeat run on the same day
+- **WHEN** a second run reuses existing files with wider permissions
+- **THEN** both files are readable by the owner only afterwards
+
+#### Scenario: Output file is not a report
+- **WHEN** a script exits 0 and leaves only an output file
+- **THEN** it is counted as having produced no report
+
+#### Scenario: Cleaning up old logs
+- **WHEN** the cleanup step runs without confirmation
+- **THEN** it reports the number of old log files and deletes none
+
 ## MODIFIED Requirements
 
 ### Requirement: Fixed compute dependency order

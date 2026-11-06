@@ -1336,7 +1336,7 @@ def _aggregate_exposure(analysis: list[dict]) -> list[dict]:
 
         # Aktive Ausbrüche
         stay_label = stay.label
-        stay_when = f"{stay.date_from}" + (f" bis {stay.date_to}" if stay.date_to and stay.date_to != stay.date_from else "")
+        stay_when = f"{_stay_start_label(stay)}" + (f" bis {stay.date_to}" if stay.date_to and stay.date_to != stay.date_from else "")
         for ev in item["outbreaks"]:
             sev = ev.get("severity", "medium")
             ev_where = ev.get("region") or ev.get("country") or "?"
@@ -1412,6 +1412,15 @@ _LEVEL_ICON = {"hoch": "██", "high": "██",
                "niedrig": "░░", "low": "░░"}
 
 
+def _starts_at_birth(stay: Stay) -> bool:
+    return bool(_cfg.birthdate) and stay.date_from[:10] == str(_cfg.birthdate)[:10]
+
+
+def _stay_start_label(stay: Stay) -> str:
+    """Das Geburtsdatum bleibt intern: Der Bericht geht auch an das LLM."""
+    return t("Geburt", "Birth") if _starts_at_birth(stay) else stay.date_from
+
+
 def _render_report(stays: list[Stay],
                    analysis: list[dict],
                    exposure: list[dict],
@@ -1438,8 +1447,8 @@ def _render_report(stays: list[Stay],
         en_count = len(item["endemic"])   if item else 0
         marker = " ⚠" if ob_count else ""
         lines.append(
-            f"  {stay.date_from} – {stay.date_to}  "
-            f"{stay.label:<28}  {stay.duration_d:>3}d  "
+            f"  {_stay_start_label(stay)} – {stay.date_to}  "
+            f"{stay.label:<28}  {'–' if _starts_at_birth(stay) else str(stay.duration_d) + 'd':>4}  "
             f"[{stay.climate_zone or '?':>18}]  "
             f"{ob_count} Ausbrüche / {en_count} Endemien{marker}"
         )
@@ -1451,7 +1460,7 @@ def _render_report(stays: list[Stay],
         lines += ["── AUSBRUCHS-ÜBERLAPPUNGEN " + "─" * 45, ""]
         for item in outbreak_hits:
             stay = item["stay"]
-            lines.append(f"  {stay.date_from} {stay.label}:")
+            lines.append(f"  {_stay_start_label(stay)} {stay.label}:")
             for ev in item["outbreaks"][:5]:
                 lines.append(
                     f"    • {ev['disease']:<40} "

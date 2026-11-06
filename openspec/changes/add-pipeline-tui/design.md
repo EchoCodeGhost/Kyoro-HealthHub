@@ -96,7 +96,7 @@ A test module enforces:
 - **Cancel:** jobs start in their own session, and cancelling sends SIGTERM to the process group, then SIGKILL after a grace period. Orchestrator children die with their parent.
 - **Language:** passed through `KYORO_LANG` in the child environment, since not every script has `--lang`.
 - **Interactive scripts own their prompts.** The TUI does not add `--yes` or `--no-confirm`.
-- **Live output has three granularities.** Directly run scripts stream line by line. `import_all.py` and `compute_all.py` show a child's output when that child ends. `analyse_all.py` shows only progress, so the job view offers the per-script log file afterwards, read-only. The job view always shows elapsed time, so a long step does not look hung. Streaming inside `run_pipeline_script()` is out of scope, because its stderr handling and import-log compliance check depend on the captured result.
+- **Live output has three granularities.** Directly run scripts stream line by line. `import_all.py` and `compute_all.py` show a child's output when that child ends. `analyse_all.py` shows only progress, so the job view offers the per-script output file afterwards, read-only. The job view always shows elapsed time, so a long step does not look hung. Streaming inside `run_pipeline_script()` is out of scope, because its stderr handling and import-log compliance check depend on the captured result.
 - **Plots:** piped jobs run with `MPLBACKEND=Agg`, as `analyse_all.py` does for its children, so no plot window opens and nothing fails over SSH.
 
 *Alternative:* a pseudo-terminal widget for interactive scripts. Rejected as far more code than `App.suspend()`, which exists in the current Textual release.
@@ -188,15 +188,35 @@ Limits: direct CLI calls and `recalibrate.py`, which calls `compute_calibrate_so
 
 ### 14. Results browser reads the existing output layout
 
-`analyse_all.py` writes to `<analyses_dir>/<run_date>/<stem>/`, with `.md` reports, `.png` plots and a `.log` per script. The browser lists scripts from `ANALYSE_SCRIPTS`, then the dated runs that have output for the selected script, newest first. Reports render in Textual's Markdown widget, and logs show as text. Terminals cannot show plots reliably, so a plot opens in the system viewer (`xdg-open` on Linux, `open` on macOS). Without a graphical session, for example over SSH, the path is shown instead.
+`analyse_all.py` writes to `<analyses_dir>/<run_date>/<stem>/`, with `.md` reports, `.png` plots, and an output file and a metadata log per script (decision 15). The browser lists scripts from `ANALYSE_SCRIPTS`, then the dated runs that have output for the selected script, newest first. Reports render in Textual's Markdown widget, and output files show as text. Terminals cannot show plots reliably, so a plot opens in the system viewer (`xdg-open` on Linux, `open` on macOS). Without a graphical session, for example over SSH, the path is shown instead.
 
 The browser only reads files and needs no index, so it also works for runs started on the CLI. Scripts that ran without a report are marked as such, matching the "no report" state in `analyse_all.py`. On-demand scripts write outside this layout, and their output locations are taken from each script during implementation.
 
-*Alternative:* showing only the log after a run. Rejected: the report is what users want to read, and the log rarely holds it.
+*Alternative:* showing only the script output after a run. Rejected: the report is what users want to read, and the output rarely holds it.
+
+### 15. Results belong to the user, logs hold metadata only
+
+Today `analyse_all.run_script()` sends each script's full stdout and stderr to `<stem>.log`, along with the command line. Those lines include dates, event names and whole reports, and the file is readable by other local users. Results should be shown to the user, not kept in a log.
+
+`run_script()` therefore writes two files in the run directory:
+
+| File | Content | Mode |
+|---|---|---|
+| `<stem>.output.txt` | The script's stdout and stderr, shown to the user in the job view and results browser | `600` |
+| `<stem>.log` | Script file name, start time, duration, exit code, output file name, and names of skipped flags | `600` |
+
+The log holds no script output, no tracebacks and no argument values, because arguments can carry dates. A log may at most name which file was accessed, by which user and for which patient. No script writes user or patient fields into it under this change, and an access log for clinical use would be a separate change.
+
+After a failed script, `analyse_all.py` prints the end of the output file to the terminal as it does with the log today. Only `.md` files count as reports, so a script that leaves just an output file keeps its "no report" state. The mode is set on existing files too, as a second run on the same day reuses them.
+
+Old `.log` files keep their mixed content. Nothing deletes them automatically, because for some runs they are the only copy of the output. The results browser shows such a file as that run's output. Cleaning them up is offered as a separate step that first lists the count and deletes only after explicit confirmation.
+
+*Alternatives:* dropping the output altogether (loses the only result of scripts without a report); scrubbing values from the log (a filter can miss values, and the output would stay in a log).
 
 ## Risks / Trade-offs
 
-- **[Script output contains health data]** → It stays in memory and on the alternate screen. No log files, and `RichLog` has a line limit. Saving a log is deliberately not part of this change.
+- **[Script output contains health data]** → In the TUI it stays in memory and on the alternate screen, and `RichLog` has a line limit. The TUI saves no logs. `analyse_all.py` writes output only to the user's own output file (decision 15).
+- **[A CLI user expects output in `<stem>.log`]** → `analyse_all.py` names the output file after a failure, and the file sits next to the log. Docs are updated.
 - **[Service temp copy]** `datasette_serve.py` works on a decrypted temporary database → Stop and quit send SIGTERM and verify that the temp file is gone. This is a test case, and if cleanup does not hold, the script gets fixed rather than worked around.
 - **[Cancelling a job mid-write]** → SIGTERM can interrupt an importer. Inserts are `INSERT OR IGNORE`, so a re-run is safe, and the UI says so after a cancel.
 - **[Sanitising covers less of `medicine.db`]** Manual lab imports write there, but the general PII scan only opens `health.db` → Handled in `extend-pii-scan-to-medicine-db`, as the existing scan would destroy clinical text there. The UI does not claim full coverage: even after that change, heuristic matches are only reported.

@@ -610,6 +610,15 @@ REF = {
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
+# Bei --lifetime beginnt das Fenster am Geburtsdatum. Das bleibt fuer die Abfragen
+# intern und erscheint weder in Ausgabe noch Bericht oder Prompt.
+_LIFETIME_WINDOW = False
+
+
+def _window_start_label(start: str) -> str:
+    return t("Lebenszeit", "Lifetime") if _LIFETIME_WINDOW else start
+
+
 def _lc_start(infection_date: str) -> str:
     d = datetime.strptime(infection_date, "%Y-%m-%d") + timedelta(weeks=_SYNDROME_CFG["lag_weeks"])
     return d.strftime("%Y-%m-%d")
@@ -1357,7 +1366,7 @@ def build_differential_report(ranking: list, infection_date: str,
                                  person: str = OWN_PERSON_ID) -> str:
     lines = [
         "## Differenzialdiagnose — Syndrom-Vermutung (automatisch)\n",
-        f"Infektionsdatum: **{infection_date}**  | Fenster: **{lc_start} – {d_to}**\n",
+        f"Infektionsdatum: **{infection_date}**  | Fenster: **{_window_start_label(lc_start)} – {d_to}**\n",
         "Methode: IDF-gewichteter Symptom-Abgleich (log-IDF, normiert auf "
         "Profilgröße) + Biomarker-Bonus.  \n"
         "⚠ Kein Ersatz für klinische Diagnostik — nur Hinweisgeber.\n",
@@ -1562,9 +1571,10 @@ def build_differential_report(ranking: list, infection_date: str,
                     spread_note = (f" **Geballt, keine Momentaufnahme des ganzen "
                                    f"Fensters:** alle {symptom_days} Tage liegen "
                                    f"innerhalb von {span_weeks} Wochen "
-                                   f"({span[0]} bis {span[1]}), nicht über die "
-                                   f"gesamten {round(window_days/30.44,1)} Monate "
-                                   f"verteilt.")
+                                   f"({span[0]} bis {span[1]}), nicht über "
+                                   + ("das gesamte Fenster" if _LIFETIME_WINDOW else
+                                      f"die gesamten {round(window_days/30.44,1)} Monate")
+                                   + " verteilt.")
                 else:
                     spread_note = (f" Einträge verteilen sich über {span_weeks} "
                                    f"Wochen ({span[0]} bis {span[1]}) -- deckt "
@@ -1602,9 +1612,11 @@ def build_differential_report(ranking: list, infection_date: str,
     if symptom_days is not None:
         months = round((datetime.strptime(d_to, "%Y-%m-%d")
                         - datetime.strptime(lc_start, "%Y-%m-%d")).days / 30.44, 1)
+        window_text = (_window_start_label(lc_start) if _LIFETIME_WINDOW else
+                       f"insgesamt {lc_start} bis {d_to}, ca. {months} Monate")
         lines.append(f"**Symptomtagebuch-Datenlage:** {symptom_days} von "
                      f"{MIN_SYMPTOM_DAYS} empfohlenen Tagen erfasst (Analysefenster "
-                     f"insgesamt {lc_start} bis {d_to}, ca. {months} Monate) -- "
+                     f"{window_text}) -- "
                      f"unter der Schwelle wird der Symptom-Score bewusst nicht zur "
                      f"Einstufung herangezogen ("
                      f"Schwelle an die IOM-2015-6-Monats-Chronizitätsschwelle "
@@ -1846,6 +1858,11 @@ def compute_trend(data: dict, lc_start: str, d_to: str) -> list:
     """Quartals-Übersicht: RMSSD, MET-Minuten, HRV-Crash-Rate."""
     start = datetime.strptime(lc_start, "%Y-%m-%d")
     end   = datetime.strptime(d_to, "%Y-%m-%d")
+
+    # Quartalsgrenzen ab Geburt wuerden das Geburtsdatum verraten, also ab den ersten Daten.
+    if _LIFETIME_WINDOW:
+        dates = [d for key in ("nhrv", "activity", "pem") for d in data[key]]
+        start = datetime.strptime(min(dates)[:10], "%Y-%m-%d") if dates else end
 
     # Earliest date with nightly RMSSD — used to annotate source in the table.
     # polar_nightly_hrv = sleep-context RMSSD; before that only daytime H10
@@ -2144,7 +2161,7 @@ def build_report(data, autonome, pem, kardio, schlaf, aktivitaet, respiration,
     lines = [
         f"## {_SYNDROME_CFG['name_de']} — Diagnostik-Score\n",
         f"Infektionsdatum: **{infection_date}**  "
-        f"| Analysefenster: **{lc_start} – {d_to}**  "
+        f"| Analysefenster: **{_window_start_label(lc_start)} – {d_to}**  "
         f"(≥{_SYNDROME_CFG['lag_weeks']} Wochen post-akut)\n",
         f"ICD-10-GM: `{icd10_str}`"
         + (f"  |  {melde_str}" if melde_str else "") + "\n",
@@ -2529,7 +2546,7 @@ def _plot(data, trend, baseline, infection_date, lc_start, d_to):
 
         fig, axes = plt.subplots(4, 1, figsize=(15, 14), facecolor="#1A1A2E")
         fig.suptitle(
-            f"{_SYNDROME_CFG['name_de']} — Biomarker  |  Inf. {infection_date}  (ab {lc_start})",
+            f"{_SYNDROME_CFG['name_de']} — Biomarker  |  Inf. {infection_date}  (ab {_window_start_label(lc_start)})",
             color="#E0E0E0", fontsize=12, fontweight="bold")
 
         BG, TEXT, RED, BLUE, GREEN, AMBER = (
@@ -2661,7 +2678,7 @@ def _build_llm_input(autonome: dict, pem: dict, kardio: dict, schlaf: dict,
     """Erstellt LLM-Eingabe ausschließlich aus berechneten Domänenwerten."""
     lines = [
         f"## Berechnete Befunde — {_SYNDROME_CFG['name_de']} Diagnostik",
-        f"Infektionsdatum: {infection_date} | Analysefenster: {lc_start} – {d_to}",
+        f"Infektionsdatum: {infection_date} | Analysefenster: {_window_start_label(lc_start)} – {d_to}",
         "",
         "### Autonome Dysregulation",
     ]
@@ -2962,8 +2979,9 @@ def main():
         args.onset_override = args.date_from
 
     if args.lifetime:
-        # Ohne konfiguriertes Geburtsdatum generischer Platzhalter statt Abbruch;
-        # die Monatsangabe im Bericht ist dann nicht aussagekraeftig.
+        # Ohne konfiguriertes Geburtsdatum generischer Platzhalter statt Abbruch.
+        global _LIFETIME_WINDOW
+        _LIFETIME_WINDOW = True
         args.onset_override = _cfg.birthdate or "1900-01-01"
 
     infection_events = _resolve_infection_events(args.infection_dates)
@@ -2994,7 +3012,7 @@ def main():
             auto_start = args.onset_override or _lc_start(infection_date)
             print(f"\n{'='*60}")
             print(f"Auto-Differenzialdiagnose  |  {event_label}")
-            print(f"Fenster: {auto_start} – {args.date_to}")
+            print(f"Fenster: {_window_start_label(auto_start)} – {args.date_to}")
             print(f"DB: {_cfg.db_path}\n")
 
             conn = open_db()
@@ -3043,7 +3061,7 @@ def main():
             print(f"\n{'='*60}")
             print(f"{_SYNDROME_CFG['name_de']} — Diagnose-Score")
             print(f"Ereignis:    {event_label}  ({infection_date}){estimated_note}")
-            print(f"Fenster:     {lc_start} – {args.date_to}{onset_note}")
+            print(f"Fenster:     {_window_start_label(lc_start)} – {args.date_to}{onset_note}")
             print(f"DB:          {_cfg.db_path}\n")
 
             conn = open_db()

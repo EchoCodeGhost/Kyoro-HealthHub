@@ -115,7 +115,7 @@ The TUI SHALL run at most one pipeline job at a time. Output SHALL stream into a
 
 #### Scenario: Analysis output after a run
 - **WHEN** an `analyse_all.py` run ends
-- **THEN** the user can open each script's log file read-only from the job view
+- **THEN** the user can open each script's output file read-only from the job view
 
 #### Scenario: Cancelling an orchestrator
 - **WHEN** the user cancels a running `import_all.py`
@@ -167,7 +167,7 @@ The TUI SHALL pass only flags declared in its manifest. Flags that weaken privac
 - **THEN** `decrypt_db.py`, `scrub_*.py`, `migrate_*.py` and `pseudonymize_*.py` are not offered
 
 ### Requirement: Browsing analysis results
-The TUI SHALL let the user select an analysis script and one of its runs, read its reports, read its log and open its plots, without starting a job. It SHALL read existing output files only, and SHALL include runs started outside the TUI.
+The TUI SHALL let the user select an analysis script and one of its runs, read its reports, read its script output and open its plots, without starting a job. It SHALL read existing output files only, and SHALL include runs started outside the TUI.
 
 #### Scenario: Reading the latest report
 - **WHEN** the user selects a script with output in several runs
@@ -178,8 +178,12 @@ The TUI SHALL let the user select an analysis script and one of its runs, read i
 - **THEN** its results appear in the browser
 
 #### Scenario: Script without a report
-- **WHEN** a selected run contains only a log file
-- **THEN** the browser says that no report exists and shows the log
+- **WHEN** a selected run contains only an output file
+- **THEN** the browser says that no report exists and shows the output
+
+#### Scenario: Run from before the separation
+- **WHEN** a selected run contains an old `.log` file and no output file
+- **THEN** the browser shows that file as the run's output
 
 #### Scenario: Plot without a graphical session
 - **WHEN** the user opens a plot and no system viewer is available
