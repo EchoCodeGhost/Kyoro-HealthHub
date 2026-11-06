@@ -15,7 +15,7 @@ Bietet Gesundheitsdatenfunktionen, essentiell für die medizinische Datenverarbe
 
 ## Methode
 
-Ausführungsreihenfolge ist abhänigkeitsbedingt. Skripte werden sequentiell gestartet, wobei jedes Skript nur dann ausgeführt wird, wenn seine Abhängigkeiten (Eingabetabellen) verfügbar sind. Bei Fehlern wird die Ausführung fortgesetzt, aber der Fehler wird protokolliert.
+Ausführungsreihenfolge ist abhängigkeitsbedingt. Skripte werden sequentiell gestartet. Bei Fehlern wird die Ausführung fortgesetzt, aber der Fehler wird protokolliert. --only-exact führt nur die genannten Skripte aus, in derselben Reihenfolge. --on-demand führt ein Skript außerhalb des vollen Laufs aus und protokolliert es.
 
 ## Datenfluss
 
@@ -38,6 +38,6 @@ Keine medizinische Interpretation. Rein technische Orchestrierung. Fehlschläge 
 python3 compute_all.py                  # alle Compute-Scripts
 python3 compute_all.py --skip-quality   # ohne abschließende Qualitätsprüfung
 python3 compute_all.py --recompute      # bestehende Ergebnisse neu berechnen
-python3 compute_all.py --from 2024-01-01 --to 2024-12-31
-python3 compute_all.py --person self
+python3 compute_all.py --only-exact compute_stress,compute_canonical
+python3 compute_all.py --on-demand compute_orthostatic_detection -- --date-from 2020-01-01
 ```

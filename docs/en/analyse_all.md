@@ -33,6 +33,8 @@ python analyse_all.py                        # alle Skripte, mit KI-Kommentaren 
 python analyse_all.py --no-llm                # ohne KI-Kommentare
 python analyse_all.py --from 2026-01-01      # Datums-Filter
 python analyse_all.py --only afib,sleep      # nur bestimmte (Namensbestandteil)
+python analyse_all.py --only-exact analyse_pem  # nur genau diese (ganzer Dateiname ohne .py)
+python analyse_all.py --on-demand analyse_ecg_session -- --session 42  # manuelles Skript, protokolliert
 python analyse_all.py --skip cgm,h7          # bestimmte überspringen
 python analyse_all.py --date 2026-05-31      # wird an Skripte weitergegeben die --date kennen
 python analyse_all.py --dry-run              # zeigt was laufen würde, ohne Ausführung

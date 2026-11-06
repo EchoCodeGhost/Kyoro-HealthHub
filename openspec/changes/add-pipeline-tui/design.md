@@ -52,7 +52,7 @@ Auto importers, compute scripts and analysis scripts run only through their orch
 
 *Alternatives:* calling scripts directly (duplicates this logic and skips sanitising); escaping `--only` patterns (substring semantics cannot express `analyse_pem` alone); changing `--only` itself (breaks existing usage).
 
-With `--only-exact`, `import_all.py` still runs post-import sanitising but skips the outbreak source health check, which is network traffic unrelated to a single import.
+With `--only-exact`, `import_all.py` still syncs the device registry and runs post-import sanitising, but skips inbox routing and the outbreak source health check. Routing would start a script nobody selected, and the health check is network traffic unrelated to a single import.
 
 ### 2. Registries are imported; only what has no registry goes into a manifest
 
@@ -129,6 +129,8 @@ Selecting a compute script shows, from `COMPUTE_REQUIRES` and `compute_log`:
 - **Downstream:** the transitive dependents that become stale. The user can run the script alone, or together with its dependents through `--only-exact`.
 
 *Alternative:* parsing the header. Rejected: it names tables rather than scripts, contains prose, and already disagrees with the code. The header stays the human-readable documentation; a test covers the mapping's structure. The mapping's initial content is derived from each script's actual SQL, not copied from the header.
+
+The mapping includes reads through views (`heart_rate`, `sleep`, `daily_summary`) and single metrics in `measurements`. Three such reads go against the fixed order: `compute_stress` reads `heart_rate` and `sleep` before their producers run, and `compute_af_evidence` reads `daily_summary` before `compute_daily_context` runs. These scripts see the previous run's state. `COMPUTE_READS_LATER` records them separately, so `COMPUTE_REQUIRES` keeps pointing backwards. The order stays unchanged here, because moving a script changes computed results.
 
 ### 9. Daily workflow is a guided sequence
 

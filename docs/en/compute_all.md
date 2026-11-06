@@ -15,7 +15,7 @@ Provides health data functions, essential for medical data processing
 
 ## Method
 
-Execution order is dependency-based. Scripts are started sequentially, with each script only executing if its dependencies (input tables) are available. On errors, execution continues but the error is logged.
+Execution order is dependency-based. Scripts are started sequentially. On errors, execution continues but the error is logged. --only-exact runs only the named scripts, in the same order. --on-demand runs one script outside the full run and logs it.
 
 ## Data flow
 
@@ -38,6 +38,6 @@ No medical interpretation. Pure technical orchestration. Failures of individual 
 python3 compute_all.py                  # alle Compute-Scripts
 python3 compute_all.py --skip-quality   # ohne abschließende Qualitätsprüfung
 python3 compute_all.py --recompute      # bestehende Ergebnisse neu berechnen
-python3 compute_all.py --from 2024-01-01 --to 2024-12-31
-python3 compute_all.py --person self
+python3 compute_all.py --only-exact compute_stress,compute_canonical
+python3 compute_all.py --on-demand compute_orthostatic_detection -- --date-from 2020-01-01
 ```

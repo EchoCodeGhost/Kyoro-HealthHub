@@ -107,13 +107,15 @@ Manuell — medizinische Befunde / Bilddaten (→ medicine.db / medicine_imaging
     python import_all.py
     python import_all.py --update
     python import_all.py --update --person PER-xxxxxxxx
+    python import_all.py --only-exact import_polar,import_ecg_logger
+    python import_all.py --sanitize-only
 """
 
 import argparse
 import sys
 from pathlib import Path
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from modules.pipeline_runner import run_pipeline_script
+from modules.pipeline_runner import parse_exact_stems, run_pipeline_script
 from utils.post_import_sanitize import run as _run_post_import_sanitize
 from utils.sync_registry_to_devices import run as _run_sync_registry_to_devices
 from utils.check_outbreak_source_health import run as _run_outbreak_source_health
@@ -184,6 +186,10 @@ IMPORTERS = [
 ]
 
 
+# Importer mit Sonderbehandlung in main(), ausserhalb von IMPORTERS
+SPECIAL_IMPORTERS = ("import_ecg_logger", "import_ecg_apple")
+
+
 def run_script(script_path: Path, cmd: list[str], errors: list[str]) -> None:
     """Führt ein Importer-Skript als Subprozess aus (siehe modules/pipeline_runner.py).
 
@@ -214,9 +220,35 @@ def main():
                              "Importer mit --person-Unterstuetzung weitergegeben (s. "
                              "_PERSON_AWARE), andere ignorieren das Flag stillschweigend "
                              "statt zu crashen")
+    parser.add_argument("--only-exact", metavar="STEM[,STEM]",
+                        help=t("Nur diese Importer (exakter Dateiname ohne .py); Bereinigung läuft danach trotzdem",
+                               "Only these importers (exact file stem); sanitising still runs afterwards"))
+    parser.add_argument("--sanitize-only", action="store_true",
+                        help=t("Nur die Post-Import-Bereinigung ausführen, keinen Importer",
+                               "Run post-import sanitising only, no importer"))
     add_lang_arg(parser)
     args = parser.parse_args()
     apply_lang_from_args(args)
+
+    if args.sanitize_only:
+        if args.update or args.date_from or args.date_to or args.person or args.only_exact:
+            parser.error(t("--sanitize-only lässt sich nicht mit Optionen für Importer kombinieren",
+                           "--sanitize-only cannot be combined with options for importers"))
+        failed = _run_post_import_sanitize()
+        if failed:
+            print(t(f"[import_all] Bereinigung unvollständig: {', '.join(failed)}",
+                    f"[import_all] Sanitising incomplete: {', '.join(failed)}"), file=sys.stderr)
+            sys.exit(1)
+        return
+
+    selected = None
+    if args.only_exact is not None:
+        known = {Path(name).stem for name in IMPORTERS} | set(SPECIAL_IMPORTERS)
+        selected, unknown = parse_exact_stems(args.only_exact, known)
+        if unknown or not selected:
+            parser.error(t(f"--only-exact: unbekannt oder leer: {', '.join(unknown) or args.only_exact!r}",
+                           f"--only-exact: unknown or empty: {', '.join(unknown) or args.only_exact!r}"))
+
     lang_flag = ["--lang", args.lang] if getattr(args, "lang", None) else []
     person_flag = ["--person", args.person] if args.person else []
 
@@ -237,7 +269,7 @@ def main():
 
     # ── Schritt 0: Inbox-Dateien routen ──────────────────────────────────────
     inbox_script = SCRIPT_DIR / "process_inbox.py"
-    if inbox_script.exists():
+    if selected is None and inbox_script.exists():
         inbox = _Cfg().data_root / "_inbox"
         has_files = inbox.exists() and any(
             f for f in inbox.iterdir()
@@ -294,6 +326,8 @@ def main():
     # Standard-Importer
     for script_name in IMPORTERS:
         script_path = SCRIPT_DIR / script_name
+        if selected is not None and script_path.stem not in selected:
+            continue
         if not script_path.exists():
             print(t(f"[import_all] Überspringe {script_name} (nicht gefunden)", f"[import_all] Skipping {script_name} (not found)"))
             continue
@@ -304,7 +338,7 @@ def main():
 
     # ECGLogger / Polar H10 — liest imports/ecglogger/ wenn Dateien vorhanden
     ecglogger_script = SCRIPT_DIR / "importers/import_ecg_logger.py"
-    if ecglogger_script.exists():
+    if ecglogger_script.exists() and (selected is None or ecglogger_script.stem in selected):
         try:
             ecglogger_dir = Path(_Cfg().data_root) / "ecglogger"
             if ecglogger_dir.is_dir() and any(ecglogger_dir.glob("*.csv")):
@@ -320,7 +354,7 @@ def main():
 
     # Apple Watch EKG — Path aus Config ableiten (electrocardiograms/ neben Export.xml)
     ecg_script = SCRIPT_DIR / "importers/import_ecg_apple.py"
-    if ecg_script.exists():
+    if ecg_script.exists() and (selected is None or ecg_script.stem in selected):
         try:
             cfg = _Cfg()
             ecg_dir = cfg.apple_xml.parent / "electrocardiograms"
@@ -351,18 +385,20 @@ def main():
     # unveraendertem Zustand bleibt dieser Schritt stumm. Blockiert den
     # Gesamtlauf nicht (kein Eintrag in errors), da eine kaputte
     # Drittanbieter-Quelle kein Fehler dieses Imports ist.
-    try:
-        newly_broken, _, _ = _run_outbreak_source_health(quiet=True)
-        if newly_broken:
-            print(t("\n[import_all] ACHTUNG — Ausbruchsdatenquelle(n) neu ausgefallen "
-                    "(siehe scripts/utils/check_outbreak_source_health.py):",
-                    "\n[import_all] WARNING — outbreak data source(s) newly broken "
-                    "(see scripts/utils/check_outbreak_source_health.py):"))
-            for line in newly_broken:
-                print(f"    - {line}")
-    except Exception as e:
-        print(t(f"[import_all] Quell-Gesundheitspruefung uebersprungen (Fehler: {e})",
-                f"[import_all] Source health check skipped (error: {e})"))
+    # Ein selektiver Lauf macht dafuer keinen Netzwerkverkehr.
+    if selected is None:
+        try:
+            newly_broken, _, _ = _run_outbreak_source_health(quiet=True)
+            if newly_broken:
+                print(t("\n[import_all] ACHTUNG — Ausbruchsdatenquelle(n) neu ausgefallen "
+                        "(siehe scripts/utils/check_outbreak_source_health.py):",
+                        "\n[import_all] WARNING — outbreak data source(s) newly broken "
+                        "(see scripts/utils/check_outbreak_source_health.py):"))
+                for line in newly_broken:
+                    print(f"    - {line}")
+        except Exception as e:
+            print(t(f"[import_all] Quell-Gesundheitspruefung uebersprungen (Fehler: {e})",
+                    f"[import_all] Source health check skipped (error: {e})"))
 
     if errors:
         sys.exit(1)
