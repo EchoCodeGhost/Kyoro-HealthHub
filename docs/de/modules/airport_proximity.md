@@ -32,12 +32,12 @@ keine epidemiologische Validierung der Radius-Schwellen.
 
 ## Datenfluss
 
-- **Liest:** `location_stays`, `location_stays_geocoded`
+- **Liest:** `location.db`, `(location_stays`, `location_stays_geocoded)`
 - **Schreibt:** `keine (reine Berechnungsfunktion, kein DB-Schreibzugriff — der Aufrufer entscheidet, was mit dem Ergebnis geschieht)`
 
 ## Grenzen
 
-Flughafenliste ist eine kuratierte Auswahl großer internationaler Hubs (Schwerpunkt Europa), keine vollständige Weltliste — ein fehlender Flughafen führt zu einem False Negative, nicht zu einer falschen Warnung. Radius-Schwellen (5/15 km) sind eine grobe, projektinterne Heuristik ohne formale epidemiologische Kalibrierung; dokumentierte Fälle liegen laut Isaäcson 1989 überwiegend im Nahbereich (wenige km) des Flughafens, Einzelfälle auch weiter entfernt (Gepäck-/Fahrzeugtransport der Mücke). Nur Malaria ist für dieses Phänomen gut dokumentiert; andere Aedes-/Anopheles-übertragene Erkrankungen (Dengue, Chikungunya, Zika) sind über denselben Transportweg theoretisch denkbar, aber nicht in vergleichbarem Maß in der Literatur belegt — deshalb hier bewusst nicht mit demselben Konfidenzgrad getaggt.
+Flughafenliste ist eine kuratierte Auswahl großer internationaler Hubs (Schwerpunkt Europa), keine vollständige Weltliste — ein fehlender Flughafen führt zu einem False Negative, nicht zu einer falschen Warnung. Radius-Schwellen (5/15 km) sind eine grobe, projektinterne Heuristik ohne formale epidemiologische Kalibrierung; dokumentierte Fälle liegen laut Isaäcson 1989 überwiegend im Nahbereich (wenige km) des Flughafens, Einzelfälle auch weiter entfernt (Gepäck-/Fahrzeugtransport der Mücke). Nur Malaria ist für dieses Phänomen gut dokumentiert; andere Aedes-/Anopheles-übertragene Erkrankungen (Dengue, Chikungunya, Zika) sind über denselben Transportweg theoretisch denkbar, aber nicht in vergleichbarem Maß in der Literatur belegt — deshalb hier bewusst nicht mit demselben Konfidenzgrad getaggt. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 
 ## Referenzen
 

@@ -15,7 +15,7 @@ Ermöglicht den Import von Gesundheitsdaten, essentiell für die umfassende Date
 
 ## Methode
 
-Liest imports/manual/timeline_symptome.txt und verwendet ein LOKALES LLM, um datierte Ereignisse nach imports/manual/life_events.json zu extrahieren. WICHTIG: Dieses Skript verarbeitet sensible persoenliche Gesundheitsdaten. Es verweigert die Ausfuehrung mit externen/Cloud-LLM-Anbietern. Nur lokale Anbieter sind zugelassen: openvino, ovms, ollama, lmstudio.
+Liest imports/manual/timeline_symptome.txt und verwendet ein LOKALES LLM, um datierte Ereignisse nach imports/manual/life_events.json zu extrahieren. WICHTIG: Dieses Skript verarbeitet sensible persoenliche Gesundheitsdaten. Es verweigert die Ausfuehrung mit externen/Cloud-LLM-Anbietern — bei Provider "multi" wird das tatsaechlich geroutete Backend geprueft (modules.llm.resolve_local_backend), nicht nur der Top-Level-String. Nur lokale Anbieter sind zugelassen: openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx.
 
 ## Datenfluss
 

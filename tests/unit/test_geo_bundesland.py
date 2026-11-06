@@ -4,9 +4,11 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
-from modules.geo_bundesland import nearest_bundesland, BUNDESLAENDER
+from modules.geo_bundesland import BUNDESLAENDER, bundesland_of
 
 
 def test_all_16_bundeslaender_present():
@@ -17,16 +19,23 @@ def test_all_16_bundeslaender_present():
     assert len(codes) == 16  # no duplicate codes
 
 
-def test_nearest_bundesland_munich_is_bayern():
-    name, code = nearest_bundesland(48.14, 11.58)
-    assert (name, code) == ("Bayern", "BY")
+@pytest.mark.parametrize("lat, lon, expected", [
+    (48.14, 11.58, ("Bayern", "BY")),                 # München
+    (51.23, 6.77, ("Nordrhein-Westfalen", "NW")),     # Düsseldorf
+    (49.79, 9.95, ("Bayern", "BY")),                  # Würzburg (per Zentroid früher BW)
+    (52.52, 13.40, ("Berlin", "BE")),
+    (54.09, 12.13, ("Mecklenburg-Vorpommern", "MV")), # Rostock
+    (50.98, 11.03, ("Thueringen", "TH")),             # Erfurt, RKI-Schreibweise
+])
+def test_bundesland_of(lat, lon, expected):
+    assert bundesland_of(lat, lon) == expected
 
 
-def test_nearest_bundesland_duesseldorf_is_nrw():
-    name, code = nearest_bundesland(51.23, 6.77)
-    assert (name, code) == ("Nordrhein-Westfalen", "NW")
-
-
-def test_nearest_bundesland_returns_a_known_code():
-    name, code = nearest_bundesland(50.0, 10.0)  # somewhere in central Germany
-    assert code in {b[1] for b in BUNDESLAENDER}
+@pytest.mark.parametrize("lat, lon", [
+    (47.80, 13.04),   # Salzburg
+    (47.56, 7.59),    # Basel
+    (28.12, -15.43),  # Las Palmas
+    (None, None),
+])
+def test_outside_germany_is_none(lat, lon):
+    assert bundesland_of(lat, lon) is None

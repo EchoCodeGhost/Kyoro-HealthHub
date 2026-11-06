@@ -66,7 +66,7 @@ def _scrub_embedded_images(pdf: "pikepdf.Pdf") -> tuple[int, list[dict]]:
 
     Gibt (Anzahl gescrubbter Bilder, Liste von {"date","gps"}-Funden vor dem
     Stripping) zurück — GPS/Datum werden vorher aus dem EXIF gelesen, damit
-    Aufrufer sie (gerundet) in photo_locations speichern können.
+    Aufrufer sie über das Ortsregister (location_store) speichern können.
     """
     scrubbed = 0
     locations: list[dict] = []
@@ -101,8 +101,7 @@ def scrub(src: Path, dst: Path) -> tuple[int, list[dict]]:
     Entfernt Dokument-Metadaten (Info + XMP) und PII aus eingebetteten JPEGs.
 
     Gibt (Anzahl gescrubbter eingebetteter Bilder, GPS-Funde) zurück. Ein
-    GPS-Fund ist {"date": str|None, "gps": (lat, lon)} — ungerundet, Aufrufer
-    rundet via imaging_utils.record_photo_location() vor dem Speichern.
+    GPS-Fund ist {"date": str|None, "gps": (lat, lon)} — ungerundet.
     """
     with pikepdf.open(src) as pdf:
         scrubbed, locations = _scrub_embedded_images(pdf)

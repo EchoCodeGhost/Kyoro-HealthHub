@@ -16,7 +16,7 @@ import os
 # Import the module
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts" / "modules"))
-from identity_resolver import IdentityResolver, resolve_device, resolve_person, reverse_resolve, resolve_display_name
+from identity_resolver import IdentityResolver, resolve_device, resolve_person, resolve_provider, resolve_sourcefile, reverse_resolve, resolve_display_name
 
 
 class TestIdentityResolver:
@@ -54,17 +54,37 @@ class TestIdentityResolver:
         pseudo2 = resolve_person("self")
         assert pseudo1 == pseudo2
         assert pseudo1.startswith("PER-")
-    
+
+        # Test provider
+        pseudo1 = resolve_provider("dr_mustermann_ingolstadt")
+        pseudo2 = resolve_provider("dr_mustermann_ingolstadt")
+        assert pseudo1 == pseudo2
+        assert pseudo1.startswith("PRV-")
+
+        # Test sourcefile
+        pseudo1 = resolve_sourcefile("SCAN0001_20260101_batch.pdf")
+        pseudo2 = resolve_sourcefile("SCAN0001_20260101_batch.pdf")
+        assert pseudo1 == pseudo2
+        assert pseudo1.startswith("SRC-")
+
     def test_different_values_different_pseudonyms(self):
         """Test that different real values get different pseudonyms."""
         pseudo1 = resolve_device("polar_v3")
         pseudo2 = resolve_device("polar_h10")
         assert pseudo1 != pseudo2
-        
+
         pseudo1 = resolve_person("self")
         pseudo2 = resolve_person("partner")
         assert pseudo1 != pseudo2
-    
+
+        pseudo1 = resolve_provider("dr_mustermann_ingolstadt")
+        pseudo2 = resolve_provider("musterklinikum")
+        assert pseudo1 != pseudo2
+
+        pseudo1 = resolve_sourcefile("SCAN0001_batch.pdf")
+        pseudo2 = resolve_sourcefile("SCAN0002_batch.pdf")
+        assert pseudo1 != pseudo2
+
     def test_reverse_resolution(self):
         """Test reverse resolution from pseudonym to real value."""
         # Device
@@ -78,7 +98,24 @@ class TestIdentityResolver:
         pseudo = self.resolver.resolve("person", real_person)
         reversed_real = self.resolver.reverse(pseudo)
         assert reversed_real == real_person
-    
+
+        # Provider
+        real_provider = "dr_mustermann_ingolstadt"
+        pseudo = self.resolver.resolve("provider", real_provider)
+        reversed_real = self.resolver.reverse(pseudo)
+        assert reversed_real == real_provider
+
+        # Sourcefile
+        real_sourcefile = "SCAN0001_20260101_batch.pdf"
+        pseudo = self.resolver.resolve("sourcefile", real_sourcefile)
+        reversed_real = self.resolver.reverse(pseudo)
+        assert reversed_real == real_sourcefile
+
+    def test_resolve_unknown_kind_raises(self):
+        """Test that an unsupported kind is rejected, not silently accepted."""
+        with pytest.raises(ValueError):
+            self.resolver.resolve("unknown_kind", "x")
+
     def test_reverse_resolution_unknown_pseudonym(self):
         """Test reverse resolution of unknown pseudonym."""
         result = reverse_resolve("UNKNOWN-PSEUDO")
@@ -93,7 +130,15 @@ class TestIdentityResolver:
         person_pseudo = resolve_person("test_person")
         assert person_pseudo.startswith("PER-")
         assert len(person_pseudo) == 12  # PER- + 8 hex chars
-    
+
+        provider_pseudo = resolve_provider("test_provider")
+        assert provider_pseudo.startswith("PRV-")
+        assert len(provider_pseudo) == 12  # PRV- + 8 hex chars
+
+        sourcefile_pseudo = resolve_sourcefile("test_sourcefile.pdf")
+        assert sourcefile_pseudo.startswith("SRC-")
+        assert len(sourcefile_pseudo) == 12  # SRC- + 8 hex chars
+
     def test_database_persistence(self):
         """Test that mappings are persisted to database."""
         # Create a mapping
@@ -161,23 +206,45 @@ class TestIdentityResolver:
         """Test display name for person pseudonyms."""
         real_person = "self"
         pseudo = self.resolver.resolve("person", real_person)
-        
+
         display_name = self.resolver.resolve_display_name(pseudo)
         assert display_name == real_person
-    
+
+    def test_display_name_provider(self):
+        """Test display name for provider pseudonyms."""
+        real_provider = "dr_mustermann_ingolstadt"
+        pseudo = self.resolver.resolve("provider", real_provider)
+
+        display_name = self.resolver.resolve_display_name(pseudo)
+        assert display_name == real_provider
+
+    def test_display_name_sourcefile(self):
+        """Test display name for sourcefile pseudonyms."""
+        real_sourcefile = "SCAN0001_batch.pdf"
+        pseudo = self.resolver.resolve("sourcefile", real_sourcefile)
+
+        display_name = self.resolver.resolve_display_name(pseudo)
+        assert display_name == real_sourcefile
+
     def test_get_all_mappings(self):
         """Test getting all mappings."""
         # Create some mappings
         resolve_device("device1")
         resolve_device("device2")
         resolve_person("person1")
-        
+        resolve_provider("provider1")
+        resolve_sourcefile("sourcefile1.pdf")
+
         mappings = self.resolver.get_all_mappings()
-        
+
         assert "device" in mappings
         assert "person" in mappings
+        assert "provider" in mappings
+        assert "sourcefile" in mappings
         assert len(mappings["device"]) == 2
         assert len(mappings["person"]) == 1
+        assert len(mappings["provider"]) == 1
+        assert len(mappings["sourcefile"]) == 1
     
     def test_unknown_pseudonym_display_name(self):
         """Test display name for unknown pseudonym."""
@@ -206,10 +273,14 @@ def test_different_kinds_different_prefixes():
     # Access the method through a test
     dev_pseudo = resolver._generate_pseudonym("device", "test")
     person_pseudo = resolver._generate_pseudonym("person", "test")
-    
+    provider_pseudo = resolver._generate_pseudonym("provider", "test")
+    sourcefile_pseudo = resolver._generate_pseudonym("sourcefile", "test")
+
     assert dev_pseudo.startswith("DEV-")
     assert person_pseudo.startswith("PER-")
-    assert dev_pseudo != person_pseudo
+    assert provider_pseudo.startswith("PRV-")
+    assert sourcefile_pseudo.startswith("SRC-")
+    assert len({dev_pseudo, person_pseudo, provider_pseudo, sourcefile_pseudo}) == 4
 
 
 if __name__ == "__main__":

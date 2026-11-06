@@ -399,8 +399,61 @@ def open_lab_db() -> sqlite3.Connection:
     return conn
 
 
+LOCATION_SCHEMA_ALIAS = "loc"
+
+
+def attach_location_db(conn: sqlite3.Connection, alias: str = LOCATION_SCHEMA_ALIAS) -> sqlite3.Connection:
+    """Hängt location.db unter dem Schema-Namen loc an eine Verbindung an.
+
+    Tracks, Aufenthalte und Standortverlauf liegen in location.db, nicht in
+    health.db. Leser, die sie mit health.db-Tabellen verknüpfen (z. B.
+    sessions), hängen location.db an und fragen loc.session_tracks,
+    loc.location_stays usw. ab. Legt das Schema bei Bedarf an. Idempotent:
+    ist der Name schon angehängt, passiert nichts.
+
+    Returns:
+        dieselbe Verbindung
+    """
+    from health_config import Config, load
+    attached = {row[1] for row in conn.execute("PRAGMA database_list")}
+    if alias in attached:
+        return conn
+    from utils.create_location_schema import ensure_location_schema
+    loc = open_location_db()
+    try:
+        ensure_location_schema(loc)
+    finally:
+        loc.close()
+    path = str(Config().location_db_path)
+    key = _load_db_key(load())
+    if conn.in_transaction:
+        # ATTACH ist in einer offenen Transaktion nicht erlaubt. Die Aufrufer
+        # (Importer) schreiben ihre Zeilen ohnehin schrittweise fest.
+        conn.commit()
+    if key:
+        # Eine angehängte verschlüsselte DB braucht ihren eigenen KEY
+        # (s. open_lab_db).
+        conn.execute(f"ATTACH DATABASE ? AS {alias} KEY ?", (path, key))
+    else:
+        conn.execute(f"ATTACH DATABASE ? AS {alias}", (path,))
+    return conn
+
+
 def open_medicine_imaging_db(path: "str | Path | None" = None) -> sqlite3.Connection:
     """Öffnet medicine_imaging.db — medizinische Bilddaten (Fundus, Röntgen, MRT, CT)."""
     from health_config import Config
     db_path = str(Path(path) if path is not None else Config().medicine_imaging_db_path)
     return _open_encrypted(db_path)
+
+
+def open_location_db(path: "str | Path | None" = None) -> sqlite3.Connection:
+    """Öffnet location.db — zentrale GPS/Ortsdaten-Registrierung.
+
+    Jeder Ort wird nur hier gespeichert, nie in health.db oder medicine.db.
+    Verschlüsselt via SQLCipher wenn db_key konfiguriert ist. Das Schema legt
+    utils.create_location_schema.ensure_location_schema() an.
+    """
+    from health_config import Config
+    db_path = Path(path) if path is not None else Config().location_db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return _open_encrypted(str(db_path))

@@ -32,12 +32,12 @@ keine epidemiologische Validierung der Radius-Schwellen.
 
 ## Data flow
 
-- **Reads:** `location_stays`, `location_stays_geocoded`
+- **Reads:** `location.db`, `(location_stays`, `location_stays_geocoded)`
 - **Writes:** `keine (reine Berechnungsfunktion, kein DB-Schreibzugriff — der Aufrufer entscheidet, was mit dem Ergebnis geschieht)`
 
 ## Limitations
 
-Airport list is a curated selection of major international hubs (Europe-weighted), not an exhaustive world list — a missing airport causes a false negative, not a false alarm. Radius thresholds (5/15 km) are a rough, project-internal heuristic without formal epidemiological calibration; documented cases per Isaäcson 1989 mostly occur close (a few km) to the airport, with isolated cases further away (baggage/vehicle-transported mosquito). Only malaria is well documented for this phenomenon; other Aedes-/Anopheles-borne diseases (dengue, chikungunya, zika) are theoretically plausible via the same transport route but not comparably documented in the literature — deliberately not tagged with the same confidence.
+Airport list is a curated selection of major international hubs (Europe-weighted), not an exhaustive world list — a missing airport causes a false negative, not a false alarm. Radius thresholds (5/15 km) are a rough, project-internal heuristic without formal epidemiological calibration; documented cases per Isaäcson 1989 mostly occur close (a few km) to the airport, with isolated cases further away (baggage/vehicle-transported mosquito). Only malaria is well documented for this phenomenon; other Aedes-/Anopheles-borne diseases (dengue, chikungunya, zika) are theoretically plausible via the same transport route but not comparably documented in the literature — deliberately not tagged with the same confidence. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 
 ## References
 

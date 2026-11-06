@@ -1,4 +1,4 @@
-# reduce_gps_precision — Rundet nachträglich zu hochauflösende GPS-Punkte in session_tracks
+# reduce_gps_precision — Rundet nachträglich zu hochauflösende GPS-Punkte in location.db::session_tracks
 
 > GENERATED FROM DOCSTRING — DO NOT EDIT BY HAND.  
 > Source: `scripts/utils/reduce_gps_precision.py`
@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Rounds down existing `session_tracks` coordinates with more than 5 decimal places to 5 decimal places (~1.1m grid). New imports already round at write time (see `import_tracks.py`, `round_coords(..., precision=5)`); this script closes the gap for legacy data imported before rounding was introduced or via a path that skipped `round_coords()`.
+Rounds down existing `session_tracks` coordinates with more than 5 decimal places to 5 decimal places (~1.1m grid). New imports already round at write time (location_store.store_track_points per location_privacy.json); this script closes the gap for legacy data imported before rounding was introduced or via a path that skipped `round_coords()`.
 
 ## Relevance
 
@@ -19,8 +19,8 @@ Identifies affected rows using the same SQL condition as `check_anonymization_co
 
 ## Data flow
 
-- **Reads:** `session_tracks`, `(lat`, `lon)`
-- **Writes:** `session_tracks (lat, lon gerundet), health.db.gps_precision_backup (Rolling-Backup)`
+- **Reads:** `location.db::session_tracks`, `(lat`, `lon)`
+- **Writes:** `location.db::session_tracks (lat, lon gerundet), location.gps_precision_backup (Rolling-Backup)`
 
 ## Limitations
 

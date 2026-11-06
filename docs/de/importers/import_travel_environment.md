@@ -19,7 +19,7 @@ Aggregiert Aufenthaltsdaten aus travel_history.json, location_stays (DB) und GPS
 
 ## Datenfluss
 
-- **Liest:** `~/Kyoro-HealthHub/.config/kyoro/travel_history.json`, `health.db:location_stays`, `health.db:location_stays_geocoded`, `health.db:sessions`, `health.db:session_tracks`
+- **Liest:** `~/Kyoro-HealthHub/.config/kyoro/travel_history.json`, `location.db:location_stays`, `location.db:location_stays_geocoded`, `health.db:sessions`, `location.db:session_tracks`
 - **Schreibt:** `health.db:air_quality, health.db:pollen, health.db:biometeo, health.db:import_log`
 
 ## Grenzen

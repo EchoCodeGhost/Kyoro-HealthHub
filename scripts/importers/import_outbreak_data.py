@@ -197,6 +197,8 @@ DISEASE_SLUG_MAP: dict[str, str] = {
     "west nile": "west_nile", "wnv": "west_nile",
     # Usutu-Virus
     "usutu": "usutu",
+    # Shamonda-Virus
+    "shamonda": "shamonda", "schamonda": "shamonda",
     # Sindbis-Virus
     "sindbis": "sindbis_virus", "ockelbo": "sindbis_virus", "pogosta": "sindbis_virus",
     # Echinokokkose
@@ -706,7 +708,7 @@ ENDEMIC_REFERENCE: list[dict] = [
 # Kartenversion erscheint (Koordinaten sind Landkreis-Zentroide, keine
 # Einzeladressen — für den 100-200km-Radius-Abgleich in
 # analyse_outbreak_exposure.py/analyse_pathogen_exposure.py ausreichend
-# präzise). "Eliminierte Population" (Stand 31.12.2025: Wiesbaden/Mainz)
+# präzise). "Eliminierte Population" (Stand 31.12.2025: Wiesbaden/Mainz)  # no-date-check: Stand der zitierten Quelle
 # bewusst NICHT aufgenommen — dort ist die Mücke laut Karte nicht mehr
 # vorhanden.
 _TIGERMUECKE_ARBOVIREN = [("Dengue-Fieber", "dengue"), ("Chikungunya-Fieber", "chikungunya"), ("Zika-Virus", "zika")]
@@ -750,7 +752,7 @@ _TIGERMUECKE_LANDKREISE_NEU: list[tuple[str, float, float]] = [
 _TIGERMUECKE_LANDKREIS_RADIUS_KM = 20.0
 
 # Konservative Floor-Datierung: der aktuelle Verbreitungsstand (FLI Stand
-# 31.12.2025 / LGL Stand 18.12.2025) darf NICHT rueckwirkend auf beliebig
+# 31.12.2025 / LGL Stand 18.12.2025) darf NICHT rueckwirkend auf beliebig  # no-date-check: Stand der zitierten Quelle
 # alte Reisen/Wohnsitze angewandt werden — anders als z.B. FSME oder
 # Malariazonen ist die Tigermuecke in Deutschland eine erst juengst (und
 # weiter aktiv) expandierende Art. Fruehester belegter Einzelnachweis einer
@@ -770,7 +772,7 @@ for _name, _lat, _lon in _TIGERMUECKE_LANDKREISE_ETABLIERT:
             "since": _TIGERMUECKE_LANDKREIS_SINCE,
             "note": "Tigermücke (Aedes albopictus), etablierte Population — "
                     "Vektor vorhanden, in Deutschland selbst bisher keine autochthone "
-                    "Übertragung nachgewiesen (Nat. Expertenkommission Stechmücken/FLI, Stand 31.12.2025)",
+                    "Übertragung nachgewiesen (Nat. Expertenkommission Stechmücken/FLI, Stand 31.12.2025)",  # no-date-check: Stand der zitierten Quelle
         })
 for _name, _lat, _lon in _TIGERMUECKE_LANDKREISE_NEU:
     for _disease, _slug in _TIGERMUECKE_ARBOVIREN:
@@ -781,7 +783,7 @@ for _name, _lat, _lon in _TIGERMUECKE_LANDKREISE_NEU:
             "since": _TIGERMUECKE_LANDKREIS_SINCE,
             "note": "Tigermücke (Aedes albopictus), neue/kleinere Population — "
                     "Vektor vorhanden, in Deutschland selbst bisher keine autochthone "
-                    "Übertragung nachgewiesen (Nat. Expertenkommission Stechmücken/FLI, Stand 31.12.2025)",
+                    "Übertragung nachgewiesen (Nat. Expertenkommission Stechmücken/FLI, Stand 31.12.2025)",  # no-date-check: Stand der zitierten Quelle
         })
 
 # Bayern: LGL-Bayern-Kartierung (BayMüMo 2024-2026) gilt vorrangig statt der
@@ -800,7 +802,7 @@ for _name, _lat, _lon in _TIGERMUECKE_LANDKREISE_NEU:
 _TIGERMUECKE_BAYERN_LGL_NOTE = (
     "Tigermücke (Aedes albopictus), Bayern — Vektor vorhanden, in Deutschland "
     "selbst bisher keine autochthone Übertragung nachgewiesen (LGL Bayern, "
-    "BayMüMo, Stand 18.12.2025)"
+    "BayMüMo, Stand 18.12.2025)"  # no-date-check: Stand der zitierten Quelle
 )
 _TIGERMUECKE_BAYERN_ETABLIERT = [
     ("Aschaffenburg", 49.98, 9.15),   # kreisfreie Stadt, dunkelblau, deckt sich mit WNV-Erstfall 2025
@@ -808,7 +810,7 @@ _TIGERMUECKE_BAYERN_ETABLIERT = [
     ("München", 48.14, 11.58),        # kreisfreie Stadt, dunkelblau
     # Fürth: per unbeschrifteter LGL-Karte nicht von benachbartem Einzelfund-
     # Gebiet zu unterscheiden, aber im LGL-Jahresbericht 2024 (jb24, Abb. 1,
-    # Stand 25.02.2025, explizit beschriftet "SK Fürth") als "Population"
+    # Stand 25.02.2025, explizit beschriftet "SK Fürth") als "Population"  # no-date-check: Stand der zitierten Quelle
     # (= etabliert) bestätigt — überschreibt die visuelle Einordnung.
     ("Fürth", 49.48, 10.99),
 ]
@@ -1784,7 +1786,7 @@ def fetch_are_konsultationsinzidenz(conn: sqlite3.Connection, weeks_back: int = 
 
 # FSME-Risikokreise Bayern (95 von 96 Kreisen; einzig SK Schweinfurt ist kein
 # Risikogebiet). Quelle: RKI Epid. Bull. 9/2026, "FSME: Risikogebiete in
-# Deutschland" (Stand 15.1.2026), Tab. 1, doi:10.25646/13864.2 — ersetzt eine
+# Deutschland" (Stand 15.1.2026), Tab. 1, doi:10.25646/13864.2 — ersetzt eine  # no-date-check: Stand der zitierten Quelle
 # deutlich unvollstaendigere Vorversion (67 statt 95 Kreise; u.a. fehlten
 # separate Stadt/Landkreis-Eintraege wie SK Fürth, SK Hof, SK Landshut,
 # SK Nürnberg, SK Passau, SK Regensburg, SK Rosenheim, SK Würzburg, die im
@@ -1849,7 +1851,7 @@ FSME_RISIKOKREISE_BAYERN: list[tuple[str, float, float]] = [
 ]
 
 # Weitere FSME-Risikogebiete ausserhalb Bayerns (RKI Epid. Bull. 9/2026,
-# "FSME: Risikogebiete in Deutschland", Stand 15.1.2026, Tab. 1) — Bayern und
+# "FSME: Risikogebiete in Deutschland", Stand 15.1.2026, Tab. 1) — Bayern und  # no-date-check: Stand der zitierten Quelle
 # Baden-Württemberg tragen zusammen den Grossteil der bundesweit 185
 # Risikokreise, aber FSME ist explizit KEIN rein bayerisches/sueddeutsches
 # Risiko mehr: einzelne Kreise auch in Mittelhessen, im Saarland und in
@@ -3145,7 +3147,7 @@ _ALL_SOURCES_DEFAULT = [
                         # von der Karte selbst genutzte Daten-API) offen und
                         # funktionsfaehig, s. fetch_healthmap-Docstring
     "eurosurveillance", # Eurosurveillance — neue URL ?TRACK=RSS
-    # "reliefweb",      # DEAD seit 1.11.2025: appname jetzt vorab-
+    # "reliefweb",      # DEAD seit 1.11.2025: appname jetzt vorab-  # no-date-check: Stand der zitierten Quelle
                         # genehmigungspflichtig (HTTP 403 "not using an
                         # approved appname"), erfordert manuelle Registrierung
                         # durch den Nutzer, s. fetch_reliefweb-Docstring
@@ -3159,7 +3161,7 @@ _ALL_SOURCES_DEFAULT = [
     "endemic",          # statische Endemie-Referenzdaten — immer verfügbar
 ]
 
-# promedmail: DEAD seit 14.07.2023, absichtlich (Login-Abo-Modell explizit
+# promedmail: DEAD seit 14.07.2023, absichtlich (Login-Abo-Modell explizit  # no-date-check: Stand der zitierten Quelle
 # gegen Scraping), s. fetch_promedmail-Docstring -- kein technischer Fix
 # gesucht/moeglich. reliefweb: s. Kommentar oben, ebenfalls kein
 # automatisierter Fix moeglich, aber ueber --sources weiterhin waehlbar

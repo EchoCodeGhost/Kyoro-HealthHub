@@ -137,7 +137,7 @@ def _datum_aus_header_or_name(lines: list[str], path: Path) -> tuple[str, str | 
 
     for line in lines[:25]:
         s = line.strip()
-        # Datum: "Date: 31.05.2026 09:15:00" or ISO
+        # Datum: "Date: 01.02.2000 09:15:00" or ISO
         m = re.search(r'(\d{1,2})[./](\d{1,2})[./](\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)', s)
         if m and dt is None:
             d, mo, y, t = m.groups()

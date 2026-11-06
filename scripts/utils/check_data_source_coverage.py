@@ -8,8 +8,8 @@ check_data_source_coverage — Findet Tabellen mit Daten, die kein Analyseskript
 @purpose.de  Gleicht alle Tabellen aus den Schema-Definitionen (health.db, medicine.db,
              medicine_imaging.db) gegen die tatsächlichen SQL-Queries aller Analyse-/
              Modul-Skripte ab und meldet Tabellen, die Daten enthalten, aber von keinem
-             Skript per FROM/JOIN referenziert werden — genau das Muster, das am
-             21.08.2026 (siehe git log) zufaellig bei pollen/user_context (Oura-Tags)/
+             Skript per FROM/JOIN referenziert werden — genau das Muster, das
+             zufaellig bei pollen/user_context (Oura-Tags)/
              acute_events (Migraene-Detailmetriken) gefunden wurde, hier systematisch
              statt zufaellig.
 @purpose.en  Cross-references every table from the schema definitions (health.db,

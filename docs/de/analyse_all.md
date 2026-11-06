@@ -15,7 +15,7 @@ Ermöglicht die umfassende Gesundheitsdatenanalyse, essentiell für die ganzheit
 
 ## Methode
 
-Durchsucht rekursiv alle analyse_*.py-Skripte im analysis/-Verzeichnis, erstellt für jedes Skript ein eigenes Ausgabeverzeichnis: <analyses_dir>/<YYYY-MM-DD>/<scriptname>/ Plots (PNG/PDF) und Text-Output (Markdown) werden dort gespeichert. stdout + stderr werden als <scriptname>.log gespeichert. Unterstützt Filterung nach Datum, Skriptnamen und Trockenlauf.
+Durchsucht rekursiv alle analyse_*.py-Skripte im analysis/-Verzeichnis, erstellt für jedes Skript ein eigenes Ausgabeverzeichnis: <analyses_dir>/<YYYY-MM-DD>/<scriptname>/ Plots (PNG/PDF) und Text-Output (Markdown) werden dort gespeichert. stdout + stderr gehen nach <scriptname>.output.txt. <scriptname>.log enthält nur Laufdaten, weder Ausgabe noch Argumentwerte. Unterstützt Filterung nach Datum, Skriptnamen und Trockenlauf.
 
 ## Datenfluss
 

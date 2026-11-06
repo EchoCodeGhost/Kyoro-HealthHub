@@ -200,30 +200,6 @@ def exif_gps(src: Path) -> tuple[float, float] | None:
         return None
 
 
-def record_photo_location(conn, date: str, gps: tuple[float, float], source: str,
-                           person: str) -> None:
-    """Schreibt eine (gerundete) Foto-GPS-Position in health.db.
-
-    Rundet via anonymize.round_coords() (~1km-Raster, gleiches Muster wie
-    air_quality/pollen/biometeo) bevor gespeichert wird.
-    """
-    import sys as _sys
-    _sys.path.insert(0, str(Path(__file__).parents[1]))
-    from utils.anonymize import round_coords
-
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS photo_locations ("
-        "date TEXT NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL,"
-        "source TEXT NOT NULL, person TEXT NOT NULL DEFAULT 'unknown',"
-        "PRIMARY KEY (date, lat, lon, source))"
-    )
-    lat, lon = round_coords(*gps)
-    conn.execute(
-        "INSERT OR IGNORE INTO photo_locations (date, lat, lon, source, person) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (date, lat, lon, source, person),
-    )
-
 
 # ── PII-Stripping ─────────────────────────────────────────────────────────────
 
@@ -332,8 +308,7 @@ def normalize_to_jpeg(src: Path, out_dir: Path) -> tuple[Path, str | None, tuple
     Normalisiert src zu PII-freiem JPEG in out_dir.
 
     Gibt (jpeg_path, exif_date_str_or_none, gps_or_None) zurück. gps ist
-    ungerundet (lat, lon) — Aufrufer rundet via record_photo_location() vor
-    dem Speichern. Für RAW-Dateien stattdessen process_raw() verwenden
+    ungerundet (lat, lon). Für RAW-Dateien stattdessen process_raw() verwenden
     (Original bleibt erhalten statt zu JPEG dekodiert zu werden).
 
     Schritte:
@@ -449,8 +424,7 @@ def process_raw(src: Path, out_dir: Path) -> dict:
     UND ein Vorschau-JPEG bleiben beide erhalten.
 
     Gibt {"raw_path", "jpeg_path", "date", "gps"} zurück. "gps" ist
-    ungerundet (lat, lon) oder None — Aufrufer rundet via
-    record_photo_location() vor dem Speichern.
+    ungerundet (lat, lon) oder None.
     """
     if not src.exists():
         raise FileNotFoundError(src)

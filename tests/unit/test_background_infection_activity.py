@@ -54,6 +54,44 @@ def test_home_bundesland_none_without_home_coordinate(monkeypatch):
     assert bia.home_bundesland() == (None, None)
 
 
+def test_home_bundesland_none_when_home_is_abroad(monkeypatch):
+    class FakeCfg:
+        home_lat, home_lon = 47.80, 13.04  # Salzburg
+        data_start = None
+        analyses_dir = Path("/tmp")
+
+    monkeypatch.setattr(bia, "_cfg", FakeCfg())
+    assert bia.home_bundesland() == (None, None)
+
+
+def test_weekly_region_map_uses_polygons_not_a_bounding_box(monkeypatch):
+    """Salzburg lag in der alten Deutschland-Box und wurde Bayern zugeordnet;
+    Würzburg landete per Zentroid in Baden-Württemberg."""
+    class FakeCfg:
+        home_lat, home_lon = 48.14, 11.58
+        data_start = None
+        analyses_dir = Path("/tmp")
+
+        def location_for_date(self, day):
+            return None, None, None
+
+    monkeypatch.setattr(bia, "_cfg", FakeCfg())
+    conn = sqlite3.connect(":memory:")
+    # Aufenthalte liegen in location.db, angehängt als loc; attach_location_db
+    # erkennt das schon angehängte Schema und tut nichts.
+    conn.execute("ATTACH DATABASE ':memory:' AS loc")
+    conn.execute("CREATE TABLE loc.location_stays (start_ts TEXT, lat REAL, lon REAL, is_home INTEGER)")
+    days = [f"2026-07-0{d}" for d in range(6, 10)] + [f"2026-07-{d}" for d in range(13, 17)]
+    for day in days[:4]:
+        conn.execute("INSERT INTO loc.location_stays VALUES (?, 47.80, 13.04, 0)", (day + "T10:00:00",))
+    for day in days[4:]:
+        conn.execute("INSERT INTO loc.location_stays VALUES (?, 49.79, 9.95, 0)", (day + "T10:00:00",))
+
+    weeks = bia._build_weekly_region_map(conn, "2026-07-06", "2026-07-19")
+    assert weeks["2026-W28"] is None
+    assert weeks["2026-W29"] == ("Bayern", "BY")
+
+
 def test_load_grippeweb_extracts_incidence_from_title():
     conn = _fresh_conn()
     now = "2026-07-08T00:00:00+00:00"

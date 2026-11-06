@@ -271,6 +271,45 @@ python3 -c "from health_config import OWN_PERSON_ID; print(OWN_PERSON_ID)"
 # Should show: PER-XXXXXXXX format
 ```
 
+## Location Data
+
+Locations found by importers are stored in a separate database,
+`location.db`, through `location_store.record()`, at the precision set per
+importer and file type in `~/.config/kyoro/location_privacy.json`. Importers
+without an entry store nothing. Locations sent to remote LLM providers are
+filtered by an allowlist per calling script (default: none), images are
+re-encoded without metadata before they are sent, and exports drop location
+columns unless the profile is allowed. Sport tracks, stays and location
+history are tables in `location.db` too; `health.db` and `medicine.db`
+keep no personal coordinates (checked by
+`scripts/utils/check_location_columns.py`). Details:
+[PII_Anonymization.md](PII_Anonymization.md), section 5c.
+
+## External Services
+
+Kyoro-HealthHub queries external services for environmental data (weather, air quality, pollen).
+All coordinates sent to external services are coarsened via `for_external_api()` in
+`location_privacy.json` to protect privacy. The default precision is 1 decimal place
+(~11 km grid), with 2 decimal places (~1 km) used only for place-name reverse geocoding.
+
+| Service | Purpose | What it receives | API key required | Setting |
+|---------|---------|------------------|------------------|---------|
+| Open-Meteo | Weather, air quality, UV index, geocoding | Coarsened coordinates (default 1 decimal place) | No | `external_api.precision` |
+| Bright Sky | DWD weather station data | Coarsened coordinates (default 1 decimal place) | No | `external_api.precision` |
+| DWD-Pollen | Pollen data (file download) | Nothing (region-based download) | No | `environment.dwd_pollen_region` |
+| Google Pollen | Pollen data (opt-in) | Coarsened coordinates (default 1 decimal place) | Yes | `external_api.services.google_pollen` |
+| AEMET | Spanish weather data | A station ID only (the nearest station is chosen locally from the downloaded station list) | Yes | `apis.aemet_api_key` in `health_config.json` |
+| Nominatim (OpenStreetMap) | Place name lookup | Coarsened coordinates (2 decimal places for place names, 1 for region); for manual travel entries without coordinates, the entered place name (city or subregion, with country) | No | `external_api.precision`, `external_api.place_precision` |
+
+**Opt-in services**: Google Pollen requires explicit opt-in via
+`external_api.services.google_pollen: true` in `location_privacy.json`.
+Without this setting, no location data is sent to Google.
+
+**Region-based services**: DWD-Pollen uses region IDs from the German Weather Service
+and does not transmit coordinates. The region can be configured via
+`environment.dwd_pollen_region` in `health_config.json` or estimated from home
+coordinates with a warning.
+
 ## Future Extensions
 
 The `identity_resolver` module is designed as a **generic pseudonym registry** and can be extended to handle additional identifier types:

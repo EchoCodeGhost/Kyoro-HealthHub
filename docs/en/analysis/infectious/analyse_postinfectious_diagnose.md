@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Scores 6 wearable domains (autonomic, PEM, cardiac, sleep, activity, respiration) plus up to 10 symptom-diary domains (neurological, pain, GI, psychiatric, sensory, etc.) against published reference values for 58 post-infectious syndromes.
+Scores 6 wearable domains (autonomic, PEM, cardiac, sleep, activity, respiration) plus up to 10 symptom-diary domains (neurological, pain, GI, psychiatric, sensory, etc.) against published reference values for every post-infectious syndrome in the catalog (scripts/analysis/syndromes/ -- count keeps growing, deliberately not hardcoded here).
 
 ## Relevance
 
@@ -53,7 +53,7 @@ Heuristisch: Kombinations-Score, spo2_lc_warn, hrv_crash_pct, Deep-Sleep-Schwell
 
 ## Limitations
 
-Heuristic method: Not a validated medical device; AFES is a screening indicator. Validated individual components: orthostatic HR rise >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/day (WHO GAPA 2018). Heuristic: multi-domain combination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, deep-sleep threshold <15% (orientation value without formal primary source), severity formula. Thresholds not prospectively evaluated; data quality depends on device availability.
+Heuristic method: Not a validated medical device; AFES is a screening indicator. Validated individual components: orthostatic HR rise >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/day (WHO GAPA 2018). Heuristic: multi-domain combination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, deep-sleep threshold <15% (orientation value without formal primary source), severity formula. Thresholds not prospectively evaluated; data quality depends on device availability. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 
 ## References
 

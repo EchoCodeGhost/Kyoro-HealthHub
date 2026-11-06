@@ -15,7 +15,7 @@ Enables comprehensive health data analysis, essential for holistic health assess
 
 ## Method
 
-Recursively scans all analyse_*.py scripts in analysis/ directory, creates dedicated output directory for each script: <analyses_dir>/<YYYY-MM-DD>/<scriptname>/ Plots (PNG/PDF) and text output (Markdown) are saved there. stdout + stderr are saved as <scriptname>.log. Supports filtering by date, script names, and dry-run mode.
+Recursively scans all analyse_*.py scripts in analysis/ directory, creates dedicated output directory for each script: <analyses_dir>/<YYYY-MM-DD>/<scriptname>/ Plots (PNG/PDF) and text output (Markdown) are saved there. stdout + stderr go to <scriptname>.output.txt. <scriptname>.log holds run metadata only, neither output nor argument values. Supports filtering by date, script names, and dry-run mode.
 
 ## Data flow
 

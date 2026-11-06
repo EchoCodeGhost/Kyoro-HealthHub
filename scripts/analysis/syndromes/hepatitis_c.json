@@ -1,0 +1,30 @@
+{
+  "slug": "hepatitis_c",
+  "name_de": "Chronische Hepatitis C / Post-SVR-Fatigue",
+  "lag_weeks": 8,
+  "refs": "RKI Epidemiologisches Bulletin Hepatitis C (jaehrliche Schaetzung, ~0.3-0.4% Anti-HCV-Praevalenz Allgemeinbevoelkerung Deutschland), S3-Leitlinie Hepatitis-C-Virus-Infektion (AWMF/DGVS), Negro et al. 2015 (Gastroenterology, extrahepatische Manifestationen), Gronwald 2023, Davis 2023 -- Hinweis: 'Post-SVR-Fatigue' (SVR = sustained virologic response, Heilung) ist ein in der Literatur beschriebenes, aber nicht einheitlich klassifiziertes Phaenomen -- manche Patienten berichten anhaltende Fatigue trotz erfolgreicher antiviraler Therapie (DAA).",
+  "system_prompt": "Du bist ein Internist mit Expertise in Hepatitis-C-Infektion und post-infektioesen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Akute Hepatitis C: meist asymptomatisch oder mild (Mudigkeit, leichter Ikterus), wird haeufig verpasst\n- Chronische Hepatitis C (>80% der Infektionen): Fatigue ist eine der haeufigsten extrahepatischen Manifestationen, unabhaengig vom Grad der Leberschaedigung -- vermuteter Mechanismus: zentralnervoese Effekte des Virus selbst, nicht nur Leberfunktion\n- Seit Einfuehrung der DAA-Therapie (direct-acting antivirals) ist Heilung (SVR) in >95% der Faelle moeglich -- ein Teil der Patienten berichtet aber anhaltende Fatigue trotz erreichter SVR ('Post-SVR-Fatigue', Mechanismus unklar)\n- Serologie: Anti-HCV-Ak als Screening, HCV-RNA-PCR zur Bestaetigung aktiver Infektion (Anti-HCV bleibt nach ausgeheilter/behandelter Infektion lebenslang positiv -- unterscheidet NICHT zwischen aktiv und ausgeheilt)\n- Deutschland: Meldepflicht (nicht-namentlich fuer den Erregernachweis, IfSG)\n- WICHTIG: Fatigue, Gelenkschmerzen, Konzentrationsstoerungen sind unspezifisch und ueberlappen mit vielen anderen Syndromen -- ein hohes Symptom-Match-Ranking ersetzt keine Serologie.\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeintraechtigung?\n2. **Domaenen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Praee-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung -- was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im naechsten Arztgespraech priorisiert werden?",
+  "icd10_gm": ["B18.2"],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI Epidemiologisches Bulletin Hepatitis C -- https://www.rki.de/DE/Themen/Infektionskrankheiten/Infektionskrankheiten-A-Z/H/HepatitisC/HepatitisC_node.html",
+    "dgvs": "S3-Leitlinie Hepatitis-C-Virus (HCV) Infektion, AWMF/DGVS"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Gelenkschmerzen",
+    "Muskelschmerzen",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Hautausschlag",
+    "Juckreiz",
+    "Appetitverlust",
+    "Oberbauchschmerzen",
+    "Depressive Verstimmung",
+    "Post-Exertionelle Malaise",
+    "Schlafstörungen"
+  ],
+  "seroprevalence_de": 0.0035,
+  "sero_category": "niedrig",
+  "endemic_regions": []
+}

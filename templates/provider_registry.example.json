@@ -1,0 +1,26 @@
+{
+  "_comment": "Lokale, nie committete Registry bekannter Ärzte/Praxen/Kliniken/eigener Adressen für scripts/modules/provider_scrubbing.py. Echte Datei liegt unter ~/.config/kyoro/provider_registry.json -- diese Datei hier ist nur das Schema mit Dummy-Werten. 'match' ist eine Liste exakter, case-insensitiver Teilstrings; der erste Eintrag jeder 'match'-Liste gilt als kanonischer Registry-Schlüssel für identity_resolver.resolve('provider', ...). 'country' ist ISO 3166-1 alpha-2 und Pflichtfeld. 'region' ist optional (z.B. ein deutsches Bundesland/Regierungsbezirk), nur nötig wenn derselbe Stadtname mehrfach im selben Land vorkommt.",
+  "providers": [
+    {
+      "match": ["dr_mustermann_ingolstadt", "Dr. Max Mustermann", "Praxis Mustermann"],
+      "category": "Hausarzt",
+      "city": "Musterstadt",
+      "country": "DE",
+      "region": null
+    },
+    {
+      "match": ["musterklinikum", "Musterklinikum GmbH"],
+      "category": "Klinik",
+      "city": "München",
+      "country": "DE",
+      "region": "Oberbayern"
+    },
+    {
+      "match": ["zuhause"],
+      "category": "Zuhause",
+      "city": "Musterstadt",
+      "country": "DE",
+      "region": null
+    }
+  ]
+}

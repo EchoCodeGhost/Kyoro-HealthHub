@@ -39,7 +39,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, KYORO_CONFIG_DIR
 from modules.db import open_db
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import, resolve_person
 
@@ -317,7 +317,7 @@ def fetch_and_import(conn: sqlite3.Connection,
                   file=sys.stderr)
         return 0
 
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     if verbose:
         print(t("[aemet] Lade Stationsinventar ...", "[aemet] Loading station inventory ..."))
     stations = fetch_stations(api_key)

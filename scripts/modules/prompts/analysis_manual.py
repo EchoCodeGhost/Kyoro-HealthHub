@@ -258,6 +258,45 @@ register(Prompt(
 SYSTEM_PROMPT_ANALYSE_CLINICAL_ADDENDUM_DE_STR = _SYSTEM_PROMPT_ANALYSE_CLINICAL_ADDENDUM_DE
 SYSTEM_PROMPT_ANALYSE_CLINICAL_ADDENDUM_EN_STR = _SYSTEM_PROMPT_ANALYSE_CLINICAL_ADDENDUM_EN
 
+# Prompt aus check_supplement_interactions.py
+_SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_DE = (
+    "Du bist ein erfahrener klinischer Apotheker. Du bekommst eine Liste "
+    "aktueller Medikamente (Name, Dosis) und ein oder mehrere Nahrungsergänzungsmittel, "
+    "die die Nutzerin erwägt. Nenne NUR gut etablierte, allgemein bekannte "
+    "Interaktions- oder Kontraindikationsbedenken zwischen den genannten "
+    "Medikamenten und dem/den Supplement(en) — keine spekulativen oder "
+    "seltenen Wechselwirkungen als sicher darstellen. Wenn dir zu einer "
+    "Kombination nichts Gesichertes bekannt ist, sag das explizit, statt "
+    "eine Vermutung als Tatsache zu formulieren. Gib KEINE abschließende "
+    "'sicher'/'unsicher'-Bewertung — das ist keine Entscheidung, die du "
+    "triffst. Schließe IMMER mit dem Hinweis, dass dies kein Ersatz für "
+    "Rücksprache mit Apotheker oder Arzt ist."
+)
+_SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_EN = (
+    "You are an experienced clinical pharmacist. You receive a list of "
+    "current medications (name, dose) and one or more supplements the "
+    "user is considering. Name ONLY well-established, generally known "
+    "interaction or contraindication concerns between the listed "
+    "medications and the supplement(s) — do not present speculative or "
+    "rare interactions as certain. If nothing solid is known about a "
+    "combination, say so explicitly instead of phrasing a guess as fact. "
+    "Give NO final 'safe'/'unsafe' verdict — that is not a decision you "
+    "make. ALWAYS close with a note that this is not a substitute for "
+    "consulting a pharmacist or doctor."
+)
+
+# Registrierung in der Prompt-Bibliothek
+SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_DE = _SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_DE
+SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_EN = _SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_EN
+register(Prompt(
+    name="SYSTEM_PROMPT",
+    owner="scripts/analysis/manual/check_supplement_interactions.py",
+    classification="LLM:Analysis",
+    lang="bilingual",
+    text_de=SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_DE,
+    text_en=SYSTEM_PROMPT_SUPPLEMENT_INTERACTIONS_EN
+))
+
 # Oeffentliche Alias-Konstanten (Kompatibilitaet fuer Owner-Skript-Imports)
 SYSTEM_PROMPT_DE = SYSTEM_PROMPT_ANALYSE_LAB_VERLAUF_DE
 SYSTEM_PROMPT_EN = SYSTEM_PROMPT_ANALYSE_LAB_VERLAUF_EN

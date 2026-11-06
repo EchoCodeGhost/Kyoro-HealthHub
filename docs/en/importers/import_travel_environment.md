@@ -19,7 +19,7 @@ Aggregate stay data from travel_history.json, location_stays (DB) and GPS traini
 
 ## Data flow
 
-- **Reads:** `~/Kyoro-HealthHub/.config/kyoro/travel_history.json`, `health.db:location_stays`, `health.db:location_stays_geocoded`, `health.db:sessions`, `health.db:session_tracks`
+- **Reads:** `~/Kyoro-HealthHub/.config/kyoro/travel_history.json`, `location.db:location_stays`, `location.db:location_stays_geocoded`, `health.db:sessions`, `location.db:session_tracks`
 - **Writes:** `health.db:air_quality, health.db:pollen, health.db:biometeo, health.db:import_log`
 
 ## Limitations

@@ -19,16 +19,10 @@ Nocturnal SpO2 minimum from raw measurement data.
              nachweislich nur EINEN Wert pro Nacht, kein Rohdatenzugriff),
              Polar/Beurer/Withings (verstreute Einzel-Spot-Checks, kein
              echtes naechtliches Minimum ableitbar) ungeeignet -- jeweils
-             gepruefte Rohdaten-Stichprobe, nicht nur Annahme. WICHTIG (von
-             der Nutzerin bestaetigt, nicht nur aus dem Zeitstempel-Muster
-             erschlossen): kein Polar-Geraet, das sie je besass oder besitzt
-             (inkl. Vantage V3), unterstuetzt durchgehende naechtliche SpO2-
-             Aufzeichnung -- die 35 in dieser DB gefundenen Polar-SpO2-Werte
-             (2024, Vantage V3) sind durchgehend EINZELNE, manuell
-             ausgeloeste Sport-/Nachbelastungs-Messungen (Stichprobe
-             gegengeprueft: ein 85%-Ausreisser am 01.02.2000 12:00 fiel ca.
-             3h nach einem 2h14min-Training desselben Tages -- klassischer
-             Nachbelastungs-Check, keine Zufallsnachtmessung), keine
+             gepruefte Rohdaten-Stichprobe, nicht nur Annahme. WICHTIG: die bisher
+             geprueften Polar-Geraete, darunter Vantage V3, unterstuetzen keine
+             durchgehende naechtliche SpO2-Aufzeichnung. Ihre SpO2-Werte sind
+             EINZELNE, manuell ausgeloeste Sport-/Nachbelastungs-Messungen, keine
              Geraetefunktion, die zwischen Schlafphasen automatisch misst.
              Diese Einschraenkung ist also eine GERAETE-KAPAZITAETSGRENZE,
              kein bloss ungluecklicher Nutzungszeitraum -- ein spaeteres
@@ -44,16 +38,11 @@ Nocturnal SpO2 minimum from raw measurement data.
              night, no raw-data access), Polar/Beurer/Withings (scattered
              single spot-checks, no genuine nocturnal minimum derivable)
              unsuitable -- each a checked raw-data sample, not an
-             assumption. IMPORTANT (confirmed by the user, not just inferred
-             from the timestamp pattern): no Polar device she has ever owned
-             or currently owns (incl. Vantage V3) supports continuous
-             nocturnal SpO2 recording -- the 35 Polar SpO2 values found in
-             this DB (2024, Vantage V3) are consistently INDIVIDUAL,
-             manually triggered sport/post-exertion checks (cross-checked
-             sample: an 85% outlier on 2000-02-01 12:00 fell ~3h after a
-             2h14min training session the same day -- a classic post-
-             exertion check, not a chance nighttime reading), not a device
-             feature that measures automatically between sleep stages. This
+             assumption. IMPORTANT: the Polar devices checked so far, including
+             Vantage V3, do not support continuous nocturnal SpO2 recording. Their
+             SpO2 values are INDIVIDUAL, manually triggered sport/post-exertion
+             checks, not a device feature that measures automatically between
+             sleep stages. This
              limitation is therefore a DEVICE CAPABILITY CEILING, not merely
              an unlucky usage period -- a later Polar model would not change
              this unless Polar itself introduces continuous nocturnal SpO2

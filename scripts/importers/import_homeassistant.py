@@ -49,10 +49,10 @@ from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, load as _load_cfg, KYORO_CONFIG_DIR
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.secure_io import write_private_text
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 from modules.base import tz_from_coords, log_import, resolve_person
 _cfg = _Cfg()
 
@@ -70,7 +70,7 @@ TRAVEL_LOG   = KYORO_CONFIG_DIR / "travel_log.json"
 # Auf 2 dec gerundet (~1.1 km Grid) bevor weitergegeben: gleiche Auflösung wie
 # alle anderen Stay-/Weather-Koords, kein Hauseingang-Leak in DB/API.
 HOME_LAT, HOME_LON = (
-    round_coords(_cfg.home_lat, _cfg.home_lon)
+    for_external_api(_cfg.home_lat, _cfg.home_lon)
     if _cfg.home_lat is not None and _cfg.home_lon is not None
     else (_cfg.home_lat, _cfg.home_lon)
 )
@@ -987,7 +987,7 @@ def fetch_open_meteo(lat: float, lon: float,
     Holt tägliche Wetterdaten via Open-Meteo Historical API.
     Gibt Liste from Dicts zurück (ein entry pro day).
     """
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon)
     try:
         r = requests.get(
             "https://archive-api.open-meteo.com/v1/archive",
@@ -1089,15 +1089,16 @@ def import_reise_weather(conn: sqlite3.Connection,
     # Häufigste Nicht-Zuhause-Position aus location_history pro day
     location_history_coords: dict[str, tuple[float, float, str]] = {}
     try:
+        attach_location_db(conn)
         for row in conn.execute("""
             SELECT date, lat, lon, city, COUNT(*) n
-            FROM location_history
+            FROM loc.location_history
             WHERE state != 'home'
             GROUP BY date, ROUND(lat,2), ROUND(lon,2)
             ORDER BY date, n DESC"""):
             d, lat, lon, city, _ = row
             if d not in location_history_coords:  # erste = häufigste
-                lat_r, lon_r = round_coords(lat, lon)
+                lat_r, lon_r = for_external_api(lat, lon)
                 location_history_coords[d] = (lat_r, lon_r, city or f"{lat_r:.2f},{lon_r:.2f}")
     except Exception:
         pass
@@ -1140,7 +1141,7 @@ def import_reise_weather(conn: sqlite3.Connection,
 
     rows = []
     for lat, lon, loc, dates in groups:
-        lat, lon = round_coords(lat, lon)
+        lat, lon = for_external_api(lat, lon)
         d_from = dates[0]
         d_to   = dates[-1]
         print(t(f"  Open-Meteo: {loc} ({lat:.2f},{lon:.2f}) {d_from}→{d_to} ...",

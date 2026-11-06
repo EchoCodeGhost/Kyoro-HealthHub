@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Creates a longitudinal table of all lab values from lab_manual: rows = parameters (grouped by category), columns = measurement dates. Out-of-range values (↑ / ↓) are flagged.
+Creates a longitudinal table of all lab values from lab_manual: rows = parameters (grouped by category), columns = measurement dates. Out-of-range values (↑ / ↓) are flagged. Selectable by date range (--from/--to) and/or individual parameters (--parameter, repeatable), in addition to the existing category filter.
 
 ## Relevance
 
@@ -15,7 +15,7 @@ Enables health data analysis, essential for medical diagnostics
 
 ## Method
 
-Reads lab_manual from medicine.db, pivots by (kategorie, parameter) × date, prints one table per category, optionally generates plots. Qualitative values (neg/pos) are shown as text, not plotted.
+Reads lab_manual from medicine.db, pivots by (kategorie, parameter) × date, prints one table per category, optionally generates plots. In addition to the Markdown table, always writes a real .ods file (via odfpy, already a project dependency) — ONE sheet, all parameters as rows, all measurement dates as columns (dd-mm-yyyy), category/unit/reference as their own columns for filtering/sorting within Calc itself. Qualitative values (neg/pos) are shown as text, not plotted.
 
 ## Scoring
 
@@ -26,7 +26,7 @@ Anomalie-Score pro Parameter: Anzahl außerhalb-Referenz-Messungen / Gesamtmessu
 ## Data flow
 
 - **Reads:** `medicine.db`, `(lab_manual)`
-- **Writes:** `Analyseergebnisse als Markdown (analyses/manual/), optional PNG`
+- **Writes:** `Analyseergebnisse als Markdown + .ods (analyses/manual/), optional PNG`
 
 ## Limitations
 
@@ -43,6 +43,8 @@ python3 scripts/analysis/manual/analyse_lab_verlauf.py
 python3 scripts/analysis/manual/analyse_lab_verlauf.py --plot
 python3 scripts/analysis/manual/analyse_lab_verlauf.py --kategorie Blutbild
 python3 scripts/analysis/manual/analyse_lab_verlauf.py --from 2024-01-01 --plot
+python3 scripts/analysis/manual/analyse_lab_verlauf.py --from 2020-01-01 --to 2026-12-31
+python3 scripts/analysis/manual/analyse_lab_verlauf.py --parameter TSH --parameter CRP --from 2020-01-01 --to 2026-12-31
 python3 scripts/analysis/manual/analyse_lab_verlauf.py --no-llm
 python3 scripts/analysis/manual/analyse_lab_verlauf.py --exclude-source import_urine_strip
 ```

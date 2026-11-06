@@ -29,6 +29,6 @@ Braucht Google Chrome an einem der bekannten Pfade. Ohne Chrome wird das HTML tr
 ## Aufruf
 
 ```bash
-python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil
-python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil --einzeln
+python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil
+python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil --einzeln
 ```

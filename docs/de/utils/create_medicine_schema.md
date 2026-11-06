@@ -15,7 +15,7 @@ Ermöglicht die Erstellung von Datenbank-Schemata, essentiell für die Datenorga
 
 ## Methode
 
-Tabellen (identische Schemas wie in health.db zur verlustfreien Migration): lab_manual (manuelle Laborbefunde), lab_results (strukturierte Laborbefunde), medications (Medikamente), assessments (Klinische Scores / Beurteilungen), findings (Befunde mit ICD-Code). Läuft bei jedem Aufruf zusätzlich ``_migrate_medications_is_chronic`` — fügt is_chronic per ALTER TABLE nach, falls eine ältere medicine.db die Spalte noch nicht hat (idempotent, per PRAGMA table_info geprüft).
+Tabellen (identische Schemas wie in health.db zur verlustfreien Migration): lab_manual (manuelle Laborbefunde), lab_results (strukturierte Laborbefunde), medications (Medikamente), assessments (Klinische Scores / Beurteilungen), findings (Befunde mit ICD-Code), diagnoses (ICD-10-codierte Diagnosehistorie). Läuft bei jedem Aufruf zusätzlich fünf Migrationen für frühere medicine.db- Stände, die eine Spalte noch nicht haben (jeweils idempotent, per PRAGMA table_info geprüft): ``_migrate_medications_is_chronic``, ``_migrate_medications_prescriber_pseudonym``, ``_migrate_medications_date_abgabe``, ``_migrate_diagnoses_date_to``, ``_migrate_diagnoses_provider_pseudonym``.
 
 ## Datenfluss
 

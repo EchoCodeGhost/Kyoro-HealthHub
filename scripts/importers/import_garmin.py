@@ -31,7 +31,7 @@ Garmin Connect → health.db
              Configuration via ~/.config/kyoro/garmin_config.json (shared with
              garmin_download.py).
 @reads       Garmin-Exportdateien (JSON/CSV)
-@writes      health.db (sessions, session_metrics, measurements)
+@writes      health.db (sessions, session_metrics, measurements), location.db (session_tracks)
 @limits.de   Keine Validierung der Garmin-Datenqualität. Abhängig von der
              Korrektheit des Garmin-Exports. Keine medizinische Interpretation.
              training_load für Aktivitäten ist eine grobe Näherung aus dem
@@ -65,7 +65,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID, KYORO_CONFIG_DIR
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import claim_training_load_slot, log_import
-from utils.anonymize import round_coords
+from modules.location_store import store_track_points
 _cfg = _Cfg()
 
 CONFIG_PATH = KYORO_CONFIG_DIR / "garmin_config.json"
@@ -630,7 +630,12 @@ def import_garmin_snapshots(conn, client, d: str, start_d: str | None = None) ->
 # ── Tier 3: Aktivitäten (Workouts) → sessions + session_metrics + GPS-Tracks ──
 
 def _import_activity_gps(cur, client, activity_id, sid: str) -> int:
-    """GPS-/HR-Punkte einer Aktivität → session_tracks."""
+    """GPS-Punkte einer Aktivität → location.db::session_tracks.
+
+    Genauigkeit und Privatsphäre-Zonen wendet location_store nach
+    location_privacy.json an (Importer import_garmin). cur bleibt für die
+    Aufrufer-Signatur erhalten; geschrieben wird in location.db.
+    """
     try:
         det = client.get_activity_details(activity_id, maxchart=2000, maxpoly=2000) or {}
         idx = {m.get("key"): m.get("metricsIndex") for m in det.get("metricDescriptors", [])}
@@ -638,7 +643,7 @@ def _import_activity_gps(cur, client, activity_id, sid: str) -> int:
         i_ele, i_spd, i_ts = idx.get("directElevation"), idx.get("directSpeed"), idx.get("directTimestamp")
         if i_lat is None or i_lon is None:
             return 0
-        n = 0
+        points = []
         for row in det.get("activityDetailMetrics", []) or []:
             m = row.get("metrics") or []
             if max(filter(None, [i_lat, i_lon])) >= len(m):
@@ -646,16 +651,11 @@ def _import_activity_gps(cur, client, activity_id, sid: str) -> int:
             lat, lon = m[i_lat], m[i_lon]
             if lat is None or lon is None:
                 continue
-            # Reduziere GPS-Präzision auf 5 Dezimalstellen (~1m) für Datenschutz
-            lat, lon = round_coords(float(lat), float(lon), precision=5) if lat is not None and lon is not None else (None, None)
             ts = ms_to_utc(int(m[i_ts])) if (i_ts is not None and m[i_ts]) else None
             ele = m[i_ele] if (i_ele is not None and i_ele < len(m)) else None
             spd = m[i_spd] if (i_spd is not None and i_spd < len(m)) else None
-            cur.execute(
-                "INSERT OR IGNORE INTO session_tracks(session_id, ts, lat, lon, elevation_m, speed_ms) "
-                "VALUES (?,?,?,?,?,?)", (sid, ts, lat, lon, ele, spd))
-            n += 1
-        return n
+            points.append((ts, float(lat), float(lon), ele, spd))
+        return store_track_points("import_garmin", sid, points)
     except Exception as e:
         print(f"[gps {activity_id}] {type(e).__name__}: {str(e)[:60]}", file=_sys.stderr)
         return 0

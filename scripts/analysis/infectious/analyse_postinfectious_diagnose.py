@@ -21,8 +21,8 @@ Domänen:
   + Datenlücken & Empfehlungen
 
 @tier        heuristic
-@purpose.de  Bewertet 6 Wearable-Domänen (Autonomie, PEM, Kardio, Schlaf, Aktivität, Respiration) + bis zu 10 Symptomtagebuch-Domänen (Neurologie, Schmerz, GI, Psychiatrie, Sensorik u.a.) gegen publizierte Referenzwerte für 58 Post-Infektionssyndrome.
-@purpose.en  Scores 6 wearable domains (autonomic, PEM, cardiac, sleep, activity, respiration) plus up to 10 symptom-diary domains (neurological, pain, GI, psychiatric, sensory, etc.) against published reference values for 58 post-infectious syndromes.
+@purpose.de  Bewertet 6 Wearable-Domänen (Autonomie, PEM, Kardio, Schlaf, Aktivität, Respiration) + bis zu 10 Symptomtagebuch-Domänen (Neurologie, Schmerz, GI, Psychiatrie, Sensorik u.a.) gegen publizierte Referenzwerte für alle Post-Infektionssyndrome im Katalog (scripts/analysis/syndromes/ -- Anzahl wächst laufend, bewusst nicht hier hartcodiert).
+@purpose.en  Scores 6 wearable domains (autonomic, PEM, cardiac, sleep, activity, respiration) plus up to 10 symptom-diary domains (neurological, pain, GI, psychiatric, sensory, etc.) against published reference values for every post-infectious syndrome in the catalog (scripts/analysis/syndromes/ -- count keeps growing, deliberately not hardcoded here).
 @method.de   Eigenentwickelter Multi-Domain-Score mit Baseline-Delta; einzelne Kriterien validated (HR-Anstieg >=30 bpm nach Raj et al. 2021; DFA alpha1 <0.75 nach Gronwald 2023). Gesamtscoring nicht klinisch validiert.
 @method.en   Proprietary multi-domain score with baseline delta; individual criteria are validated (HR rise >=30 bpm per Raj et al. 2021; DFA alpha1 <0.75 per Gronwald 2023). Overall scoring is not clinically validated.
 @refs        Soriano JB, Murthy S, Marshall JC, Relan P, Diaz JV (2022). A clinical case definition of post-COVID-19 condition by a Delphi consensus. The Lancet Infectious Diseases, 22(4):e102-e107. doi:10.1016/S1473-3099(21)00703-9
@@ -32,8 +32,8 @@ Domänen:
              Hickie I, Davenport T, Wakefield D et al. (2006). Post-infective and chronic fatigue syndromes precipitated by viral and non-viral pathogens: prospective cohort study. BMJ, 333(7568):575. doi:10.1136/bmj.38933.585764.AE
 @relevance.de Ermöglicht die Unterscheidung zwischen zufälligen und tatsächlich infektionsgetriggerten Symptomclustern, zentral für die Abgrenzung postinfektiöser Syndrome untereinander. Unterstützt die klinische Entscheidungsfindung bei der Abgrenzung von Long-COVID, Post-Lyme-Syndrom, ME/CFS und anderen postinfektiösen Erkrankungen.
 @relevance.en Enables differentiation between random and infection-triggered symptom clusters, central to distinguishing between post-infectious syndromes. Supports clinical decision-making in distinguishing Long-COVID, Post-Lyme syndrome, ME/CFS, and other post-infectious conditions.
-@limits.de   Heuristische Methode: Kein validiertes Medizinprodukt; AFES ist ein Screening-Indikator. Validierte Einzelkomponenten: orthostatischer HR-Anstieg >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/Tag (WHO GAPA 2018). Heuristisch: Multi-Domain-Kombination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, Deep-Sleep-Schwelle <15% (Orientierungswert ohne formale Primaerquelle), Schweregrad-Formel. Schwellenwerte nicht prospektiv evaluiert; Datenqualitaet abhaengig von Geraeteverfuegbarkeit.
-@limits.en   Heuristic method: Not a validated medical device; AFES is a screening indicator. Validated individual components: orthostatic HR rise >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/day (WHO GAPA 2018). Heuristic: multi-domain combination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, deep-sleep threshold <15% (orientation value without formal primary source), severity formula. Thresholds not prospectively evaluated; data quality depends on device availability.
+@limits.de   Heuristische Methode: Kein validiertes Medizinprodukt; AFES ist ein Screening-Indikator. Validierte Einzelkomponenten: orthostatischer HR-Anstieg >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/Tag (WHO GAPA 2018). Heuristisch: Multi-Domain-Kombination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, Deep-Sleep-Schwelle <15% (Orientierungswert ohne formale Primaerquelle), Schweregrad-Formel. Schwellenwerte nicht prospektiv evaluiert; Datenqualitaet abhaengig von Geraeteverfuegbarkeit. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
+@limits.en   Heuristic method: Not a validated medical device; AFES is a screening indicator. Validated individual components: orthostatic HR rise >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/day (WHO GAPA 2018). Heuristic: multi-domain combination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, deep-sleep threshold <15% (orientation value without formal primary source), severity formula. Thresholds not prospectively evaluated; data quality depends on device availability. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 @scoring     Domänen (Ampel-System):
                1. Autonome Dysregulation
                   RHR:    gut ≤60 bpm / Warnung ≤80 / Krit. >90 bpm
@@ -84,7 +84,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db, open_medicine_db
+from modules.db import attach_location_db, open_db, open_medicine_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.baseline import get_baseline, baseline_delta_pct
 from modules.confidence import label_finding
@@ -284,8 +284,11 @@ _UNCERTAIN_MARKERS = (
 _EXPOSURE_MARKERS = (
     "exposition", "hochdosis-exposition", "tiermarkt", "stallstaub",
     "angeschafft", "stallarbeit", "reiten", "pferde", "hühner",
-    "wellensittich", "wochenmarkt", "bauernhof", "coxiella", "psittaci",
-)
+    "wellensittich", "bauernhof", "coxiella", "psittaci",
+    # Direkte Expositionsnachweise: ohne sie kann ein nur beilaeufig genannter
+    # Erregername ein Ereignis mit belegter Exposition in der Wertung schlagen.
+    "zeckenstich", "dokumentiert", "belegt",
+) + tuple(m.lower() for m in _cfg.exposure_markers)
 
 # Tier → score boost (on the scale of IDF symptom scores, which reach ~90+;
 # see _SYMPTOM_SCORE_SCALE)
@@ -316,6 +319,10 @@ def _exposure_slug_boosts() -> dict[str, tuple[float, str, str]]:
     for event in _cfg.events:
         etype      = event.get("type", "")
         name       = event.get("name", "")
+        # Datum anhaengen, sofern es nicht schon im Namenstext steht.
+        event_date = event.get("date")
+        if event_date and event_date not in name:
+            name = f"{name} ({event_date})"
         name_lower = name.lower()
         notes      = (event.get("notes") or "").lower()
         text       = name_lower + " " + notes
@@ -375,6 +382,11 @@ _LIFESTYLE_BOOST: dict[str, dict[str, float]] = {
     "water_exposure":  {"leptospirose": 7.0},
     "soil_contact":    {"q_fieber": 5.0, "toxoplasmose": 3.0},
     "raw_food":        {"toxoplasmose": 4.0},
+    # Berufsbedingte Risiken: Zoonosen bei Landwirtschaft, Tiermedizin und Labor
+    # (RKI/BGW-Berufskrankheiten-Listen), blutuebertragbare Erreger durch
+    # Nadelstichverletzungen im Gesundheitswesen (TRBA 250/BGW).
+    "occupation":      {"q_fieber": 2.0, "brucellose": 1.5, "leptospirose": 1.5,
+                        "hepatitis_c": 1.5, "hiv": 0.5},
 }
 
 _LIFESTYLE_TYPE_LABEL: dict[str, str] = {
@@ -597,6 +609,15 @@ REF = {
 
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
+
+# Bei --lifetime beginnt das Fenster am Geburtsdatum. Das bleibt fuer die Abfragen
+# intern und erscheint weder in Ausgabe noch Bericht oder Prompt.
+_LIFETIME_WINDOW = False
+
+
+def _window_start_label(start: str) -> str:
+    return t("Lebenszeit", "Lifetime") if _LIFETIME_WINDOW else start
+
 
 def _lc_start(infection_date: str) -> str:
     d = datetime.strptime(infection_date, "%Y-%m-%d") + timedelta(weeks=_SYNDROME_CFG["lag_weeks"])
@@ -918,8 +939,9 @@ def _structural_exposure_hits(conn) -> dict[str, str]:
             })
 
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
-            SELECT lat, lon, COALESCE(end_ts, start_ts) FROM location_stays
+            SELECT lat, lon, COALESCE(end_ts, start_ts) FROM loc.location_stays
             WHERE lat IS NOT NULL AND lon IS NOT NULL
         """).fetchall()
         today = datetime.now().strftime("%Y-%m-%d")
@@ -1015,7 +1037,7 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
             continue
 
         sero = SYNDROME_SERO.get(slug, {})
-        sero_pct   = sero.get("seroprevalence_de")
+        sero_pct   = _sero_pct_for_slug(slug)
         sero_cat   = sero.get("sero_category", "unbekannt")
         endemisch  = set(sero.get("endemic_regions", []))
 
@@ -1049,10 +1071,12 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
         # Drei Stufen: bestätigte Infektion (+20), dokumentierte Exposition (+14),
         # Verdacht/wahrscheinlich (+6). Skaliert auf IDF-Score-Niveau (~90+).
         prior_note = None
+        prior_tier = None  # saubere Kategorie, s. personalisierte_einordnung()
         prior_data = _EXPOSURE_BOOSTS.get(slug)
         if prior_data:
             exp_boost, exp_label, exp_tier = prior_data
             score += exp_boost
+            prior_tier = exp_tier  # "confirmed" | "exposure" | "suspected"
             _LEVEL_MAP = {"confirmed": "confirmed", "exposure": "suspected", "suspected": "lead"}
             level = _LEVEL_MAP.get(exp_tier, "lead")
             prior_note_de, _ = label_finding(exp_label, exp_label, level)
@@ -1060,7 +1084,10 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
         elif exposure_priors and slug in exposure_priors:
             db_b = min(exposure_priors[slug], 3.0)
             score += db_b
-            prior_note = f"Expositions-Prior (DB): +{db_b:.1f}"
+            prior_tier = "db_weak"
+            detail = _EXPOSURE_PRIOR_DETAILS.get(slug)
+            prior_note = (f"Expositions-Prior (DB): +{db_b:.1f} -- {detail}"
+                          if detail else f"Expositions-Prior (DB): +{db_b:.1f}")
 
         # ── Reise-/Struktur-Boost ─────────────────────────────────────────────
         # Zwei unabhaengige Evidenzquellen: Freitext-Ueberschneidung mit den
@@ -1131,26 +1158,36 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
         lab_ausstehend: list[str] = []
         _med = open_medicine_db()
         for marker in LAB_MARKERS.get(slug, []):
-            # Only use lab results from the post-infection window
+            # "date >= lc_start" filtert Werte von VOR dem Analysefenster raus
+            # -- funktioniert sauber im normalen (infektionsbezogenen) Modus,
+            # wird aber bedeutungslos im --lifetime-Modus (lc_start =
+            # Geburtsdatum, praktisch jeder Laborwert liegt "danach"). Dort
+            # kann z.B. ein Vor-Infektions-Antikoerpertest (negativ, weil die
+            # Infektion schlicht noch nicht stattgefunden hatte) faelschlich
+            # wie ein Gegenbeweis aussehen, wenn das Datum nicht mit
+            # ausgegeben wird.
+            # Deshalb Datum IMMER in den Hinweistext aufnehmen, nicht nur
+            # Status -- Interpretation bleibt beim Lesenden, aber mit den
+            # nötigen Informationen dafür.
             rows_lab = _med.execute(
-                "SELECT wert, wert_num, ref_max, status FROM lab_manual"
+                "SELECT date, wert, wert_num, ref_max, status FROM lab_manual"
                 " WHERE parameter LIKE ? AND date >= ? ORDER BY date DESC LIMIT 1",
                 (f"%{marker['parameter']}%", lc_start),
             ).fetchall()
             if not rows_lab:
                 lab_ausstehend.append(marker["label"])
                 continue
-            wert, wert_num_v, ref_max_v, status_v = rows_lab[0]
+            lab_date, wert, wert_num_v, ref_max_v, status_v = rows_lab[0]
             result_status = _lab_result_status(wert, wert_num_v, ref_max_v, status_v)
             boosts = _LAB_BOOST.get(marker.get("type", "IgG"), _LAB_BOOST["IgG"])
             if result_status == "elevated":
                 score += boosts["elevated"]
-                lab_hints.append(f"✓ {marker['label']} positiv/erhöht")
+                lab_hints.append(f"✓ {marker['label']} positiv/erhöht ({lab_date})")
             elif result_status == "negative":
                 score += boosts["negative"]
-                lab_hints.append(f"✗ {marker['label']} negativ")
+                lab_hints.append(f"✗ {marker['label']} negativ ({lab_date})")
             else:
-                lab_hints.append(f"? {marker['label']} (kein Referenz)")
+                lab_hints.append(f"? {marker['label']} (kein Referenz, {lab_date})")
 
         results.append({
             "slug":            slug,
@@ -1164,6 +1201,7 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
             "lab_hints":        lab_hints,
             "lab_ausstehend":   lab_ausstehend,
             "prior_note":       prior_note,
+            "prior_tier":       prior_tier,
             "sero_cat":         sero_cat,
             "sero_note":        sero_note,
             "reise_note":       reise_note,
@@ -1175,11 +1213,160 @@ def vermute_syndrome(conn, lc_start: str, d_to: str,
     return results
 
 
+_TIER_ORDER = {"Hoch": 0, "Mittel-Hoch": 1, "Mittel": 2, "Niedrig-Mittel": 3,
+               "Vollständige Testung ausstehend": 4, "Niedrig": 5,
+               "Laborausgeschlossen": 6, "Unklar (zu wenig Daten)": 7}
+
+
+def _sero_pct_for_slug(slug: str) -> float | None:
+    """Bevölkerungs-Hintergrund-Prävalenz für ein Syndrom, abhängig vom
+    konfigurierten user.country -- `seroprevalence_de` gilt nur fuer
+    Deutschland, das Tool ist international nutzbar.
+
+    Gibt None zurück, wenn für das konfigurierte Land keine Daten
+    vorliegen (aktuell: nur `seroprevalence_de`, also nur DE) -- lieber
+    ehrlich "keine Daten" als eine falsche Landes-Prävalenz unterzuschieben.
+    Erfindet KEINE Zahlen für andere Länder; bis echte Länder-Daten in den
+    Syndrom-Dateien ergänzt werden (eigenes, größeres Vorhaben), bleibt die
+    Prävalenz-Spalte für nicht-deutsche Nutzer leer."""
+    sero = SYNDROME_SERO.get(slug, {})
+    country = (_cfg.country or "DE").upper()
+    if country == "DE":
+        return sero.get("seroprevalence_de")
+    return None
+
+# Mindestanzahl Tage mit Symptomeintrag, ab der der Symptom-Score als
+# einigermassen belastbar gilt, angelehnt an die 6-Monats-Chronizitaetsschwelle
+# aus IOM 2015. Zaehlt ERFASSTE Tage (COUNT DISTINCT date), nicht verstrichene
+# Kalenderzeit: bei duenner Erfassung bringt ein laengeres Fenster allein keine
+# zusaetzlichen Daten. Darunter wird der Symptom-Score aus der Einstufung
+# ausgeklammert, weil die Stichprobe zu klein sein kann.
+MIN_SYMPTOM_DAYS = 180
+
+
+def personalisierte_einordnung(r: dict, sero_pct: float | None,
+                               symptom_days: int | None = None) -> tuple[str, str]:
+    """Kombiniert Symptom-Score, persönliches Expositionsprofil und
+    vorliegende Laborbefunde zu einer QUALITATIVEN Einstufung (Tier +
+    Begründungstext) -- bewusst KEINE kalibrierte Wahrscheinlichkeits-
+    Prozentzahl, dafür gibt es kein validiertes Modell, das diese drei
+    heterogenen Signale (Score-Skala, kategoriale Expositionsstufen,
+    binäre Laborergebnisse) korrekt verrechnen würde. Reine
+    Regel-Kaskade, jede Regel einzeln nachvollziehbar.
+
+    Warum sero_pct (Bevölkerungs-Hintergrund-Prävalenz) überhaupt
+    einfließt, nicht nur der Symptom-Score: Score misst ausschließlich,
+    wie gut die Symptome zum jeweiligen Syndrom-Profil passen --
+    unabhängig davon, wie häufig dieser Erreger überhaupt vorkommt. Ohne
+    Korrektur dagegen würde das Ranking seltene/exotische Syndrome
+    systematisch überbewerten, sobald ihr (oft generisches) Symptomprofil
+    zufaellig gut passt. Das ist
+    dieselbe Logik wie Bayes'sche Vortest-Wahrscheinlichkeit in der
+    Diagnostik ("bei Hufgetrappel an Pferde denken, nicht an Zebras"):
+    zwei Syndrome mit identischem Symptom-Score sind nicht gleich
+    plausibel, wenn eines eine Alltagserkrankung ist (z.B. EBV) und das
+    andere eine extreme Rarität. sero_pct ist der verfügbare Korrekturfaktor
+    dafür -- kein Ersatz für eine echte patientenindividuelle
+    Vortest-Wahrscheinlichkeit (die würde zusätzlich Alter, Geschlecht,
+    Region etc. einbeziehen), aber besser als Score allein."""
+    lab_hints = r.get("lab_hints", [])
+    has_pos_lab = any(h.startswith("✓") for h in lab_hints)
+    has_neg_lab = any(h.startswith("✗") for h in lab_hints)
+    lab_ausstehend = r.get("lab_ausstehend", [])
+    # Kategorie aus vermute_syndrome() statt Textsuche im fertigen Satz: eine
+    # Substring-Suche erkennt keine Verneinung ("NICHT bestaetigt").
+    # None, wenn kein Expositions-Prior vorliegt.
+    exp_tier = r.get("prior_tier")
+    exp_text = r.get("prior_note")
+    sero_bucket = (
+        "unbekannt" if sero_pct is None else
+        "hoch" if sero_pct >= 0.50 else
+        "mittel" if sero_pct >= 0.10 else "niedrig"
+    )
+
+    # Bestaetigte Exposition/Infektion geht vor jedem Laborbefund: ein klinisch
+    # gesicherter Fakt darf nicht durch einen negativen Marker fuer einen anderen
+    # Teilaspekt desselben Syndroms herabgestuft werden.
+    if exp_tier == "confirmed":
+        lab_addendum = ""
+        if lab_hints:
+            lab_addendum = f" (zusätzliches Labor vorhanden: {', '.join(lab_hints)})"
+        return "Hoch", (f"Bestätigte Exposition/Infektion: {exp_text}.{lab_addendum}"
+                        if lab_addendum else
+                        f"Bestätigte Exposition/Infektion: {exp_text}. Kein Labor zu "
+                        f"diesem Syndrom vorliegend.")
+    if has_pos_lab:
+        return "Hoch", f"Labor positiv/erhöht: {', '.join(h for h in lab_hints if h.startswith('✓'))}."
+    if has_neg_lab:
+        neg_list = ', '.join(h for h in lab_hints if h.startswith('✗'))
+        if lab_ausstehend:
+            # Nicht "Laborausgeschlossen" nennen, solange relevante Tests fehlen.
+            csf_note = ""
+            if r["slug"] == "neuroborreliose":
+                # Auch ein vollstaendiger Serum-Western-Blot reicht hier nicht
+                # fuer einen Ausschluss: Standard ist der Liquor-Serum-
+                # Antikoerperindex (AWMF S3-Leitlinie Neuroborreliose). Die
+                # Marker-Liste dieses Slugs kennt nur Serum-Tests.
+                csf_note = (" Zusätzlich unabhängig vom Serum-Ergebnis: die "
+                           "eigentliche Standardabklärung für Neuroborreliose "
+                           "ist der Liquor-Serum-Antikörperindex per "
+                           "Lumbalpunktion. Falls sie noch nicht erfolgt ist, kann "
+                           "Serum allein eine ZNS-Beteiligung nicht sicher "
+                           "ausschließen.")
+            return "Vollständige Testung ausstehend", (
+                f"Labor negativ: {neg_list}. Aber noch nicht vollständig "
+                f"getestet -- {', '.join(lab_ausstehend)} steht noch aus, "
+                f"daher KEIN endgültiger Ausschluss, nur ein erster "
+                f"negativer Hinweis.{csf_note}")
+        return "Laborausgeschlossen", (
+            f"Labor negativ: {neg_list} -- alle für dieses Syndrom "
+            f"bekannten Marker getestet und negativ, kein ausstehender Test.")
+    if exp_tier == "exposure":
+        return "Mittel-Hoch", f"Dokumentierte Exposition: {exp_text}. Kein Labor vorliegend."
+    if exp_tier == "suspected":
+        return "Mittel", f"Vermutete Exposition (nicht bestätigt): {exp_text}. Kein Labor vorliegend."
+    if exp_tier == "db_weak":
+        return "Niedrig-Mittel", (f"Automatisch berechnetes Hintergrundsignal aus Reise-/"
+                                   f"Ausbruchsdaten ({exp_text}), NICHT manuell bestätigt -- "
+                                   f"diese Quelle ist bekannt fehleranfällig (z.B. Wohnsitz-"
+                                   f"Daten ohne echtes Ankunftsdatum können fälschlich gegen "
+                                   f"Ausbruchsberichte matchen). Vor dem Arztgespräch gegen die "
+                                   f"tatsächliche Reisehistorie prüfen, nicht blind übernehmen. "
+                                   f"Kein Labor vorliegend.")
+    # Kein personalisiertes Signal (keine Labor-/Expositionsdaten) --
+    # bleibt bei Symptom-Score + Bevölkerungs-Hintergrund als einzige Basis.
+    # Unter MIN_SYMPTOM_DAYS wird der Score dafuer NICHT herangezogen (nicht
+    # nur mit Vorbehalt versehen): eine Einstufung auf so wenigen Tagen wuerde
+    # Praezision vortaeuschen, die die Datenlage nicht hergibt.
+    if symptom_days is not None and symptom_days < MIN_SYMPTOM_DAYS:
+        return "Unklar (zu wenig Daten)", (
+            f"Nur {symptom_days} von {MIN_SYMPTOM_DAYS} empfohlenen Tagen mit "
+            f"Symptomeintrag im Analysefenster -- Symptom-Score wird bei dieser "
+            f"Datenlage bewusst NICHT zur Einstufung herangezogen. Keine Labor-/"
+            f"Expositionsdaten vorhanden, die stattdessen tragen könnten. "
+            f"Nachrichtlich, NICHT gewichtet: Score {r['score']:.2f}, "
+            f"Symptom-Übereinstimmung {r['coverage_pct']:.0f}% "
+            f"({r['n_matched']}/{r['n_profil']} Symptome getroffen).")
+    high_score = r["coverage_pct"] >= 75
+    if high_score and sero_bucket in ("hoch", "mittel"):
+        return "Mittel", (f"Hohe Symptom-Übereinstimmung ({r['coverage_pct']:.0f}%), "
+                           f"Erreger in der Bevölkerung {sero_bucket} verbreitet -- "
+                           f"aber keine eigene Exposition/kein Labor dokumentiert.")
+    if high_score:
+        return "Niedrig-Mittel", (f"Hohe Symptom-Übereinstimmung ({r['coverage_pct']:.0f}%), "
+                                   f"aber Erreger in der Bevölkerung selten/unbekannt UND "
+                                   f"keine eigene Exposition dokumentiert -- Symptome allein "
+                                   f"tragen hier wenig, da viele Syndrome ähnliche Symptome teilen.")
+    return "Niedrig", (f"Niedrige Symptom-Übereinstimmung ({r['coverage_pct']:.0f}%), "
+                        f"keine Exposition, kein Labor.")
+
+
 def build_differential_report(ranking: list, infection_date: str,
-                                 lc_start: str, d_to: str, conn=None) -> str:
+                                 lc_start: str, d_to: str, conn=None,
+                                 person: str = OWN_PERSON_ID) -> str:
     lines = [
         "## Differenzialdiagnose — Syndrom-Vermutung (automatisch)\n",
-        f"Infektionsdatum: **{infection_date}**  | Fenster: **{lc_start} – {d_to}**\n",
+        f"Infektionsdatum: **{infection_date}**  | Fenster: **{_window_start_label(lc_start)} – {d_to}**\n",
         "Methode: IDF-gewichteter Symptom-Abgleich (log-IDF, normiert auf "
         "Profilgröße) + Biomarker-Bonus.  \n"
         "⚠ Kein Ersatz für klinische Diagnostik — nur Hinweisgeber.\n",
@@ -1299,11 +1486,16 @@ def build_differential_report(ranking: list, infection_date: str,
     lines += _exposure_profile_lines()
 
     lines += [
-        "### Symptom-basiertes Ranking\n",
-        f"  {'Rang':<5} {'Syndrom':<42} {'Score':>7} {'Cov':>6} {'Treffer':<8} {'Sero':<8} {'Hinweise'}",
-        "  " + "─" * 90,
+        "### Symptom-basiertes Ranking (alle Syndrome)\n",
+        f"  {'Rang':<5} {'Syndrom':<42} {'Score':>7} {'Cov':>6} {'Treffer':<8} "
+        f"{'Sero':<8} {'Bev.-Präv.':<11} {'Begründung'}",
+        "  " + "─" * 100,
     ]
-    for i, r in enumerate(ranking[:10], 1):
+    # Volle Liste statt Top 10. "Begruendung" sind die Expositions-, Reise- und
+    # Biomarker-Hinweise, "Bev.-Präv." ist die Bevoelkerungs-Praevalenz aus SYNDROME_SERO,
+    # nicht die Wahrscheinlichkeit, dass die Person das Syndrom hat.
+    sero_pcts: dict[str, float | None] = {}
+    for i, r in enumerate(ranking, 1):
         hints_parts = []
         if r.get("prior_note"):
             hints_parts.append(f"📋 {r['prior_note']}")
@@ -1315,11 +1507,131 @@ def build_differential_report(ranking: list, infection_date: str,
         sero_label = {"hoch": "↑↑↑", "mittel": "↑↑", "niedrig": "↑",
                       "reise": "✈", "novel": "neu", "autoimmun": "AI",
                       "dysbiose": "GI"}.get(r.get("sero_cat", ""), "?")
+        sero_pct = _sero_pct_for_slug(r["slug"])
+        sero_pcts[r["slug"]] = sero_pct
+        praev_str = f"{sero_pct:.0%}" if sero_pct is not None else "?"
         lines.append(
             f"  {i:<5} {r['name']:<42} {r['score']:>7.2f} "
             f"{r['coverage_pct']:>5.1f}%  "
-            f"{r['n_matched']}/{r['n_profil']:<5}  {sero_label:<8}{hints}"
+            f"{r['n_matched']}/{r['n_profil']:<5}  {sero_label:<8}{praev_str:<12}{hints}"
         )
+
+    # ── Zweite Sortierung: nach Bevoelkerungs-Praevalenz statt Symptom-Score ─
+    # Der Score oben misst reine Symptom-Überlappung, nicht Plausibilität --
+    # ein seltenes/reisebedingtes Syndrom kann zufällig hoch scoren, obwohl
+    # die Bevoelkerungs-Praevalenz praktisch null ist. Eintraege ohne
+    # SYNDROME_SERO-Wert stehen bereits im Abschnitt zu dokumentierter Exposition
+    # und werden hier nicht als unsortierbar wiederholt.
+    known_prob = sorted(
+        (r for r in ranking if sero_pcts.get(r["slug"]) is not None),
+        key=lambda r: -sero_pcts[r["slug"]],
+    )
+    if known_prob:
+        lines += [
+            "", "### Nach Bevölkerungs-Prävalenz sortiert "
+            "(nur Einträge mit bekanntem Wert; keine persönliche Wahrscheinlichkeit)\n",
+            f"  {'Bev.-Präv.':<11} {'Syndrom':<42} {'Score':>7} {'Rang (Score)'}",
+            "  " + "─" * 70,
+        ]
+        score_rank = {r["slug"]: i for i, r in enumerate(ranking, 1)}
+        for r in known_prob:
+            pct = sero_pcts[r["slug"]]
+            lines.append(
+                f"  {pct:>10.0%}  {r['name']:<42} {r['score']:>7.2f}   "
+                f"#{score_rank[r['slug']]}"
+            )
+
+    # ── Personalisierte Einordnung: Score + Exposition + Labor kombiniert ───
+    symptom_days = None
+    spread_note = ""
+    if conn is not None:
+        try:
+            symptom_days = conn.execute(
+                "SELECT COUNT(DISTINCT date) FROM symptoms WHERE person = ? AND date >= ? AND date <= ?",
+                (person, lc_start, d_to),
+            ).fetchone()[0]
+            # Streuungs-Hinweis: reine Tagesanzahl sagt nicht, ob die Stichprobe
+            # das ganze Fenster abdeckt oder eine kurze Momentaufnahme ist --
+            # 24 Tage innerhalb von 6 Wochen ist etwas anderes
+            # über 13 Monate verteilt, auch wenn beide dieselbe Tageszahl
+            # ergeben. Einfache Kennzahl statt komplizierter Zeitgewichtung:
+            # Spannweite (erster bis letzter Eintrag) vs. Gesamtfenster.
+            if symptom_days and symptom_days > 1:
+                span = conn.execute(
+                    "SELECT MIN(date), MAX(date) FROM symptoms WHERE person = ? AND date >= ? AND date <= ?",
+                    (person, lc_start, d_to),
+                ).fetchone()
+                span_days = (datetime.strptime(span[1], "%Y-%m-%d")
+                            - datetime.strptime(span[0], "%Y-%m-%d")).days
+                window_days = (datetime.strptime(d_to, "%Y-%m-%d")
+                              - datetime.strptime(lc_start, "%Y-%m-%d")).days
+                coverage_of_window = span_days / window_days if window_days else 0
+                span_weeks = round(span_days / 7, 1)
+                if coverage_of_window < 0.3:
+                    spread_note = (f" **Geballt, keine Momentaufnahme des ganzen "
+                                   f"Fensters:** alle {symptom_days} Tage liegen "
+                                   f"innerhalb von {span_weeks} Wochen "
+                                   f"({span[0]} bis {span[1]}), nicht über "
+                                   + ("das gesamte Fenster" if _LIFETIME_WINDOW else
+                                      f"die gesamten {round(window_days/30.44,1)} Monate")
+                                   + " verteilt.")
+                else:
+                    spread_note = (f" Einträge verteilen sich über {span_weeks} "
+                                   f"Wochen ({span[0]} bis {span[1]}) -- deckt "
+                                   f"den Großteil des Analysefensters ab, keine "
+                                   f"reine Momentaufnahme.")
+        except Exception:
+            symptom_days = None
+    _ref_country = (_cfg.country or "DE").upper()
+    if _ref_country == "DE":
+        _sero_note = ("⚠ **Bevölkerungs-Prävalenz (Spalte Bev.-Präv.):** zeigt, wie verbreitet ein Erreger "
+                      "in der Bevölkerung ist, NICHT die Wahrscheinlichkeit, dass du das "
+                      "Syndrom hast. Bezieht sich auf die "
+                      "**deutsche Allgemeinbevölkerung** (Feld `seroprevalence_de`, "
+                      "user.country=DE). Wichtige Einschränkung: die `refs`-Zitate je "
+                      "Syndrom-Datei belegen meist die Symptom-/Biomarker-Schwellen "
+                      "(z.B. Davis 2023, Gronwald 2023), NICHT separat die "
+                      "Prävalenz-Zahl selbst -- plausible Schätzwerte, aber nicht "
+                      "einzeln sauber referenziert. Bei Reise-/Ausbruchsbezug (Rubrik "
+                      "'reise') ist die Referenz ohnehin das Zielland, nicht "
+                      "Deutschland.\n")
+    else:
+        _sero_note = (f"⚠ **Bevölkerungs-Prävalenz (Spalte Bev.-Präv.):** user.country ist "
+                      f"auf '{_ref_country}' konfiguriert -- für dieses Land liegen im "
+                      f"Syndrom-Katalog noch KEINE Prävalenz-Daten vor (nur "
+                      f"`seroprevalence_de` für Deutschland existiert bisher). Die "
+                      f"Spalte bleibt deshalb konsequent leer ('?'), statt "
+                      f"dir fälschlich deutsche Zahlen für dein Land unterzuschieben. "
+                      f"Bei Reise-/Ausbruchsbezug (Rubrik 'reise') ist die Referenz "
+                      f"ohnehin das jeweilige Zielland.\n")
+    lines += ["", "### Personalisierte Einordnung "
+              "(Score + persönliche Exposition + Laborstatus kombiniert)\n",
+              "⚠ Regelbasierte Einstufung, KEINE kalibrierte Wahrscheinlichkeit --\n"
+              "s. Begründung je Zeile für die Herleitung.\n",
+              _sero_note]
+    if symptom_days is not None:
+        months = round((datetime.strptime(d_to, "%Y-%m-%d")
+                        - datetime.strptime(lc_start, "%Y-%m-%d")).days / 30.44, 1)
+        window_text = (_window_start_label(lc_start) if _LIFETIME_WINDOW else
+                       f"insgesamt {lc_start} bis {d_to}, ca. {months} Monate")
+        lines.append(f"**Symptomtagebuch-Datenlage:** {symptom_days} von "
+                     f"{MIN_SYMPTOM_DAYS} empfohlenen Tagen erfasst (Analysefenster "
+                     f"{window_text}) -- "
+                     f"unter der Schwelle wird der Symptom-Score bewusst nicht zur "
+                     f"Einstufung herangezogen ("
+                     f"Schwelle an die IOM-2015-6-Monats-Chronizitätsschwelle "
+                     f"angelehnt).{spread_note}\n")
+    personal = []
+    for r in ranking:
+        tier, begruendung = personalisierte_einordnung(r, sero_pcts.get(r["slug"]), symptom_days)
+        personal.append((tier, begruendung, r))
+    personal.sort(key=lambda x: (_TIER_ORDER[x[0]], -x[2]["score"]))
+    for tier, begruendung, r in personal:
+        if tier in ("Niedrig", "Laborausgeschlossen", "Unklar (zu wenig Daten)"):
+            continue  # Begründung fürs Ausschließen ist selten das, was beim Arztgespräch gebraucht wird
+        lines.append(f"**{tier} — {r['name']}** (Score {r['score']:.2f})")
+        lines.append(f"  {begruendung}")
+        lines.append("")
 
     lines.append("")
     top = ranking[0]
@@ -1367,8 +1679,7 @@ def build_differential_report(ranking: list, infection_date: str,
     for r in ranking:
         cat = r.get("sero_cat", "")
         if cat in cat_groups:
-            sero = SYNDROME_SERO.get(r["slug"], {})
-            pct  = sero.get("seroprevalence_de")
+            pct  = _sero_pct_for_slug(r["slug"])
             pct_str = f"{pct:.0%}" if pct is not None else "?"
             cat_groups[cat].append(f"{r['name']} ({pct_str})")
 
@@ -1453,6 +1764,13 @@ def load_baseline(conn, infection_date: str) -> dict:
     return base
 
 
+# Modul-globaler Cache für "wann/wo/wie oft"-Texte pro Slug, gefuellt von
+# load_exposure_priors() und gelesen von personalisierte_einordnung() --
+# kein zusaetzlicher Rückgabewert noetig, da beide im selben Report-Lauf
+# nacheinander aufgerufen werden (load_exposure_priors() immer zuerst).
+_EXPOSURE_PRIOR_DETAILS: dict[str, str] = {}
+
+
 def load_exposure_priors(conn, lc_start: str) -> dict[str, float]:
     """Liest Exposition-Priors aus den DB-Tabellen der Exposure-Skripte.
 
@@ -1468,23 +1786,51 @@ def load_exposure_priors(conn, lc_start: str) -> dict[str, float]:
     DB-Priors sind Hintergrund-Hypothesen aus Reise- und Expositionsdaten.
     """
     priors: dict[str, float] = {}
+    latest_run = None
 
     # ── pathogen_exposure_summary ────────────────────────────────────────────
     RISK_BOOST = {"hoch": 2.0, "high": 2.0, "mittel": 1.0,
                   "medium": 1.0, "niedrig": 0.5, "low": 0.5}
     try:
-        rows = conn.execute("""
-            SELECT slug, risk_level, MAX(score) AS top_score
-            FROM pathogen_exposure_summary
-            WHERE slug IS NOT NULL AND slug != ''
-            GROUP BY slug
-        """).fetchall()
-        for slug, risk_level, top_score in rows:
-            base = RISK_BOOST.get(risk_level, 0.5)
-            scale = min(top_score / 100.0, 1.0)
-            priors[slug] = round(base * (0.5 + 0.5 * scale), 2)
+        # Nur der neueste Lauf zaehlt (MAX(computed_at)): ueber alle Laeufe
+        # hinweg bliebe ein Fehltreffer aus einem veralteten Lauf dauerhaft
+        # wirksam. dfrom wird
+        # bewusst NICHT mitgefiltert -- ein Lauf mit kuerzerem dfrom
+        # (z.B. "nur ab 2017") ist nicht automatisch veralteter als einer
+        # mit laengerem Lebenszeit-Fenster, nur computed_at zeigt das an.
+        latest_run = conn.execute("""
+            SELECT person, MAX(computed_at) FROM pathogen_exposure_summary
+            WHERE person = ? GROUP BY person
+        """, (OWN_PERSON_ID,)).fetchone()
+        if latest_run:
+            rows = conn.execute("""
+                SELECT slug, risk_level, MAX(score) AS top_score
+                FROM pathogen_exposure_summary
+                WHERE slug IS NOT NULL AND slug != '' AND computed_at = ?
+                GROUP BY slug
+            """, (latest_run[1],)).fetchall()
+            for slug, risk_level, top_score in rows:
+                base = RISK_BOOST.get(risk_level, 0.5)
+                scale = min(top_score / 100.0, 1.0)
+                priors[slug] = round(base * (0.5 + 0.5 * scale), 2)
     except Exception:
         pass  # Tabelle nicht befüllt
+
+    # ── Detailtext pro Slug (wann/wo/wie oft) ────────────────────────────────
+    details: dict[str, str] = {}
+    try:
+        rows = conn.execute("""
+            SELECT slug, details, stay_count
+            FROM pathogen_exposure_summary
+            WHERE slug IS NOT NULL AND slug != '' AND details IS NOT NULL
+                  AND details != '' AND computed_at = ?
+        """, (latest_run[1] if latest_run else "",)).fetchall()
+        for slug, det, stay_count in rows:
+            details[slug] = f"{det} (insgesamt {stay_count}x erfasst)"
+    except Exception:
+        pass  # Spalte/Tabelle noch nicht vorhanden (alter Lauf vor dem Fix)
+    _EXPOSURE_PRIOR_DETAILS.clear()
+    _EXPOSURE_PRIOR_DETAILS.update(details)
 
     # ── outbreak_exposure × outbreak_events ──────────────────────────────────
     # Nur Ausbrüche, deren Reise nach lc_start endete (zeitlich relevant).
@@ -1512,6 +1858,11 @@ def compute_trend(data: dict, lc_start: str, d_to: str) -> list:
     """Quartals-Übersicht: RMSSD, MET-Minuten, HRV-Crash-Rate."""
     start = datetime.strptime(lc_start, "%Y-%m-%d")
     end   = datetime.strptime(d_to, "%Y-%m-%d")
+
+    # Quartalsgrenzen ab Geburt wuerden das Geburtsdatum verraten, also ab den ersten Daten.
+    if _LIFETIME_WINDOW:
+        dates = [d for key in ("nhrv", "activity", "pem") for d in data[key]]
+        start = datetime.strptime(min(dates)[:10], "%Y-%m-%d") if dates else end
 
     # Earliest date with nightly RMSSD — used to annotate source in the table.
     # polar_nightly_hrv = sleep-context RMSSD; before that only daytime H10
@@ -1810,7 +2161,7 @@ def build_report(data, autonome, pem, kardio, schlaf, aktivitaet, respiration,
     lines = [
         f"## {_SYNDROME_CFG['name_de']} — Diagnostik-Score\n",
         f"Infektionsdatum: **{infection_date}**  "
-        f"| Analysefenster: **{lc_start} – {d_to}**  "
+        f"| Analysefenster: **{_window_start_label(lc_start)} – {d_to}**  "
         f"(≥{_SYNDROME_CFG['lag_weeks']} Wochen post-akut)\n",
         f"ICD-10-GM: `{icd10_str}`"
         + (f"  |  {melde_str}" if melde_str else "") + "\n",
@@ -2195,7 +2546,7 @@ def _plot(data, trend, baseline, infection_date, lc_start, d_to):
 
         fig, axes = plt.subplots(4, 1, figsize=(15, 14), facecolor="#1A1A2E")
         fig.suptitle(
-            f"{_SYNDROME_CFG['name_de']} — Biomarker  |  Inf. {infection_date}  (ab {lc_start})",
+            f"{_SYNDROME_CFG['name_de']} — Biomarker  |  Inf. {infection_date}  (ab {_window_start_label(lc_start)})",
             color="#E0E0E0", fontsize=12, fontweight="bold")
 
         BG, TEXT, RED, BLUE, GREEN, AMBER = (
@@ -2327,7 +2678,7 @@ def _build_llm_input(autonome: dict, pem: dict, kardio: dict, schlaf: dict,
     """Erstellt LLM-Eingabe ausschließlich aus berechneten Domänenwerten."""
     lines = [
         f"## Berechnete Befunde — {_SYNDROME_CFG['name_de']} Diagnostik",
-        f"Infektionsdatum: {infection_date} | Analysefenster: {lc_start} – {d_to}",
+        f"Infektionsdatum: {infection_date} | Analysefenster: {_window_start_label(lc_start)} – {d_to}",
         "",
         "### Autonome Dysregulation",
     ]
@@ -2600,6 +2951,19 @@ def main():
                             "Infektionen (Influenza, Erkältung) wo nur Symptom-Onset bekannt.",
                             "Direct analysis start date (YYYY-MM-DD) bypassing lag — for "
                             "undocumented infections where only symptom onset is known."))
+    parser.add_argument("--lifetime", action="store_true",
+                        help=t(
+                            "Analysefenster auf das ganze bisherige Leben ausweiten (keine "
+                            "Beschränkung auf 'seit der Infektion') -- für die Frage 'welche "
+                            "Erreger kommen über mein ganzes Leben betrachtet infrage', nicht "
+                            "'was hat sich seit DIESER Infektion verändert'. Setzt --onset "
+                            "auf user.birthdate aus der Config, ohne diesen Wert auf ein "
+                            "weit zurückliegendes Datum.",
+                            "Widen the analysis window to the whole life so far (no 'since "
+                            "this infection' restriction) -- for 'which pathogens could be "
+                            "relevant over my whole life', not 'what changed since THIS "
+                            "infection'. Sets --onset to user.birthdate from config, or a "
+                            "far-past date if that is not set."))
     parser.add_argument("--to",     dest="date_to",  default=today)
     parser.add_argument("--plot",   action="store_true")
     parser.add_argument("--no-llm", action="store_true")
@@ -2613,6 +2977,12 @@ def main():
     # Use --from as fallback for --onset if --onset is not provided
     if args.date_from and not args.onset_override:
         args.onset_override = args.date_from
+
+    if args.lifetime:
+        # Ohne konfiguriertes Geburtsdatum generischer Platzhalter statt Abbruch.
+        global _LIFETIME_WINDOW
+        _LIFETIME_WINDOW = True
+        args.onset_override = _cfg.birthdate or "1900-01-01"
 
     infection_events = _resolve_infection_events(args.infection_dates)
     if not infection_events:
@@ -2642,7 +3012,7 @@ def main():
             auto_start = args.onset_override or _lc_start(infection_date)
             print(f"\n{'='*60}")
             print(f"Auto-Differenzialdiagnose  |  {event_label}")
-            print(f"Fenster: {auto_start} – {args.date_to}")
+            print(f"Fenster: {_window_start_label(auto_start)} – {args.date_to}")
             print(f"DB: {_cfg.db_path}\n")
 
             conn = open_db()
@@ -2664,7 +3034,7 @@ def main():
 
             vbericht = build_differential_report(ranking, infection_date,
                                                    auto_start, args.date_to,
-                                                   conn=conn)
+                                                   conn=conn, person=args.person)
             conn.close()
             print("\n" + vbericht)
 
@@ -2691,7 +3061,7 @@ def main():
             print(f"\n{'='*60}")
             print(f"{_SYNDROME_CFG['name_de']} — Diagnose-Score")
             print(f"Ereignis:    {event_label}  ({infection_date}){estimated_note}")
-            print(f"Fenster:     {lc_start} – {args.date_to}{onset_note}")
+            print(f"Fenster:     {_window_start_label(lc_start)} – {args.date_to}{onset_note}")
             print(f"DB:          {_cfg.db_path}\n")
 
             conn = open_db()

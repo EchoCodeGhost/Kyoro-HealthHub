@@ -11,13 +11,15 @@ Master-Analyse — führt alle analyse_*.py-Skripte aus.
              erstellt für jedes Skript ein eigenes Ausgabeverzeichnis:
              <analyses_dir>/<YYYY-MM-DD>/<scriptname>/
              Plots (PNG/PDF) und Text-Output (Markdown) werden dort gespeichert.
-             stdout + stderr werden als <scriptname>.log gespeichert.
+             stdout + stderr gehen nach <scriptname>.output.txt. <scriptname>.log
+             enthält nur Laufdaten, weder Ausgabe noch Argumentwerte.
              Unterstützt Filterung nach Datum, Skriptnamen und Trockenlauf.
 @method.en   Recursively scans all analyse_*.py scripts in analysis/ directory,
              creates dedicated output directory for each script:
              <analyses_dir>/<YYYY-MM-DD>/<scriptname>/
              Plots (PNG/PDF) and text output (Markdown) are saved there.
-             stdout + stderr are saved as <scriptname>.log.
+             stdout + stderr go to <scriptname>.output.txt. <scriptname>.log holds
+             run metadata only, neither output nor argument values.
              Supports filtering by date, script names, and dry-run mode.
 @reads       Alle Tabellen, die von den einzelnen Analyse-Skripten gelesen werden
 @writes      Analyseergebnisse in <analyses_dir>/<YYYY-MM-DD>/<scriptname>/
@@ -255,6 +257,45 @@ def _matches(stem: str, patterns: list[str]) -> bool:
     return any(p.lower() in stem.lower() for p in patterns)
 
 
+_LOG_HEADER = "SCRIPT: "
+
+
+def _open_private(path: Path):
+    """Öffnet eine Datei zum Schreiben, nur für den Eigentümer lesbar, auch wenn sie schon existiert."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.fchmod(fd, 0o600)
+    return os.fdopen(fd, "w", encoding="utf-8")
+
+
+def _old_format_logs(analyses_dir: Path) -> list[Path]:
+    """Logs von vor der Trennung unter <Lauf>/<stem>/<stem>.log: alles ohne die neue Kopfzeile."""
+    logs = []
+    for path in analyses_dir.glob("*/*/*.log"):
+        if not path.is_file() or path.is_symlink() or path.stem != path.parent.name:
+            continue
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            if not fh.readline().startswith(_LOG_HEADER):
+                logs.append(path)
+    return logs
+
+
+def purge_old_logs(analyses_dir: Path, confirmed: bool) -> int:
+    """Nennt die alten Logs und löscht sie nur mit Bestätigung. Gibt die Zahl gelöschter Dateien zurück."""
+    logs = _old_format_logs(analyses_dir)
+    print(t(f"Alte Logs mit Skriptausgabe: {len(logs)}", f"Old logs with script output: {len(logs)}"))
+    if not confirmed:
+        if logs:
+            print(t("Nichts gelöscht. Zum Löschen zusätzlich --yes angeben. "
+                    "Bei manchen Läufen sind sie die einzige Kopie der Ausgabe.",
+                    "Nothing deleted. Add --yes to delete them. "
+                    "For some runs they are the only copy of the output."))
+        return 0
+    for path in logs:
+        path.unlink()
+    print(t(f"Gelöscht: {len(logs)}", f"Deleted: {len(logs)}"))
+    return len(logs)
+
+
 def run_script(
     script_path: Path,
     out_dir: Path,
@@ -266,6 +307,7 @@ def run_script(
     """Führt ein Analyse-Skript aus. Gibt (success, elapsed_s) zurück."""
     out_dir.mkdir(parents=True, exist_ok=True)
     log_path = out_dir / f"{script_path.stem}.log"
+    output_path = out_dir / f"{script_path.stem}.output.txt"
 
     cmd = [sys.executable, str(script_path)]
     if plot_supported:
@@ -283,22 +325,27 @@ def run_script(
     env["KYORO_ANALYSES_DIR"] = str(out_dir)
     env["MPLBACKEND"] = "Agg"  # kein interaktives Fenster im Batch-Modus
 
+    started = datetime.now().isoformat()
     t0 = time.monotonic()
-    with open(log_path, "w", encoding="utf-8") as log:
-        log.write(f"CMD: {' '.join(cmd)}\n")
-        log.write(f"OUT: {out_dir}\n")
-        log.write(f"TIME: {datetime.now().isoformat()}\n")
-        if skipped_flags:
-            log.write(f"SKIPPED (vom Skript nicht unterstützt): {', '.join(skipped_flags)}\n")
-        log.write("-" * 60 + "\n")
+    with _open_private(output_path) as output:
         result = subprocess.run(
             cmd,
             env=env,
-            stdout=log,
+            stdout=output,
             stderr=subprocess.STDOUT,
         )
-        log.write(f"\nEXIT: {result.returncode}\n")
     elapsed = time.monotonic() - t0
+
+    # Nur Laufdaten: die Ausgabe gehört in die Ausgabedatei, und Argumentwerte
+    # können Datumsangaben enthalten.
+    with _open_private(log_path) as log:
+        log.write(f"{_LOG_HEADER}{script_path.name}\n")
+        log.write(f"OUTPUT: {output_path.name}\n")
+        log.write(f"TIME: {started}\n")
+        log.write(f"DURATION_S: {elapsed:.1f}\n")
+        if skipped_flags:
+            log.write(f"SKIPPED (vom Skript nicht unterstützt): {', '.join(skipped_flags)}\n")
+        log.write(f"EXIT: {result.returncode}\n")
 
     from modules.pipeline_runner import _log_analysis_run
     _log_analysis_run(script_path.name, result.returncode, elapsed)
@@ -339,12 +386,21 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help=t("Zeigt was laufen würde ohne Ausführung",
                                "Show what would run without executing"))
+    parser.add_argument("--purge-old-logs", action="store_true",
+                        help=t("Nennt alte Logs mit Skriptausgabe; löscht sie nur mit --yes, führt keine Analyse aus",
+                               "Lists old logs with script output; deletes them only with --yes, runs no analysis"))
+    parser.add_argument("--yes", action="store_true",
+                        help=t("Bestätigt das Löschen bei --purge-old-logs",
+                               "Confirms deletion with --purge-old-logs"))
     add_lang_arg(parser)
     args = parser.parse_args()
     apply_lang_from_args(args)
 
     # Ausgabe-Basisverzeichnis
     cfg = _Cfg()
+    if args.purge_old_logs:
+        purge_old_logs(Path(cfg.analyses_dir).expanduser(), args.yes)
+        return
     run_date = args.run_date or date.today().isoformat()
     base_dir = Path(cfg.analyses_dir).expanduser() / run_date
 
@@ -476,11 +532,11 @@ def main():
 
         if not success:
             errors.append(stem)
-            log_hint = out_dir / f"{stem}.log"
-            print(t(f"         → Log: {log_hint}", f"         → Log: {log_hint}"))
-            if log_hint.exists():
+            output_hint = out_dir / f"{stem}.output.txt"
+            print(t(f"         → Ausgabe: {output_hint}", f"         → Output: {output_hint}"))
+            if output_hint.exists():
                 try:
-                    tail = log_hint.read_text(encoding="utf-8", errors="replace").splitlines()
+                    tail = output_hint.read_text(encoding="utf-8", errors="replace").splitlines()
                     for ln in tail[-20:]:
                         print(f"           {ln}", file=sys.stderr)
                 except Exception:

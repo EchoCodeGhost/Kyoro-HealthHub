@@ -15,7 +15,7 @@ Supports infection-related data analysis and decision-making through systematic 
 
 ## Method
 
-Geo-matching (ISO country, coordinate radius, region text) combined with temporal overlap score; aggregation over all available stay sources (JSON, DB, Google Takeout, GPX).
+Geo-matching (ISO country, coordinate radius, region text) combined with temporal overlap score; aggregation over all available stay sources (JSON, DB, Google Takeout, GPX). Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km).
 
 ## Scoring
 
@@ -35,7 +35,7 @@ Basis: projektintern, keine epidemiologische Validierung.
 
 ## Limitations
 
-Heuristic method: Heuristic geo and time-window matching without epidemiological validation; severity weights (1.0/0.6/0.25) and score formula are project-internal; outbreak data requires manual maintenance; climate zone risk model is simplified (latitude classes); results only for hypothesis generation in medical consultation (no substitute for serology).
+Heuristic method: Heuristic geo and time-window matching without epidemiological validation; severity weights (1.0/0.6/0.25) and score formula are project-internal; outbreak data requires manual maintenance; climate zone risk model is simplified (latitude classes); results only for hypothesis generation in medical consultation (no substitute for serology). Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 
 ## References
 

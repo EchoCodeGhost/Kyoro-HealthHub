@@ -15,7 +15,7 @@ Provides utility functions for data processing, essential for system functionali
 
 ## Method
 
-Executes three steps sequentially: 1. scrub_pii: Cleans known PII patterns in text columns 2. pseudonymize_devices: Replaces real serial numbers with SN pseudonyms 3. check_anonymization: Checks GPS precision, serial numbers, person IDs No step is blocking - errors only generate warnings. Logs all changes to import_log.
+Executes four steps sequentially: 1. scrub_pii: Cleans known PII patterns in text columns 2. pseudonymize_devices: Replaces real serial numbers with SN pseudonyms 3. pseudonymize_providers: Replaces medical practice/lab names with pseudonyms and removes addresses from lab free text (local, mapping only in identity.db) 4. check_anonymization: Checks GPS precision, serial numbers, person IDs No step is blocking - errors only generate warnings. Logs all changes to import_log.
 
 ## Data flow
 

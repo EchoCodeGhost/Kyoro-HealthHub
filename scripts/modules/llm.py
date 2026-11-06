@@ -99,6 +99,101 @@ def ai_label(provider_name: str | None = None) -> str:
     return t(_AI_LABEL_DE, _AI_LABEL_EN).format(model=name, ts=ts)
 
 
+# Marker routed via multi_routing to a dedicated local-only multi_backends
+# entry (see templates/health_config.example.json) — importer scripts that
+# extract sensitive free text (lab values, diagnoses, calendar text) include
+# this in their system prompt so the "multi" provider's keyword router sends
+# them to that entry instead of "default"/"medical", which may be remote.
+IMPORTER_LOCAL_TAG = "kyoro_importer_local_only"
+
+_LOCAL_PROVIDER_EXAMPLES = "openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx"
+
+
+def resolve_local_backend(backend_key: str = "importer") -> tuple[bool, str]:
+    """Checks whether the EFFECTIVE backend for sensitive importer/extraction
+    calls is local — correctly follows "multi" indirection instead of only
+    inspecting the top-level provider string (which would just say "multi"),
+    and asks the actual provider CLASS (`.is_local`) rather than maintaining
+    a separate hardcoded provider-name list that can silently drift out of
+    sync with utils/llm_provider.py (found exactly this drift while writing
+    this function: an earlier hardcoded set here was missing "llamacpp" and
+    "exo", both genuinely local).
+
+    For provider == "multi": looks up multi_backends[backend_key] (falling
+    back to multi_backends["default"] if that key isn't configured) and
+    checks THAT backend's own instantiated provider.
+
+    Returns (is_local, effective_provider_name).
+    """
+    llm_cfg = _cfg.llm_config
+    provider = (llm_cfg.get("provider") or "openvino").lower().strip()
+
+    if provider == "multi":
+        backends = llm_cfg.get("multi_backends", {})
+        sub_cfg = backends.get(backend_key) or backends.get("default") or {}
+        effective = (sub_cfg.get("provider") or "").lower().strip()
+        probe_cfg = {"llm": sub_cfg}
+    else:
+        effective = provider
+        probe_cfg = {"llm": llm_cfg}
+
+    try:
+        instance = LLMProvider.from_config(probe_cfg)
+        is_local = bool(getattr(instance, "is_local", False))
+    except Exception:
+        is_local = False
+
+    return is_local, effective
+
+
+def require_local_llm(purpose: str, backend_key: str = "importer") -> bool:
+    """Non-fatal guard for sensitive extraction calls (lab/diagnosis/
+    calendar text, scanned documents): returns True only if the effective
+    backend (following "multi" routing) is local. Prints a bilingual
+    explanation and returns False otherwise — callers decide whether to
+    skip the LLM step or abort; they must never send the data anyway."""
+    is_local, effective = resolve_local_backend(backend_key)
+    if is_local:
+        return True
+    print(t(
+        f"  Lokaler LLM-Provider erforderlich fuer: {purpose}. Effektiver "
+        f"Provider ist '{effective}' (nicht lokal) — Aufruf wird NICHT "
+        f"gesendet. Lokalen Provider konfigurieren (z.B. "
+        f"{_LOCAL_PROVIDER_EXAMPLES}), oder bei 'multi' einen "
+        f"lokalen Eintrag unter multi_backends['{backend_key}'] anlegen.",
+        f"  Local LLM provider required for: {purpose}. Effective provider "
+        f"is '{effective}' (not local) — call will NOT be sent. Configure a "
+        f"local provider (e.g. {_LOCAL_PROVIDER_EXAMPLES}), or for "
+        f"'multi', add a local entry under multi_backends['{backend_key}'].",
+    ))
+    return False
+
+
+def call_llm_importer_only(
+    prompt: str,
+    *,
+    system: str | None = None,
+    purpose: str = "sensitive data extraction",
+    max_tokens: int = 2000,
+    **kwargs,
+) -> str | None:
+    """Wrapper for importer/extraction scripts handling sensitive free text
+    (lab values, diagnoses, calendar entries, scanned documents). Verifies
+    the effective backend is local (resolve_local_backend) BEFORE sending,
+    and tags the system prompt with IMPORTER_LOCAL_TAG so the "multi"
+    provider's own keyword router also lands on the same local backend
+    rather than "default"/"medical" (which may be remote) — the guard check
+    and the actual routed call must agree on which backend is used.
+
+    Returns None (never raises) if no local backend is available; the
+    caller decides how to proceed (skip this item, abort the run), never to
+    fall back to a remote provider."""
+    if not require_local_llm(purpose):
+        return None
+    tagged_system = f"[{IMPORTER_LOCAL_TAG}]\n{system}" if system else f"[{IMPORTER_LOCAL_TAG}]"
+    return call_llm(prompt, system=tagged_system, max_tokens=max_tokens, **kwargs)
+
+
 def _text_provider() -> LLMProvider:
     global _text_provider_instance
     if _text_provider_instance is None:
@@ -128,6 +223,7 @@ def call_llm(
     temperature: float = 0.1,   # note: temperature is set per-provider in llm_provider.py
     require_grounding: bool = True,
     label_output: bool = True,
+    caller: str | None = None,  # Name des aufrufenden Skripts (für Location-Filter)
 ) -> str:
     """Send a prompt to the configured LLM or VLM provider.
 
@@ -142,15 +238,37 @@ def call_llm(
     labeled as AI-generated wherever displayed). Pass False when the
     return value is parsed structurally instead of shown as prose (JSON
     extraction, regex-matched triage markers) — label at the point it is
-    actually rendered to a person instead."""
+    actually rendered to a person instead.
+
+    caller: name of the calling script for the location filter
+    (location_store.filter_prompt_text); defaults to the stem of sys.argv[0].
+    For a remote provider (is_local false; unknown counts as remote) the
+    prompt and system text pass through the filter and an image is
+    re-encoded without metadata. If the image cannot be cleaned, nothing
+    is sent.
+    """
+    from modules.location_store import filter_prompt_text, get_caller_name
+
+    effective_caller = caller if caller is not None else get_caller_name()
+    provider = _vision_provider() if image_b64 else _text_provider()
+    is_remote = not getattr(provider, "is_local", False)
+
+    if is_remote:
+        prompt, _ = filter_prompt_text(prompt, effective_caller)
+        if system:
+            system, _ = filter_prompt_text(system, effective_caller)
+
     if require_grounding:
         system = (system or "") + _GROUNDING_SUFFIX
+
     if image_b64:
-        provider = _vision_provider()
+        image_data = base64.standard_b64decode(image_b64)
+        if is_remote:
+            image_data, image_mime = _strip_image_metadata(image_data, image_mime)
         ext = {"image/jpeg": ".jpg", "image/png": ".png",
                "image/webp": ".webp"}.get(image_mime, ".jpg")
         with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
-            tmp.write(base64.standard_b64decode(image_b64))
+            tmp.write(image_data)
             tmp_path = Path(tmp.name)
         try:
             text = provider.vision(tmp_path, prompt, max_tokens=max_tokens)
@@ -158,8 +276,57 @@ def call_llm(
             tmp_path.unlink(missing_ok=True)
         return text + "\n\n" + ai_label(provider.name) if label_output else text
     else:
-        text = _text_provider().chat(system or "", prompt, max_tokens=max_tokens)
-        return text + "\n\n" + ai_label(_text_provider().name) if label_output else text
+        text = provider.chat(system or "", prompt, max_tokens=max_tokens)
+        return text + "\n\n" + ai_label(provider.name) if label_output else text
+
+
+class ImageMetadataError(RuntimeError):
+    """Raised when an image cannot be re-encoded without metadata."""
+
+
+def _strip_image_metadata(image_data: bytes, mime_type: str) -> tuple[bytes, str]:
+    """Re-encode an image from its pixels only, dropping EXIF/XMP/GPS/ICC/text.
+
+    The pixels are copied into a fresh image object, which carries no
+    metadata; a palette is kept. Formats JPEG cannot hold (alpha, palette)
+    are sent as PNG instead, so the returned MIME type may differ from the
+    input. The result is re-opened and checked for leftover EXIF.
+
+    Fails closed: on any error ImageMetadataError is raised and the caller
+    must not send the image. Returns (clean bytes, MIME type).
+    """
+    from PIL import Image
+
+    try:
+        with Image.open(io.BytesIO(image_data)) as img:
+            img.load()
+            clean = Image.frombytes(img.mode, img.size, img.tobytes())
+            if img.mode == "P" and img.getpalette():
+                clean.putpalette(img.getpalette())
+
+        out_mime = mime_type if mime_type in ("image/png", "image/webp") else "image/jpeg"
+        if out_mime == "image/jpeg" and clean.mode not in ("RGB", "L", "CMYK"):
+            out_mime = "image/png"
+        fmt = {"image/png": "PNG", "image/webp": "WEBP", "image/jpeg": "JPEG"}[out_mime]
+
+        buf = io.BytesIO()
+        if fmt == "JPEG":
+            clean.save(buf, format=fmt, quality=95)
+        else:
+            clean.save(buf, format=fmt)
+        cleaned = buf.getvalue()
+
+        with Image.open(io.BytesIO(cleaned)) as check:
+            if len(check.getexif()) or "xmp" in check.info or "icc_profile" in check.info:
+                raise ImageMetadataError("metadata survived re-encoding")
+        return cleaned, out_mime
+    except ImageMetadataError:
+        raise
+    except Exception as e:
+        raise ImageMetadataError(
+            t(f"Bild konnte nicht ohne Metadaten neu kodiert werden, wird nicht gesendet: {e}",
+              f"Image could not be re-encoded without metadata, not sending it: {e}")
+        ) from e
 
 
 class _Tee(io.TextIOBase):

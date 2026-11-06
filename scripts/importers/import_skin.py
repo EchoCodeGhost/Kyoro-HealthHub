@@ -48,7 +48,7 @@ from modules.base import log_import
 from modules.db import open_medicine_imaging_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.imaging_utils import (
-    normalize_to_jpeg, is_supported, RAW_EXTENSIONS, process_raw, record_photo_location,
+    normalize_to_jpeg, is_supported, RAW_EXTENSIONS, process_raw,
 )
 
 _cfg = Config()
@@ -196,7 +196,7 @@ def update_lesion(conn, lesion_id: int, args) -> None:
 # ── Foto importieren ──────────────────────────────────────────────────────────
 
 def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
-                 source_type: str) -> int:
+                 source_type: str, date_given: bool = True) -> int:
     import tempfile
     gps = None
     raw_dst = None
@@ -206,26 +206,17 @@ def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
             # Weg 2: RAW-Original (metadatenbereinigt) UND JPEG-Vorschau behalten
             result = process_raw(src, tmp_dir)
             exif_dt, gps = result["date"], result["gps"]
-            if exif_dt and photo_date == date.today().isoformat():
+            if exif_dt and not date_given:
                 photo_date = exif_dt
             dst     = _safe_copy(result["jpeg_path"], photo_date, lesion_id)
             raw_dst = _safe_copy(result["raw_path"], photo_date, lesion_id,
                                   idx=int(dst.stem.rsplit("_", 1)[-1]))
         else:
             normalized, exif_dt, gps = normalize_to_jpeg(src, tmp_dir)
-            if exif_dt and photo_date == date.today().isoformat():
+            if exif_dt and not date_given:
                 photo_date = exif_dt
             dst = _safe_copy(normalized, photo_date, lesion_id)
     now = datetime.now(timezone.utc).isoformat()
-
-    if gps:
-        from modules.db import open_db
-        health_conn = open_db()
-        try:
-            record_photo_location(health_conn, photo_date, gps, "import_skin", OWN_PERSON_ID)
-            health_conn.commit()
-        finally:
-            health_conn.close()
 
     conn.execute("""
         INSERT OR IGNORE INTO imaging_files
@@ -236,6 +227,32 @@ def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
           photo_date, "PHOTO", "SKIN", source_type, lesion_id,
           str(raw_dst) if raw_dst else None, "skin_lesion", now))
     file_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+    # GPS-Daten in location.db speichern (falls vorhanden). Ohne echtes
+    # Aufnahmedatum (EXIF oder --date) kein Eintrag: das Ersatzdatum "heute"
+    # taugt nicht für die Reise-/Expositions-Korrelation.
+    if gps and (date_given or exif_dt):
+        from modules.location_store import record, file_sha256
+        # Original- und Stored-File-Hashes berechnen
+        original_hash = file_sha256(src)
+        stored_hash = file_sha256(dst)
+        # source_file ist der relative Pfad
+        source_file_rel = str(src.relative_to(_cfg.data_root.parent)) if src.is_relative_to(_cfg.data_root.parent) else str(src.name)
+        record(
+            importer="import_skin",
+            file_type=src.suffix.lower(),
+            lat=gps[0],
+            lon=gps[1],
+            ts=now,
+            date=photo_date,
+            original_sha256=original_hash,
+            stored_sha256=stored_hash,
+            source_file=source_file_rel,
+            ref_db="medicine",
+            ref_table="imaging_files",
+            ref_id=file_id,
+            person=OWN_PERSON_ID
+        )
 
     conn.execute(
         "UPDATE skin_lesions SET last_checked=? WHERE id=? AND (last_checked IS NULL OR last_checked<?)",
@@ -362,7 +379,8 @@ def main() -> None:
             print(t(f"Neue Läsion angelegt: ID {lesion_id}  [{args.location}]",
                     f"New lesion created: ID {lesion_id}  [{args.location}]"))
 
-        import_photo(conn, src, lesion_id, photo_date, args.source)
+        import_photo(conn, src, lesion_id, photo_date, args.source,
+                     date_given=args.photo_date is not None)
         total += 1
 
     log_import(conn, "import_skin", "", total)

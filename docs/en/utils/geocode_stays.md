@@ -15,15 +15,15 @@ Enables geocoding of location data, essential for spatial analysis
 
 ## Method
 
-Uses Nominatim API (https://nominatim.openstreetmap.org/reverse) with rate limiting (1.1 seconds between requests). GPS coordinates are rounded to 2 decimal places (approx. 1.1km accuracy) via round_coords() from utils.anonymize for privacy. Determines climate zone based on coordinates and country code. Home area defined as radius of 0.3 degrees (approx. 30km). Session tracks are grouped and averaged by date for cluster detection.
+Uses Nominatim API (https://nominatim.openstreetmap.org/reverse) with rate limiting (1.1 seconds between requests). GPS coordinates are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km; place names 2 digits). Determines climate zone based on coordinates and country code. Home area defined as radius of 0.3 degrees (approx. 30km). Session tracks are grouped and averaged by date for cluster detection.
 
 ## Data flow
 
-- **Reads:** `health.db.location_stays`, `health.db.session_tracks`, `health.db.sessions`, `~/.config/kyoro/travel_history.json`
+- **Reads:** `location.db.location_stays`, `location.db.session_tracks`, `health.db.sessions`, `~/.config/kyoro/travel_history.json`
 - **Writes:**
 
   ```
-  health.db.location_stays_geocoded, health.db.location_stays.timezone,
+  location.db.location_stays_geocoded, location.db.location_stays.timezone,
   ~/.config/kyoro/travel_history.json (bei Bestätigung durch Benutzer)
   ```
 

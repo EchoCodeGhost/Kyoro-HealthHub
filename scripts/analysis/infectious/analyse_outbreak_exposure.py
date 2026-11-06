@@ -36,8 +36,8 @@ positive Reiseanamnese in der Praxis oft der einzige Trigger ist, an sowas
                                                 GEO_RADIUS_KM_EXACT=100 km (konkreter Ausbruch)
                Datums-Unschärfe (nur Reisen): YYYY-MM-DD=±0 Tage, YYYY-MM=±45 Tage, YYYY=±180 Tage
                Basis: projektintern, keine epidemiologische Validierung.
-@limits.de   Heuristische Methode: Koordinaten-Matching via Haversine; Ausbruchsdaten müssen manuell in outbreak_events gepflegt werden; kein Serologienachweis ersetzbar; Ergebnisse nur als Hypothesengeneration zu verstehen; Inkubationspuffer (60 Tage) deckt die meisten Erkrankungen ab, ist aber nicht krankheitsspezifisch kalibriert. Wohnsitz-Score ist eine eigene, unvalidierte Heuristik (Anteil der Ausbruchsdauer, der in die Wohnsitzzeit fällt), nicht direkt mit dem Reise-Score vergleichbar.
-@limits.en   Heuristic method: Coordinate matching uses Haversine formula; outbreak data must be manually maintained in outbreak_events; no substitute for serological confirmation; results to be interpreted as hypothesis generation only; incubation buffer (60 days) covers most diseases but is not calibrated per pathogen. Home-residence score is a separate, unvalidated heuristic (share of outbreak duration falling within the residence period), not directly comparable to the trip score.
+@limits.de   Heuristische Methode: Koordinaten-Matching via Haversine; Ausbruchsdaten müssen manuell in outbreak_events gepflegt werden; kein Serologienachweis ersetzbar; Ergebnisse nur als Hypothesengeneration zu verstehen; Inkubationspuffer (60 Tage) deckt die meisten Erkrankungen ab, ist aber nicht krankheitsspezifisch kalibriert. Wohnsitz-Score ist eine eigene, unvalidierte Heuristik (Anteil der Ausbruchsdauer, der in die Wohnsitzzeit fällt), nicht direkt mit dem Reise-Score vergleichbar. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
+@limits.en   Heuristic method: Coordinate matching uses Haversine formula; outbreak data must be manually maintained in outbreak_events; no substitute for serological confirmation; results to be interpreted as hypothesis generation only; incubation buffer (60 days) covers most diseases but is not calibrated per pathogen. Home-residence score is a separate, unvalidated heuristic (share of outbreak duration falling within the residence period), not directly comparable to the trip score. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 @reads       outbreak_events, endemic_ref, location_stays
 @writes      analyses/infectious/outbreak_exposure_*.{md,txt}
 
@@ -72,7 +72,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db, DB_ERRORS
+from modules.db import attach_location_db, open_db, DB_ERRORS
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.airport_proximity import home_airport_risk_exposures
 from modules.endemic_matching import (
@@ -415,14 +415,15 @@ def load_gps_stays(conn: sqlite3.Connection, dfrom: str = "2010-01-01") -> list[
     zu einem einzigen Eintrag geclustert — verhindert n-fache Wiederholung
     identischer Endemie-Treffer für denselben Aufenthaltsort.
     """
+    attach_location_db(conn)
     rows = conn.execute("""
         SELECT ls.id, ls.start_ts, ls.end_ts, ls.lat, ls.lon,
                COALESCE(g.country, '') as country,
                COALESCE(g.country_iso, '') as country_iso,
                COALESCE(g.subregion, '') as subregion,
                COALESCE(g.city, '') as city
-        FROM location_stays ls
-        LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+        FROM loc.location_stays ls
+        LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
         WHERE ls.is_home = 0 AND ls.start_ts >= ?
         ORDER BY ls.start_ts
     """, (dfrom,)).fetchall()
@@ -497,14 +498,15 @@ def load_home_stays(conn: sqlite3.Connection, dfrom: str = "2010-01-01") -> list
     verschlucken — relevant sobald Wohnsitz-Historie ueber mehrere,
     nicht zwingend chronologisch sortierte Lebensabschnitte hinweg erfasst wird.
     """
+    attach_location_db(conn)
     rows = conn.execute("""
         SELECT ls.id, ls.start_ts, ls.end_ts, ls.lat, ls.lon,
                COALESCE(g.country, '') as country,
                COALESCE(g.country_iso, '') as country_iso,
                COALESCE(g.subregion, '') as subregion,
                COALESCE(g.city, '') as city
-        FROM location_stays ls
-        LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+        FROM loc.location_stays ls
+        LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
         WHERE ls.is_home = 1 AND (ls.end_ts IS NULL OR ls.end_ts >= ?)
         ORDER BY ls.start_ts
     """, (dfrom,)).fetchall()
@@ -1012,10 +1014,12 @@ def main():
 
     # Travel history + Wohnsitze prüfen
     travel = _cfg.travel_history
+    attach_location_db(conn)
     n_gps  = conn.execute(
-        "SELECT COUNT(*) FROM location_stays WHERE is_home=0").fetchone()[0]
+        "SELECT COUNT(*) FROM loc.location_stays WHERE is_home=0").fetchone()[0]
+    attach_location_db(conn)
     n_home = conn.execute(
-        "SELECT COUNT(*) FROM location_stays WHERE is_home=1").fetchone()[0]
+        "SELECT COUNT(*) FROM loc.location_stays WHERE is_home=1").fetchone()[0]
     print(f"Reisen: {len(travel)} (travel_history) + {n_gps} GPS-Aufenthalte "
           f"+ {n_home} Wohnsitz(e)")
 

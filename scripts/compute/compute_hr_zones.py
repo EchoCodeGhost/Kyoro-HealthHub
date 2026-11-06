@@ -88,8 +88,8 @@ def _daily_source_winners(rows: list) -> dict[str, tuple]:
     """Waehlt je Kalendertag GENAU EINE Quellengruppe fuer die Minutenbildung.
 
     Bisher wurde AVG(value) je Minute ueber ALLE Quellen gebildet — an Tagen
-    mit sowohl Garmin- als auch Apple-Messwerten (Apple leitet hier Garmin-Daten
-    weiter, over 1000 Tage in dieser DB, siehe compute_clinical/compute_acute_events)
+    mit sowohl Garmin- als auch Apple-Messwerten (Apple kann Garmin-Daten
+    weiterleiten, siehe compute_clinical/compute_acute_events)
     mischte das zwei unterschiedlich abgetastete, unterschiedlich aufgeloeste
     Reihen desselben Signals in ein Minutenmittel. Gleiche Rangfolge wie
     modules/metric_loader.load_metric_daily: Sammelquellen (AGGREGATOR_SOURCES,

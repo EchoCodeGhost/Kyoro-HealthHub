@@ -29,6 +29,6 @@ Requires Google Chrome at one of the known paths. Without Chrome the HTML is sti
 ## Usage
 
 ```bash
-python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil
-python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil --einzeln
+python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil
+python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil --einzeln
 ```

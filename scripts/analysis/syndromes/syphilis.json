@@ -1,0 +1,29 @@
+{
+  "slug": "syphilis",
+  "name_de": "Spätsyphilis / Neurosyphilis-Residuen",
+  "lag_weeks": 52,
+  "refs": "RKI Epidemiologisches Bulletin Syphilis (jaehrliche Meldezahlen, ~8000-9000 Neuinfektionen/Jahr Deutschland -- Punktpraevalenz unsicher, deutlich seltener als Neuinfektionsrate wegen Behandlung), CDC Syphilis -- Tertiary/Late Syphilis, S2k-Leitlinie Diagnostik und Therapie der Syphilis (DSTIG/AWMF), Gronwald 2023, Davis 2023 -- Hinweis: Spaetsyphilis/Neurosyphilis ist bei fruehzeitiger Antibiotikatherapie der Primaer-/Sekundaersyphilis sehr selten geworden, bleibt aber eine anerkannte Differenzialdiagnose bei unklaren neuropsychiatrischen/fatigue-aehnlichen Verlaeufen ueber Jahre.",
+  "system_prompt": "Du bist ein Internist mit Expertise in Syphilis-Infektion und post-infektioesen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Primaersyphilis (Ulkus, meist genital, oft unbemerkt) -> Sekundaersyphilis (Wochen spaeter: Hautausschlag, Lymphknotenschwellung, Fieber, grippeaehnlich) -> bei fehlender Behandlung jahrelange Latenz -> Spaetsyphilis/Tertiaersyphilis (Jahre bis Jahrzehnte spaeter: kardiovaskulaer, gummatoes, ODER Neurosyphilis)\n- Neurosyphilis kann sich sehr variabel praesentieren: kognitive Beeintraechtigung, Persoenlichkeitsveraenderung, Gangstoerung, Sehstoerungen (Argyll-Robertson-Pupille klassisch, aber selten), Fatigue -- deshalb historisch 'der grosse Imitator' genannt\n- Serologie: Treponema-pallidum-Hintergrundtest (TPPA/TPHA oder ELISA) als Screening, bei positivem Ergebnis Bestaetigungstest + Aktivitaetsmarker (VDRL/RPR-Titer); bei V.a. Neurosyphilis Liquorpunktion (VDRL im Liquor, Zellzahl, Eiweiss)\n- Deutschland: Meldepflicht (nicht-namentlich fuer den Erregernachweis, IfSG)\n- WICHTIG: Spaetsyphilis ist in der Allgemeinbevoelkerung sehr selten (deutlich niedrigere Punktpraevalenz als die Hintergrund-Serologie vieler anderer hier gelisteter Syndrome) -- ein hohes Symptom-Match-Ranking bedeutet hier besonders wenig ohne spezifische serologische Bestaetigung, da die Symptome (Fatigue, kognitive Stoerungen) extrem unspezifisch sind.\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeintraechtigung?\n2. **Domaenen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Praee-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung -- was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im naechsten Arztgespraech priorisiert werden?",
+  "icd10_gm": ["A52", "A51"],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI Epidemiologisches Bulletin Syphilis -- https://www.rki.de/DE/Themen/Infektionskrankheiten/Infektionskrankheiten-A-Z/S/Syphilis/Syphilis_node.html",
+    "dstig": "S2k-Leitlinie Diagnostik und Therapie der Syphilis, DSTIG/AWMF"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Kopfschmerzen",
+    "Hautausschlag",
+    "Lymphknotenschwellung",
+    "Gelenkschmerzen",
+    "Sehstörungen",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Persönlichkeitsveränderung",
+    "Gangstörung",
+    "Fieber"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "niedrig",
+  "endemic_regions": []
+}

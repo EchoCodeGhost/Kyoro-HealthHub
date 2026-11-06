@@ -10,16 +10,23 @@ create_medicine_schema.py — medicine.db initialisieren
 @method.de   Tabellen (identische Schemas wie in health.db zur verlustfreien Migration):
              lab_manual (manuelle Laborbefunde), lab_results (strukturierte Laborbefunde),
              medications (Medikamente), assessments (Klinische Scores / Beurteilungen),
-             findings (Befunde mit ICD-Code). Läuft bei jedem Aufruf zusätzlich
-             ``_migrate_medications_is_chronic`` — fügt is_chronic per ALTER TABLE
-             nach, falls eine ältere medicine.db die Spalte noch nicht hat (idempotent,
-             per PRAGMA table_info geprüft).
+             findings (Befunde mit ICD-Code), diagnoses (ICD-10-codierte Diagnosehistorie).
+             Läuft bei jedem Aufruf zusätzlich fünf Migrationen für frühere medicine.db-
+             Stände, die eine Spalte noch nicht haben (jeweils idempotent, per
+             PRAGMA table_info geprüft): ``_migrate_medications_is_chronic``,
+             ``_migrate_medications_prescriber_pseudonym``,
+             ``_migrate_medications_date_abgabe``, ``_migrate_diagnoses_date_to``,
+             ``_migrate_diagnoses_provider_pseudonym``.
 @method.en   Tables (identical schemas as in health.db for lossless migration):
              lab_manual (manual lab results), lab_results (structured lab results),
-             medications, assessments (clinical scores), findings (with ICD codes).
-             Also runs ``_migrate_medications_is_chronic`` on every call — adds
-             is_chronic via ALTER TABLE if an older medicine.db is missing it
-             (idempotent, checked via PRAGMA table_info).
+             medications, assessments (clinical scores), findings (with ICD codes),
+             diagnoses (ICD-10-coded entries history). Also runs five migrations
+             on every call for older medicine.db instances missing a column (each
+             idempotent, checked via PRAGMA table_info):
+             ``_migrate_medications_is_chronic``,
+             ``_migrate_medications_prescriber_pseudonym``,
+             ``_migrate_medications_date_abgabe``, ``_migrate_diagnoses_date_to``,
+             ``_migrate_diagnoses_provider_pseudonym``.
 @reads       Keine (erstellt neues Schema)
 @writes      medicine.db (Tabellen: lab_manual, lab_results, medications, assessments, findings)
 @limits.de   Einmalig aufrufen. Wiederholte Ausfuehrung ist idempotent (CREATE IF NOT EXISTS).
@@ -94,19 +101,21 @@ CREATE TABLE IF NOT EXISTS lab_results (
 
 -- ── Medikamente ───────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS medications (
-    ts             TEXT NOT NULL,
-    date           TEXT NOT NULL,
-    medication_id  TEXT,
-    drug_name      TEXT,
-    dose_value     REAL,
-    dose_unit      TEXT,
-    route          TEXT,
-    injection_site TEXT,
-    is_skipped     INTEGER DEFAULT 0,
-    is_chronic     INTEGER DEFAULT 1,
-    notes          TEXT,
-    person         TEXT NOT NULL,
-    source         TEXT,
+    ts                   TEXT NOT NULL,
+    date                 TEXT NOT NULL,
+    date_abgabe          TEXT,
+    medication_id        TEXT,
+    drug_name            TEXT,
+    dose_value           REAL,
+    dose_unit            TEXT,
+    route                TEXT,
+    injection_site       TEXT,
+    is_skipped           INTEGER DEFAULT 0,
+    is_chronic           INTEGER DEFAULT 1,
+    notes                TEXT,
+    prescriber_pseudonym TEXT,
+    person               TEXT NOT NULL,
+    source               TEXT,
     PRIMARY KEY (ts, person, source)
 );
 
@@ -124,16 +133,18 @@ CREATE TABLE IF NOT EXISTS assessments (
 
 -- ── Diagnosen (neu) ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS diagnoses (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    person        TEXT    NOT NULL,
-    date          TEXT    NOT NULL,
-    icd_code      TEXT,
-    description   TEXT    NOT NULL,
-    status        TEXT    DEFAULT 'confirmed',
-    certainty     REAL,
-    source        TEXT,
-    notes         TEXT,
-    ts_import     TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    person              TEXT    NOT NULL,
+    date                TEXT    NOT NULL,
+    date_to             TEXT,
+    icd_code            TEXT,
+    description         TEXT    NOT NULL,
+    status              TEXT    DEFAULT 'confirmed',
+    certainty           REAL,
+    source              TEXT,
+    notes               TEXT,
+    provider_pseudonym  TEXT,
+    ts_import           TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
     UNIQUE (person, icd_code, date)
 );
 
@@ -153,6 +164,46 @@ def _migrate_medications_is_chronic(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE medications ADD COLUMN is_chronic INTEGER DEFAULT 1")
 
 
+def _migrate_medications_prescriber_pseudonym(conn: sqlite3.Connection) -> None:
+    """Add prescriber_pseudonym to medications on DBs created before this column existed."""
+    if not _table_exists(conn, "medications"):
+        return
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(medications)")}
+    if "prescriber_pseudonym" not in cols:
+        conn.execute("ALTER TABLE medications ADD COLUMN prescriber_pseudonym TEXT")
+
+
+def _migrate_medications_date_abgabe(conn: sqlite3.Connection) -> None:
+    """Add date_abgabe to medications on DBs created before this column existed --
+    Verordnung (date) and Abgabe are often two distinct dates for the same entry."""
+    if not _table_exists(conn, "medications"):
+        return
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(medications)")}
+    if "date_abgabe" not in cols:
+        conn.execute("ALTER TABLE medications ADD COLUMN date_abgabe TEXT")
+
+
+def _migrate_diagnoses_date_to(conn: sqlite3.Connection) -> None:
+    """Add date_to to diagnoses on DBs created before this column existed --
+    diagnoses are often billed as a Beginn/Ende period, not a single date."""
+    if not _table_exists(conn, "diagnoses"):
+        return
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(diagnoses)")}
+    if "date_to" not in cols:
+        conn.execute("ALTER TABLE diagnoses ADD COLUMN date_to TEXT")
+
+
+def _migrate_diagnoses_provider_pseudonym(conn: sqlite3.Connection) -> None:
+    """Add provider_pseudonym to diagnoses on DBs created before this column
+    existed (was referenced by import_billed_diagnoses.py's INSERT but never
+    added to the CREATE TABLE statement)."""
+    if not _table_exists(conn, "diagnoses"):
+        return
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(diagnoses)")}
+    if "provider_pseudonym" not in cols:
+        conn.execute("ALTER TABLE diagnoses ADD COLUMN provider_pseudonym TEXT")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="medicine.db initialisieren")
     ap.add_argument("--force", action="store_true",
@@ -161,6 +212,10 @@ def main() -> None:
 
     conn = open_medicine_db()
     _migrate_medications_is_chronic(conn)
+    _migrate_medications_prescriber_pseudonym(conn)
+    _migrate_medications_date_abgabe(conn)
+    _migrate_diagnoses_date_to(conn)
+    _migrate_diagnoses_provider_pseudonym(conn)
     conn.commit()
     existing = conn.execute(
         "SELECT phase FROM schema_version WHERE phase=?", (PHASE,)

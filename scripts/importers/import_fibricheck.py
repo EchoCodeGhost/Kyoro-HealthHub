@@ -69,7 +69,10 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from modules.base import log_import, resolve_person
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from utils.scrub_pdf_metadata import scrub as _scrub_pdf_metadata
+try:  # Metadaten + sichtbare Adressen; Fallback: nur Metadaten
+    from modules.media_redaction import scrub_pdf as _scrub_pdf_metadata
+except ImportError:  # pragma: no cover
+    from utils.scrub_pdf_metadata import scrub as _scrub_pdf_metadata
 
 PDF_DIR       = Path(__file__).parents[2] / "imports" / "fibricheck"
 ORIGINALE_DIR = PDF_DIR / "originals"

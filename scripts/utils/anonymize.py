@@ -18,7 +18,10 @@ from health_config import KYORO_CONFIG_DIR
               Geräte-Seriennummern-Pseudonymisierung (SN-XXXXXXXX Format mit SHA-256 Hash in identity.db),
               E-Mail-Adressen-Ersetzung, Telefon/Fax-Nummern-Erkennung und Pseudonymisierung,
               Versicherungsnummern und -namen Pseudonymisierung, Geburtsdaten-Ersetzung,
-              Namen-Pseudonymisierung (Vorname, Nachname), Adressen- und Stadtnamen-Ersetzung,
+              Namen-Pseudonymisierung (Vorname, Nachname), Entfernen von Postadressen
+              (Straße mit Hausnummer, PLZ mit Ort; siehe modules.address_redaction),
+              Arztpraxis- und Labornamen-Pseudonymisierung (Präfix Labor-/Arztpraxis-Kennung),
+              Stadtnamen-Ersetzung,
               Compliance-Checks für die Datenbank, Apple Health sourceName-Bereinigung und
               HealthKit <Me> Attribut-Scrubbing. Speichert alle Pseudonymisierungen in einer
               separaten identity.db für Konsistenz.
@@ -26,12 +29,15 @@ from health_config import KYORO_CONFIG_DIR
               device serial number pseudonymization (SN-XXXXXXXX format with SHA-256 hash in identity.db),
               email address replacement, phone/fax number detection and pseudonymization,
               insurance number and name pseudonymization, birthdate replacement,
-              name pseudonymization (first name, last name), address and city name replacement,
+              name pseudonymization (first name, last name), removal of postal addresses
+              (street with house number, postal code with town; see modules.address_redaction),
+              medical practice and laboratory name pseudonymization,
+              city name replacement,
               database compliance checks, Apple Health sourceName scrubbing and HealthKit
               <Me> attribute scrubbing. Stores all pseudonymizations in a separate identity.db
               for consistency.
-@reads       identity.db.device_serial_map
-@writes      identity.db.device_serial_map
+@reads       identity.db.device_serial_map, identity.db.provider_pseudonym_map
+@writes      identity.db.device_serial_map, identity.db.provider_pseudonym_map
 @limits.de   GPS-Präzision auf 2 Dezimalstellen begrenzt (ca. 1,1 km Genauigkeit) - kann bei Bedarf angepasst werden.
               Pseudonymisierung ist deterministisch (gleiche Eingabe → gleiche Ausgabe) aber nicht umkehrbar.
               Identitätsdatenbank (identity.db) wird mit restriktiven Berechtigungen (600) angelegt.
@@ -271,6 +277,53 @@ def pseudonymize_mvz_name(name: str) -> str:
     return f"MVZ-{hashlib.sha256(name.encode()).hexdigest()[:6].upper()}"
 
 
+_PROVIDER_PSEUDO_RE = re.compile(r"^(?:Praxis|Labor)-[0-9A-F]{8}$")
+
+
+def pseudonymize_provider(name: str, kind: str = "Praxis") -> str:
+    """Replace a practice or laboratory name with a stable pseudonym.
+
+    Example: "Labor Beispiel & Kollegen" → "Labor-1A2B3C4D"
+
+    The mapping is stored in identity.db (table provider_pseudonym_map), outside
+    health.db, so the pseudonym can be resolved locally but not from the database
+    alone. The same name always yields the same pseudonym (case and spacing are
+    ignored). Names that already are pseudonyms and empty names are returned as is.
+
+    Args:
+        name: Real practice or laboratory name.
+        kind: "Praxis" or "Labor" (prefix of the pseudonym).
+    """
+    cleaned = " ".join((name or "").split())
+    if not cleaned or _PROVIDER_PSEUDO_RE.match(cleaned):
+        return name
+    pseudo = f"{kind}-{hashlib.sha256(f'{kind}|{cleaned.casefold()}'.encode()).hexdigest()[:8].upper()}"
+
+    _IDENTITY_DB.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(_IDENTITY_DB)
+    try:
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS provider_pseudonym_map (
+                pseudo_id  TEXT PRIMARY KEY,
+                kind       TEXT NOT NULL,
+                name_real  TEXT NOT NULL,
+                created_at TEXT
+            )
+            """
+        )
+        con.execute(
+            "INSERT OR IGNORE INTO provider_pseudonym_map (pseudo_id, kind, name_real, created_at) "
+            "VALUES (?, ?, ?, ?)",
+            (pseudo, kind, cleaned, datetime.now(timezone.utc).isoformat()),
+        )
+        con.commit()
+    finally:
+        con.close()
+    _IDENTITY_DB.chmod(0o600)
+    return pseudo
+
+
 def pseudonymize_fax_number(fax: str) -> str:
     """Replace fax number with pseudonym.
     
@@ -368,7 +421,7 @@ def _load_name_lists() -> dict:
     # Fallback to built-in lists if file is missing or invalid
     return {
         "common_first_names": [
-            'Erika', 'Michael', 'Erika', 'Alexander', 'Thomas', 'Andreas',
+            'Michael', 'Alexander', 'Thomas', 'Andreas',
             'Stefan', 'Christian', 'Daniel', 'Markus', 'Jan', 'Peter',
             'Anna', 'Julia', 'Lisa', 'Sarah', 'Laura', 'Maria', 'Sophie',
             'Hanna', 'Emma', 'Lea', 'Mia', 'Lena', 'Hannah', 'Johanna'
@@ -457,7 +510,14 @@ def scrub_sensitive_health_data(text: str | None, preserve_gender_age: bool = Tr
         return text
     
     import re
-    
+
+    # 0. Remove postal addresses first (street + number, postal code + town), before
+    #    the ZIP step below turns the postal code into a pseudonym and hides the pattern.
+    from modules.address_redaction import redact_addresses
+    text = redact_addresses(text)
+    from modules.name_redaction import redact_names
+    text = redact_names(text)
+
     # 1. Pseudonymize emails
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     text = re.sub(email_pattern, lambda m: pseudonymize_email(m.group(0)), text)
@@ -610,14 +670,23 @@ def check_anonymization_compliance(db_conn_or_path: sqlite3.Connection | str | P
         
         # 2. Check GPS precision (more than 5 decimal places indicates high precision)
         # Count lat/lon values with more than 5 decimal places
-        issues['high_precision_gps'] = con.execute(
-            """
-            SELECT COUNT(*) FROM session_tracks 
-            WHERE lat IS NOT NULL 
-            AND (LENGTH(CAST(lat AS TEXT)) - INSTR(CAST(lat AS TEXT), '.') > 6
-                 OR LENGTH(CAST(lon AS TEXT)) - INSTR(CAST(lon AS TEXT), '.') > 6)
-            """
-        ).fetchone()[0]
+        # Tracks liegen in location.db (eigene Verbindung)
+        try:
+            from modules.db import open_location_db
+            loc_con = open_location_db()
+            try:
+                issues['high_precision_gps'] = loc_con.execute(
+                    """
+                    SELECT COUNT(*) FROM session_tracks
+                    WHERE lat IS NOT NULL
+                    AND (LENGTH(CAST(lat AS TEXT)) - INSTR(CAST(lat AS TEXT), '.') > 6
+                         OR LENGTH(CAST(lon AS TEXT)) - INSTR(CAST(lon AS TEXT), '.') > 6)
+                    """
+                ).fetchone()[0]
+            finally:
+                loc_con.close()
+        except sqlite3.Error:
+            issues['high_precision_gps'] = 0
         
         # 3. Check for unpseudonymized devices (no SN- prefix in serial)
         issues['unpseudonymized_devices'] = con.execute(
