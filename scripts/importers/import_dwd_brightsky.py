@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg
 from modules.db import open_db
 from modules.location_store import for_external_api
-from modules.base import ImportResult, log_import
+from modules.base import ImportResult, log_import, resolve_person
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
 _cfg = _Cfg()
@@ -96,7 +96,9 @@ def fetch_brightsky(lat: float, lon: float, date_from: str, date_to: str) -> dic
     return merged if ok else None
 
 
-def import_brightsky_from_raw(conn: sqlite3.Connection, data: dict) -> int:
+def import_brightsky_from_raw(conn: sqlite3.Connection, data: dict, person: str | None = None) -> int:
+    # Ohne Angabe griffe der Spalten-Default 'unknown' und würde zu einem eigenen Pseudonym.
+    _person = resolve_person(person)
     from importers.import_aemet import _setup_table
     _setup_table(conn)
 
@@ -177,9 +179,9 @@ def import_brightsky_from_raw(conn: sqlite3.Connection, data: dict) -> int:
          pressure_hpa, pressure_min, pressure_max,
          wind_speed_kmh, wind_gust_max, wind_dir_deg,
          rain_mm, snow_cm, evap_mm,
-         source)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'brightsky')
-    """, rows)
+         source, person)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'brightsky',?)
+    """, [(*row, _person) for row in rows])
     log_import(conn, 'dwd_brightsky', '', len(rows))
     conn.commit()
     return len(rows)
@@ -232,7 +234,7 @@ def run(conn: sqlite3.Connection, _data_path=None,
         print(t("DWD Brightsky: API nicht erreichbar.", "DWD Brightsky: API not reachable."))
         return result
 
-    n = import_brightsky_from_raw(conn, data)
+    n = import_brightsky_from_raw(conn, data, person)
     result.rows_inserted = n
     return result
 
