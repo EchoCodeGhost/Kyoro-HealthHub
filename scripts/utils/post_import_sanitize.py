@@ -13,7 +13,8 @@
               3. pseudonymize_providers: Ersetzt Arztpraxis-/Labornamen durch Pseudonyme und
                  entfernt Adressen aus Laborfreitext (lokal, Zuordnung nur in identity.db)
               4. check_anonymization: Prüft GPS-Präzision, Seriennummern, Person-IDs
-              Kein Schritt blockiert - bei Fehlern wird nur eine Warnung ausgegeben.
+              Kein Schritt blockiert - bei Fehlern wird nur eine Warnung ausgegeben,
+              und run() gibt die Namen der fehlgeschlagenen Schritte zurück.
               Protokolliert alle Änderungen in import_log.
 @method.en   Executes four steps sequentially:
               1. scrub_pii: Cleans known PII patterns in text columns
@@ -21,7 +22,8 @@
               3. pseudonymize_providers: Replaces medical practice/lab names with pseudonyms and
                  removes addresses from lab free text (local, mapping only in identity.db)
               4. check_anonymization: Checks GPS precision, serial numbers, person IDs
-              No step is blocking - errors only generate warnings.
+              No step is blocking - errors only generate warnings, and run()
+              returns the names of the failed steps.
               Logs all changes to import_log.
 @reads       health.db (alle Tabellen für PII-Prüfung)
 @writes      health.db (bereinigte Felder), import_log
@@ -49,18 +51,26 @@ from utils.anonymize import check_anonymization_compliance
 from modules.db import open_db
 
 
-def run(errors: list | None = None) -> None:
-    """PII-Scrub + Compliance-Check. Gibt Warnungen aus, bricht nie ab."""
+def run(errors: list | None = None) -> list[str]:
+    """PII-Scrub + Compliance-Check. Gibt Warnungen aus, bricht nie ab.
+
+    Gibt die Namen der fehlgeschlagenen Schritte zurück. errors bleibt unberührt,
+    damit der Exit-Code eines vollen Imports nicht von diesen Schritten abhängt.
+    """
     print("\n── Post-Import: PII-Bereinigung ─────────────────────────────────────")
-    _scrub()
-    _pseudonymize_devices()
-    _pseudonymize_providers()
-    _check()
+    steps = (
+        ("scrub_pii", _scrub),
+        ("pseudonymize_devices", _pseudonymize_devices),
+        ("pseudonymize_providers", _pseudonymize_providers),
+        ("check_anonymization", _check),
+    )
+    failed = [name for name, step in steps if step() is False]
     print("── Post-Import: abgeschlossen ────────────────────────────────────────\n")
+    return failed
 
 
-def _scrub() -> None:
-    """Ruft scrub_pii.find_pii_in_database() direkt auf — kein Backup, kein Prompt."""
+def _scrub() -> bool | None:
+    """Ruft scrub_pii.find_pii_in_database() direkt auf — kein Backup, kein Prompt. False bei Fehler."""
     try:
         from utils.scrub_pii import find_pii_in_database
         from utils.anonymize import scrub_sensitive_health_data
@@ -94,10 +104,11 @@ def _scrub() -> None:
 
     except Exception as exc:
         print(f"  ⚠ PII-Scrub fehlgeschlagen (nicht blockierend): {exc}")
+        return False
 
 
-def _pseudonymize_devices() -> None:
-    """Ersetzt echte Seriennummern automatisch durch SN-Pseudonyme."""
+def _pseudonymize_devices() -> bool | None:
+    """Ersetzt echte Seriennummern automatisch durch SN-Pseudonyme. False bei Fehler."""
     try:
         from datetime import datetime, timezone
         from utils.anonymize import pseudonymize_device_serial, get_device_pseudo
@@ -130,10 +141,11 @@ def _pseudonymize_devices() -> None:
 
     except Exception as exc:
         print(f"  ⚠ Geräte-Pseudonymisierung fehlgeschlagen (nicht blockierend): {exc}")
+        return False
 
 
-def _pseudonymize_providers() -> None:
-    """Pseudonymisiert Praxis-/Labornamen und entfernt Adressen aus Laborfreitext (lokal)."""
+def _pseudonymize_providers() -> bool | None:
+    """Pseudonymisiert Praxis-/Labornamen und entfernt Adressen aus Laborfreitext (lokal). False bei Fehler."""
     try:
         from utils.pseudonymize_providers import run_all
         stats = run_all()
@@ -143,10 +155,11 @@ def _pseudonymize_providers() -> None:
             print(f"  ✓ Praxis-/Labor-Pseudonymisierung: {names} Name(n), {texts} Freitext-Feld(er)")
     except Exception as exc:
         print(f"  ⚠ Praxis-/Labor-Pseudonymisierung fehlgeschlagen (nicht blockierend): {exc}")
+        return False
 
 
-def _check() -> None:
-    """Compliance-Check: GPS-Präzision, Seriennummern, Person-IDs."""
+def _check() -> bool | None:
+    """Compliance-Check: GPS-Präzision, Seriennummern, Person-IDs. False, wenn er nicht laufen konnte."""
     try:
         conn = open_db()
         result = check_anonymization_compliance(conn)
@@ -162,3 +175,4 @@ def _check() -> None:
 
     except Exception as exc:
         print(f"  ⚠ Compliance-Check fehlgeschlagen (nicht blockierend): {exc}")
+        return False

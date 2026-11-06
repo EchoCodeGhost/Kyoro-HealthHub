@@ -73,11 +73,19 @@ The TUI SHALL run on-demand compute and analysis scripts through `--on-demand` o
 - **THEN** the dashboard still reports compute as older than the import
 
 ### Requirement: Flag forms expose orchestrator options
-The analyse form SHALL offer AI comments on or off, date range, single date, run date, person, all data, dry run and a skip selection. The compute form SHALL offer skip-quality and recompute. The import form SHALL offer update, date range and person. The deprecated `--llm` flag SHALL NOT be offered.
+The analyse form SHALL offer AI comments on or off, date range, single date, run date, person, all data, dry run and a skip selection. The compute form SHALL offer skip-quality and recompute. The import form SHALL offer update, date range and person. The deprecated `--llm` flag SHALL NOT be offered. The person field SHALL list the persons found in the databases with their display names and default to the own person. With only one person, it SHALL be hidden and no `--person` flag SHALL be passed. The TUI SHALL NOT store the list or the selection.
 
 #### Scenario: Analyse defaults match the CLI
 - **WHEN** the user starts an analyse run without changing the form
 - **THEN** the command line equals `analyse_all.py` without added flags, apart from the selection
+
+#### Scenario: Only one person
+- **WHEN** the databases hold data for one person only
+- **THEN** the form shows no person field and the command line has no `--person`
+
+#### Scenario: Several persons
+- **WHEN** the databases hold data for more than one person
+- **THEN** the field offers them by display name, the own person is preselected, and the command line carries the selected pseudonym
 
 #### Scenario: Invalid date
 - **WHEN** a date field does not contain a valid ISO date
@@ -136,16 +144,35 @@ Scripts declared as interactive SHALL run with the terminal handed over by `App.
 - **WHEN** a script declared as non-interactive calls `input()`
 - **THEN** it fails with a visible error instead of hanging
 
+### Requirement: Every job start requires one confirmation
+Before any job starts, including single scripts, manual imports, utilities, checks, full orchestrator runs and starting a service, the TUI SHALL show one dialog that names the script, its arguments and whether it writes data. Nothing SHALL run before the user confirms. A sequence SHALL ask once at its start. Scripts SHALL keep their own prompts.
+
+#### Scenario: Read-only check
+- **WHEN** the user starts `check_all.py`
+- **THEN** the dialog appears, and the script runs only after confirmation
+
+#### Scenario: Cancelling the dialog
+- **WHEN** the user cancels the dialog
+- **THEN** no process starts
+
+#### Scenario: Script with its own prompt
+- **WHEN** the user confirms `analyse_synthesis.py`
+- **THEN** the TUI suspends, and the script still asks its own cost question
+
+#### Scenario: Actions without a job
+- **WHEN** the user stops a service, cancels a job or browses results
+- **THEN** no start dialog appears
+
 ### Requirement: Remote LLM use requires per-run consent
-The TUI SHALL show the active LLM provider and whether it is local on every screen that can start LLM use. Before a run that may use LLM, if the provider is remote or cannot be determined, the TUI SHALL name the provider and ask for consent. Consent SHALL apply to one run only.
+The TUI SHALL show the active LLM provider and whether it is local on every screen that can start LLM use. Before a run that may use LLM, if the provider is remote or cannot be determined, the start dialog SHALL name the provider and ask for consent. Consent SHALL apply to one run only.
 
 #### Scenario: Remote provider configured
 - **WHEN** the user starts `analyse_all.py` with AI comments on and a remote provider
-- **THEN** a dialog names the provider and offers run, run without AI, and cancel, and nothing runs before a choice
+- **THEN** the start dialog names the provider and offers run, run without AI, and cancel, and nothing runs before a choice
 
 #### Scenario: Local provider
 - **WHEN** the active provider is local
-- **THEN** no dialog appears and the local provider stays visible on the screen
+- **THEN** the start dialog has no consent part and the local provider stays visible on the screen
 
 #### Scenario: Provider unknown
 - **WHEN** the provider cannot be determined
@@ -190,7 +217,7 @@ The TUI SHALL let the user select an analysis script and one of its runs, read i
 - **THEN** the file path is shown and no error occurs
 
 ### Requirement: Curated utility screen
-The TUI SHALL offer grouped utilities for capture, lookup, checks, maintenance, documents and services. Maintenance actions that change data SHALL require confirmation. The Datasette service SHALL run read-only on localhost, SHALL have a start/stop toggle and SHALL stop when the TUI exits.
+The TUI SHALL offer grouped utilities for capture, lookup, checks, maintenance, documents and services. The Datasette service SHALL run read-only on localhost, SHALL have a start/stop toggle and SHALL stop when the TUI exits.
 
 #### Scenario: Service stopped
 - **WHEN** the user stops the Datasette service or quits the TUI
@@ -201,7 +228,7 @@ The TUI SHALL offer grouped utilities for capture, lookup, checks, maintenance, 
 - **THEN** the job lock does not block other actions
 
 ### Requirement: Dashboard and guided daily workflow
-The dashboard SHALL show last-run status per stage, a hint when compute is older than the latest import, and the analysis scripts that would be skipped for lack of `clinical.infection_date`. It SHALL offer a guided daily workflow, with a mandatory inbox preview before the inbox import. On a non-zero exit the workflow SHALL pause and ask whether to continue or abort.
+The dashboard SHALL show last-run status per stage, a hint when compute is older than the latest import, and the analysis scripts that would be skipped for lack of `clinical.infection_date`. It SHALL offer a guided daily workflow that asks once at its start, with a mandatory inbox preview before the inbox import. On a non-zero exit the workflow SHALL pause and ask whether to continue or abort.
 
 #### Scenario: Stale compute
 - **WHEN** the latest import is newer than the latest successful compute run
@@ -218,6 +245,14 @@ The dashboard SHALL show last-run status per stage, a hint when compute is older
 #### Scenario: Infection date not set
 - **WHEN** `cfg.infection_date` is empty
 - **THEN** the dashboard lists the affected scripts from `REQUIRES_INFECTION_DATE`
+
+#### Scenario: One question for the workflow
+- **WHEN** the user starts the daily workflow
+- **THEN** one dialog appears at the start, and no further start dialog appears before each step
+
+#### Scenario: Workflow with remote AI
+- **WHEN** the daily workflow would run `analyse_all.py` with a remote provider
+- **THEN** the first dialog names the provider and offers the run without AI, and the answer applies to this one sequence only
 
 #### Scenario: Inbox preview
 - **WHEN** the workflow reaches the inbox step

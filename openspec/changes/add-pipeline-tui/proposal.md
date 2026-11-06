@@ -15,7 +15,9 @@ Running Kyoro means remembering dozens of commands, flags and an implicit stage 
 - On-demand compute and analysis runs started from the TUI are recorded in `compute_log` and `analysis_log`, like registered scripts.
 - Dashboard with last-run status from `import_log`, `compute_log` and `analysis_log`, stale-stage hints, a preview of scripts that would be skipped, and a guided daily workflow.
 - Query and export screens wrapping `health_query.py` and `export_health.py`.
-- Consent step before any run that may send data to a remote LLM provider. The active provider is always visible. This matters because AI comments are on by default in `analyse_all.py`.
+- One confirmation before every job start, naming the script, its arguments and whether it writes. A guided daily workflow asks once at its start.
+- Consent as part of that confirmation for any run that may send data to a remote LLM provider. The active provider is always visible. This matters because AI comments are on by default in `analyse_all.py`.
+- A person selection that lists the persons found in the databases, hidden when there is only one.
 - Small additions to the orchestrators, none of which change existing behaviour:
   - `--only-exact STEM[,STEM]` on `import_all.py`, `compute_all.py` and `analyse_all.py`. The existing `analyse_all.py --only` matches substrings, so `analyse_pem` also runs `analyse_pem_cascade` and `analyse_pem_threshold`.
   - A machine-readable `COMPUTE_REQUIRES` mapping in `compute_all.py`. The dependency chain in the header is prose and is not reliably parseable.

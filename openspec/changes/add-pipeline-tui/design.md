@@ -52,7 +52,7 @@ Auto importers, compute scripts and analysis scripts run only through their orch
 
 *Alternatives:* calling scripts directly (duplicates this logic and skips sanitising); escaping `--only` patterns (substring semantics cannot express `analyse_pem` alone); changing `--only` itself (breaks existing usage).
 
-With `--only-exact`, `import_all.py` still runs post-import sanitising but skips the outbreak source health check, which is network traffic unrelated to a single import.
+With `--only-exact`, `import_all.py` still syncs the device registry and runs post-import sanitising, but skips inbox routing and the outbreak source health check. Routing would start a script nobody selected, and the health check is network traffic unrelated to a single import.
 
 ### 2. Registries are imported; only what has no registry goes into a manifest
 
@@ -63,10 +63,9 @@ ScriptEntry(
     script="analysis/manual/analyse_ecg_session.py",
     label=("...", "..."),            # DE, EN; rendered through t()
     group="analyse_manual",
-    fields=[IntField("--session", required=True), BoolField("--plot")],
-    mode="piped",                    # piped | interactive | service
+    fields=(TextField("--session"), BoolField("--plot")),
+    mode=ScriptMode.PIPED,           # PIPED | INTERACTIVE | SERVICE
     uses_llm=False,
-    confirm=False,
 )
 ```
 
@@ -99,17 +98,20 @@ A test module enforces:
 - **Live output has three granularities.** Directly run scripts stream line by line. `import_all.py` and `compute_all.py` show a child's output when that child ends. `analyse_all.py` shows only progress, so the job view offers the per-script output file afterwards, read-only. The job view always shows elapsed time, so a long step does not look hung. Streaming inside `run_pipeline_script()` is out of scope, because its stderr handling and import-log compliance check depend on the captured result.
 - **Plots:** piped jobs run with `MPLBACKEND=Agg`, as `analyse_all.py` does for its children, so no plot window opens and nothing fails over SSH.
 
+- **Waiting for a job:** the runner waits for the process to exit, not for `Process.wait()`, which also waits for the pipes to close and would hang on a grandchild holding them open. After a short drain period, remaining output of such a grandchild is read and discarded, so it cannot block on a full pipe.
+- **Service output** is always read, for the same reason.
+
 *Alternative:* a pseudo-terminal widget for interactive scripts. Rejected as far more code than `App.suspend()`, which exists in the current Textual release.
 
 ### 5. Safety is an allowlist
 
-Only flags declared in a manifest can be passed, so blocked flags cannot be reached from the UI. The blocked set covers privacy-weakening or secret-exposing options (`--no-scrub`, `--host`, `--writable`, `--api-key`, `--show-mappings`, `--fix` on check scripts, `--no-backup`, `--accept-terms`) and is asserted by test.
+Only flags declared in a manifest can be passed, so blocked flags cannot be reached from the UI. The blocked set covers privacy-weakening or secret-exposing options (`--no-scrub`, `--host`, `--writable`, `--api-key`, `--show-mappings`, `--fix` on check scripts, `--no-backup`, `--accept-terms`), plus `--yes` and `--no-confirm`, which would bypass a script's prompts. An entry declaring such a flag cannot be created, and this is asserted by test.
 
 Out of the TUI entirely, listed in `EXCLUDED`: `decrypt_db`, `scrub_*`, `migrate_*`, `pseudonymize_*`, `reduce_gps_precision`, `create_*_schema`, `apply_icd_corrections`, `promote_anamnese_findings`, plus `calibration/`, `medical/` and `cluster/`.
 
 ### 6. Remote LLM consent
 
-The analyse form has a single "AI comments" toggle mapped to `--no-llm`; the deprecated `--llm` is not offered. The screen shows the active provider and whether it is local, using `is_local` from `utils/llm_provider.py`. Before a run that may use LLM, if the provider is not local or cannot be determined, a dialog names the provider and offers: run, run without AI (where supported), or cancel. Consent applies to one run and is never remembered. Local providers need no dialog.
+The analyse form has a single "AI comments" toggle mapped to `--no-llm`; the deprecated `--llm` is not offered. The screen shows the active provider and whether it is local, using `is_local` from `utils/llm_provider.py`. Before a run that may use LLM, if the provider is not local or cannot be determined, the start dialog (decision 16) names the provider and offers: run, run without AI (where supported), or cancel. Consent applies to one run and is never remembered. With a local provider, the dialog has no consent part.
 
 *Why not default AI off in the TUI?* The TUI should not silently produce different results than the same command on the CLI.
 
@@ -130,9 +132,11 @@ Selecting a compute script shows, from `COMPUTE_REQUIRES` and `compute_log`:
 
 *Alternative:* parsing the header. Rejected: it names tables rather than scripts, contains prose, and already disagrees with the code. The header stays the human-readable documentation; a test covers the mapping's structure. The mapping's initial content is derived from each script's actual SQL, not copied from the header.
 
+The mapping includes reads through views (`heart_rate`, `sleep`, `daily_summary`) and single metrics in `measurements`. Three such reads go against the fixed order: `compute_stress` reads `heart_rate` and `sleep` before their producers run, and `compute_af_evidence` reads `daily_summary` before `compute_daily_context` runs. These scripts see the previous run's state. `COMPUTE_READS_LATER` records them separately, so `COMPUTE_REQUIRES` keeps pointing backwards. The order stays unchanged here, because moving a script changes computed results.
+
 ### 9. Daily workflow is a guided sequence
 
-`fetch_daily` → `import_staged` → `process_inbox --dry-run` (preview, explicit confirmation) → `process_inbox --import` → `compute_all` → `analyse_all`. On a non-zero exit the sequence pauses and asks whether to continue or abort. It does not stop automatically, because `import_all.py` exits non-zero when any one source fails, which would otherwise block the whole day. The preview is mandatory because inbox routing is by file pattern, and a wrong file can end up in the wrong importer.
+`fetch_daily` → `import_staged` → `process_inbox --dry-run` (preview, explicit confirmation) → `process_inbox --import` → `compute_all` → `analyse_all`. The workflow asks once at its start, not before each step (decision 16), and the inbox preview keeps its own confirmation. If `analyse_all` may use a remote provider, that first question says so and offers the run without AI, and the answer applies to this one sequence only. On a non-zero exit the sequence pauses and asks whether to continue or abort. It does not stop automatically, because `import_all.py` exits non-zero when any one source fails, which would otherwise block the whole day. The preview is mandatory because inbox routing is by file pattern, and a wrong file can end up in the wrong importer.
 
 ### 10. Layout and entry point
 
@@ -143,7 +147,7 @@ scripts/tui/
 ├── runner.py               job runner (decision 4)
 ├── manifests.py            ScriptEntry, EXCLUDED (decisions 2, 5)
 ├── status.py               read-only status queries (decision 7)
-├── widgets/                job log, flag form generated from fields, consent dialog
+├── widgets/                job log, flag form generated from fields, start dialog
 └── screens/                dashboard, import, compute, analyse, utils, query, export
 ```
 
@@ -213,7 +217,30 @@ Old `.log` files keep their mixed content. Nothing deletes them automatically, b
 
 *Alternatives:* dropping the output altogether (loses the only result of scripts without a report); scrubbing values from the log (a filter can miss values, and the output would stay in a log).
 
+### 16. Every job start asks once
+
+Every job start shows one dialog before anything runs: single scripts, manual imports, utilities, checks, full orchestrator runs and starting a service. Stopping a service, cancelling and read-only browsing of results do not ask. The dialog names the script, its arguments and whether it writes, so it is worth reading.
+
+A sequence asks once at its start. Asking before each of six daily steps would train the user to confirm without looking, and then the question protects nothing.
+
+Remote LLM consent is part of the same dialog (decision 6), so two questions never follow each other. Scripts with their own prompts, such as the cost question in `analyse_synthesis.py`, still ask afterwards, because the TUI does not bypass them.
+
+This is a property of starting a job, so it does not depend on a manifest entry, and `ScriptEntry` has no `confirm` field. There are no exceptions for read-only checks: one rule without exceptions is easier to rely on.
+
+*Alternative:* asking only for actions that write. Rejected, because the user wants to be asked everywhere.
+
+### 17. Person selection comes from the databases
+
+The person field lists the persons found in the databases, read through the read-only opener (decision 7), with display names from `identity_resolver.resolve_display_name`. The default is `OWN_PERSON_ID`. With only one person, the field is hidden and no `--person` is passed. Names appear only on screen, and the TUI stores neither the list nor the selection.
+
+`identity_resolver` has no function that lists persons, so the list comes from the data. This also keeps persons out of the list for whom no data exists.
+
+*Alternatives:* no field (other persons would need the CLI); free text for the `PER-` ID (nobody remembers these, and a typo runs against the wrong person).
+
 ## Risks / Trade-offs
+
+- **[Confirmation fatigue]** Every start asks → A sequence asks once, the dialog states what will happen, and confirming takes one key.
+- **[Names on screen]** The person selection shows display names, for example over a shared screen → It appears only with more than one person, and nothing is stored.
 
 - **[Script output contains health data]** → In the TUI it stays in memory and on the alternate screen, and `RichLog` has a line limit. The TUI saves no logs. `analyse_all.py` writes output only to the user's own output file (decision 15).
 - **[A CLI user expects output in `<stem>.log`]** → `analyse_all.py` names the output file after a failure, and the file sits next to the log. Docs are updated.
@@ -233,5 +260,4 @@ Purely additive. Existing commands and flags are unchanged. Rollback: remove `sc
 
 ## Open Questions
 
-- Which person values should the person field offer? Default is `OWN_PERSON_ID`. A list needs `identity_resolver`, which is worth checking during implementation before falling back to free text.
 - Does `process_inbox --import` run `import_all.py --update` when the inbox is empty? This decides whether the daily workflow needs a separate import step.

@@ -33,6 +33,8 @@ Master-Analyse — führt alle analyse_*.py-Skripte aus.
     python analyse_all.py --no-llm                # ohne KI-Kommentare
     python analyse_all.py --from 2026-01-01      # Datums-Filter
     python analyse_all.py --only afib,sleep      # nur bestimmte (Namensbestandteil)
+    python analyse_all.py --only-exact analyse_pem  # nur genau diese (ganzer Dateiname ohne .py)
+    python analyse_all.py --on-demand analyse_ecg_session -- --session 42  # manuelles Skript, protokolliert
     python analyse_all.py --skip cgm,h7          # bestimmte überspringen
     python analyse_all.py --date 2026-05-31      # wird an Skripte weitergegeben die --date kennen
     python analyse_all.py --dry-run              # zeigt was laufen würde, ohne Ausführung
@@ -50,6 +52,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.pipeline_runner import is_preview_run, parse_exact_stems, split_forwarded_args
 
 SCRIPT_DIR = Path(__file__).parent
 
@@ -157,6 +160,22 @@ REQUIRES_INFECTION_DATE = {
 # │    Wearable-/Labordaten nicht ableitbar sind — LLM, teuer)             │
 # │    python3 scripts/analysis/manual/analyse_clinical_addendum.py         │
 # └─────────────────────────────────────────────────────────────────────────┘
+
+# Die manuellen Skripte oben, für --on-demand, mit den Flags, die nur eine Vorschau
+# oder Liste erzeugen. --dry-run und --help zählen immer als Vorschau.
+ON_DEMAND_ANALYSE_SCRIPTS: dict[str, tuple[str, ...]] = {
+    "analysis/manual/analyse_clinical_addendum.py": (),
+    "analysis/manual/analyse_ecg_session.py": ("--list",),
+    "analysis/manual/analyse_lab_anomalies.py": (),
+    "analysis/manual/analyse_lab_verlauf.py": (),
+    "analysis/manual/analyse_reha_klinik_empfehlung.py": ("--list-backends",),
+    "analysis/manual/analyse_saliva_ph.py": (),
+    "analysis/manual/analyse_skin.py": (),
+    "analysis/manual/analyse_synthesis.py": (),
+    "analysis/manual/analyse_urine.py": (),
+    "analysis/manual/check_supplement_interactions.py": (),
+    "analysis/manual/explain_synthesis.py": (),
+}
 
 # Alle automatisch laufenden Analyse-Skripte.
 # Reihenfolge ist inhaltlich egal — Abhängigkeiten sind in compute_all.py geregelt.
@@ -353,7 +372,30 @@ def run_script(
     return result.returncode == 0, elapsed
 
 
+def run_on_demand(stem: str, forwarded: list[str], lang: str | None) -> int:
+    """Führt ein manuelles Skript mit geerbter Ein- und Ausgabe aus und gibt den Exit-Code zurück.
+
+    Nicht über run_script(): das leitet die Ausgabe in eine Datei um, was Rückfragen
+    wie die von analyse_synthesis.py unsichtbar machen würde.
+    """
+    name = next(n for n in ON_DEMAND_ANALYSE_SCRIPTS if _script_stem(n) == stem)
+    script_path = SCRIPT_DIR / name
+    env = os.environ.copy()
+    if lang:
+        env["KYORO_LANG"] = lang
+
+    t0 = time.monotonic()
+    result = subprocess.run([sys.executable, str(script_path), *forwarded], env=env)
+    elapsed = time.monotonic() - t0
+
+    if not is_preview_run(forwarded, ON_DEMAND_ANALYSE_SCRIPTS[name]):
+        from modules.pipeline_runner import _log_analysis_run
+        _log_analysis_run(script_path.name, result.returncode, elapsed)
+    return result.returncode
+
+
 def main():
+    own_args, forwarded = split_forwarded_args(sys.argv[1:])
     parser = argparse.ArgumentParser(
         description=t(
             "Master-Analyse: führt alle analyse_*.py-Skripte aus",
@@ -372,8 +414,15 @@ def main():
                         help="Nur Daten bis Datum (YYYY-MM-DD), wird weitergegeben")
     parser.add_argument("--date", dest="single_date", metavar="DATE",
                         help="Einzeldatum (YYYY-MM-DD), wird weitergegeben wo unterstützt")
-    parser.add_argument("--only", metavar="PATTERN[,PATTERN]",
-                        help="Nur Skripte deren Name diese Begriffe enthält (Komma-getrennt)")
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--only", metavar="PATTERN[,PATTERN]",
+                           help="Nur Skripte deren Name diese Begriffe enthält (Komma-getrennt)")
+    selection.add_argument("--only-exact", metavar="STEM[,STEM]",
+                           help=t("Nur genau diese Skripte (ganzer Dateiname ohne .py)",
+                                  "Only exactly these scripts (full file stem)"))
+    selection.add_argument("--on-demand", metavar="STEM",
+                           help=t("Ein manuelles Skript ausführen und protokollieren; seine Argumente folgen nach --",
+                                  "Run and log one manual script; its arguments follow after --"))
     parser.add_argument("--skip", metavar="PATTERN[,PATTERN]",
                         help="Skripte überspringen deren Name diese Begriffe enthält")
     parser.add_argument("--person", default=OWN_PERSON_ID,
@@ -393,8 +442,34 @@ def main():
                         help=t("Bestätigt das Löschen bei --purge-old-logs",
                                "Confirms deletion with --purge-old-logs"))
     add_lang_arg(parser)
-    args = parser.parse_args()
+    args = parser.parse_args(own_args)
     apply_lang_from_args(args)
+
+    if forwarded and not args.on_demand:
+        parser.error(t("Argumente nach -- gibt es nur mit --on-demand",
+                       "Arguments after -- require --on-demand"))
+    if args.on_demand:
+        conflicting = (args.llm or args.no_llm or args.date_from or args.date_to or args.single_date
+                       or args.skip or args.run_date or args.all_data or args.dry_run
+                       or args.purge_old_logs or args.yes or args.person != OWN_PERSON_ID)
+        if conflicting:
+            parser.error(t("--on-demand nimmt die Argumente des Skripts nur nach --",
+                           "--on-demand takes the script's arguments only after --"))
+        known_on_demand = {_script_stem(n) for n in ON_DEMAND_ANALYSE_SCRIPTS}
+        if args.on_demand not in known_on_demand:
+            parser.error(t(f"--on-demand: unbekannt: {args.on_demand}",
+                           f"--on-demand: unknown: {args.on_demand}"))
+        returncode = run_on_demand(args.on_demand, forwarded, args.lang)
+        if returncode != 0:
+            sys.exit(returncode if returncode > 0 else 1)
+        return
+
+    exact_stems = None
+    if args.only_exact is not None:
+        exact_stems, unknown = parse_exact_stems(args.only_exact, {_script_stem(n) for n in ANALYSE_SCRIPTS})
+        if unknown or not exact_stems:
+            parser.error(t(f"--only-exact: unbekannt oder leer: {', '.join(unknown) or args.only_exact!r}",
+                           f"--only-exact: unknown or empty: {', '.join(unknown) or args.only_exact!r}"))
 
     # Ausgabe-Basisverzeichnis
     cfg = _Cfg()
@@ -443,6 +518,9 @@ def main():
 
         if not path.exists():
             skipped_missing.append(stem)
+            continue
+        if exact_stems is not None and stem not in exact_stems:
+            skipped_filter.append(stem)
             continue
         if only_patterns and not _matches(stem, only_patterns):
             skipped_filter.append(stem)

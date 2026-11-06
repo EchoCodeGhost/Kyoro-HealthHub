@@ -104,6 +104,28 @@ from modules.i18n import t
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# Laeufe mit diesen Flags berechnen nichts und duerfen nicht als frisches Ergebnis gelten.
+_PREVIEW_FLAGS = ("--dry-run", "-h", "--help")
+
+
+def split_forwarded_args(argv: list[str]) -> tuple[list[str], list[str]]:
+    """Trennt die eigenen Argumente von denen hinter dem ersten "--" (fuer das Kindskript)."""
+    if "--" not in argv:
+        return argv, []
+    index = argv.index("--")
+    return argv[:index], argv[index + 1:]
+
+
+def parse_exact_stems(value: str, known: set[str]) -> tuple[set[str], list[str]]:
+    """Zerlegt STEM[,STEM] und gibt (gewaehlte Stems, unbekannte Stems) zurueck."""
+    stems = {part.strip() for part in value.split(",") if part.strip()}
+    return stems, sorted(stems - known)
+
+
+def is_preview_run(forwarded: list[str], preview_flags: tuple[str, ...] = ()) -> bool:
+    """True, wenn ein weitergereichter Aufruf nur eine Vorschau oder Liste erzeugt."""
+    return any(flag in forwarded for flag in _PREVIEW_FLAGS + preview_flags)
+
 
 def _log_pipeline_run(table_name: str, script_name: str, returncode: int,
                       duration_s: float) -> None:

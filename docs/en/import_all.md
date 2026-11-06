@@ -32,4 +32,6 @@ Dependent on the availability and correctness of individual importers. No centra
 python import_all.py
 python import_all.py --update
 python import_all.py --update --person PER-xxxxxxxx
+python import_all.py --only-exact import_polar,import_ecg_logger
+python import_all.py --sanitize-only
 ```
