@@ -196,7 +196,7 @@ def update_lesion(conn, lesion_id: int, args) -> None:
 # ── Foto importieren ──────────────────────────────────────────────────────────
 
 def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
-                 source_type: str) -> int:
+                 source_type: str, date_given: bool = True) -> int:
     import tempfile
     gps = None
     raw_dst = None
@@ -206,14 +206,14 @@ def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
             # Weg 2: RAW-Original (metadatenbereinigt) UND JPEG-Vorschau behalten
             result = process_raw(src, tmp_dir)
             exif_dt, gps = result["date"], result["gps"]
-            if exif_dt and photo_date == date.today().isoformat():
+            if exif_dt and not date_given:
                 photo_date = exif_dt
             dst     = _safe_copy(result["jpeg_path"], photo_date, lesion_id)
             raw_dst = _safe_copy(result["raw_path"], photo_date, lesion_id,
                                   idx=int(dst.stem.rsplit("_", 1)[-1]))
         else:
             normalized, exif_dt, gps = normalize_to_jpeg(src, tmp_dir)
-            if exif_dt and photo_date == date.today().isoformat():
+            if exif_dt and not date_given:
                 photo_date = exif_dt
             dst = _safe_copy(normalized, photo_date, lesion_id)
     now = datetime.now(timezone.utc).isoformat()
@@ -228,8 +228,10 @@ def import_photo(conn, src: Path, lesion_id: int, photo_date: str,
           str(raw_dst) if raw_dst else None, "skin_lesion", now))
     file_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
-    # GPS-Daten in location.db speichern (falls vorhanden)
-    if gps:
+    # GPS-Daten in location.db speichern (falls vorhanden). Ohne echtes
+    # Aufnahmedatum (EXIF oder --date) kein Eintrag: das Ersatzdatum "heute"
+    # taugt nicht für die Reise-/Expositions-Korrelation.
+    if gps and (date_given or exif_dt):
         from modules.location_store import record, file_sha256
         # Original- und Stored-File-Hashes berechnen
         original_hash = file_sha256(src)
@@ -377,7 +379,8 @@ def main() -> None:
             print(t(f"Neue Läsion angelegt: ID {lesion_id}  [{args.location}]",
                     f"New lesion created: ID {lesion_id}  [{args.location}]"))
 
-        import_photo(conn, src, lesion_id, photo_date, args.source)
+        import_photo(conn, src, lesion_id, photo_date, args.source,
+                     date_given=args.photo_date is not None)
         total += 1
 
     log_import(conn, "import_skin", "", total)

@@ -29,8 +29,8 @@ konsil_pdf.py — Konsil-Gutachten als PDF rendern
              the HTML is still written and its path reported so it can be
              printed manually.
 @usage
-    python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil
-    python3 scripts/utils/konsil_pdf.py analyses/2026-08-02/konsil --einzeln
+    python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil
+    python3 scripts/utils/konsil_pdf.py analyses/2000-01-02/konsil --einzeln
 
 Exit Codes:
     0: PDF(s) erzeugt

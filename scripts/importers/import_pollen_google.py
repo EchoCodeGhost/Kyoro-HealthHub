@@ -43,7 +43,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import
-from modules.location_store import for_external_api
+from modules.location_store import for_external_api, external_service_enabled
 
 _cfg = _Cfg()
 DB_PATH  = _cfg.db_path
@@ -75,11 +75,16 @@ def _fetch_google(api_key: str, lat: float, lon: float, days: int) -> dict:
         with urllib.request.urlopen(url, timeout=15) as resp:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"[import_pollen_google] HTTP {e.code}: {body[:200]}", file=sys.stderr)
+        print(t(
+            f"[import_pollen_google] HTTP {e.code}: Fehler bei Google Pollen API-Aufruf.",
+            f"[import_pollen_google] HTTP {e.code}: Google Pollen API call failed."
+        ), file=sys.stderr)
         return {}
     except Exception as e:
-        print(f"[import_pollen_google] Fehler: {e}", file=sys.stderr)
+        print(t(
+            f"[import_pollen_google] Fehler: {e}",
+            f"[import_pollen_google] Error: {e}"
+        ), file=sys.stderr)
         return {}
 
 
@@ -116,6 +121,16 @@ def import_pollen_google_from_raw(conn: sqlite3.Connection, data: dict) -> int:
 def import_pollen_google(conn: sqlite3.Connection,
                          lat: float, lon: float,
                          days: int = 5) -> int:
+    # Prüfe, ob der Dienst freigegeben ist
+    if not external_service_enabled("google_pollen"):
+        print(t(
+            "Google Pollen-Dienst ist in location_privacy.json nicht freigegeben "
+            "(external_api.services.google_pollen). Import übersprungen.",
+            "Google Pollen service is not enabled in location_privacy.json "
+            "(external_api.services.google_pollen). Skipping import."
+        ))
+        return 0
+    
     api_key = _get_api_key()
     if not api_key:
         print(t(

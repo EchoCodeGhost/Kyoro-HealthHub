@@ -80,7 +80,7 @@ from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.llm import ai_label, grounding_suffix
 from modules.metric_loader import load_metric_daily, weakest_confidence
 from modules.prompts.query import (
@@ -1611,16 +1611,17 @@ def analyse_training() -> None:
 def analyse_routen() -> None:
     """GPS-Routen: Dauer, Höhenmeter, Geschwindigkeit."""
     print("Lade Routendaten ...", flush=True)
-    conn = open_db()
+    conn = attach_location_db(open_db())
     sections = []
 
     # v1 hatte eine eigene workout_routes-Tabelle (workout_date-Spalte); im
-    # v2-Schema liegen GPS-Trackpunkte in session_tracks (session_id, ts, lat,
+    # v2-Schema liegen GPS-Trackpunkte in session_tracks (heute in location.db,
+    # angehängt als loc; session_id, ts, lat,
     # lon, elevation_m, speed_ms) OHNE eigenes Datum — das Datum kommt über
     # den Join auf sessions.date. "no such table: workout_routes" lief hier
     # bislang bei jedem Aufruf unabgefangen auf einen Absturz.
     has_tracks = conn.execute(
-        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='session_tracks'"
+        "SELECT 1 FROM loc.sqlite_master WHERE type='table' AND name='session_tracks'"
     ).fetchone()
     if not has_tracks:
         sections.extend(_missing_source(
@@ -1634,7 +1635,7 @@ def analyse_routen() -> None:
                    ROUND(MAX(st.elevation_m) - MIN(st.elevation_m), 0) AS hoehendiff,
                    ROUND(AVG(st.speed_ms) * 3.6, 1) AS speed_avg_kmh,
                    ROUND(MAX(st.speed_ms) * 3.6, 1) AS speed_max_kmh
-            FROM session_tracks st
+            FROM loc.session_tracks st
             JOIN sessions s ON s.id = st.session_id
             GROUP BY s.date
             ORDER BY s.date DESC
@@ -1655,7 +1656,7 @@ def analyse_routen() -> None:
                        COUNT(*) AS punkte_gesamt,
                        ROUND(AVG(st.elevation_m), 0) AS hoehe_avg,
                        ROUND(AVG(st.speed_ms) * 3.6, 1) AS speed_avg
-                FROM session_tracks st
+                FROM loc.session_tracks st
                 JOIN sessions s ON s.id = st.session_id
             """).fetchone()
             sections.append(

@@ -5,11 +5,11 @@ Tests that import_fundus and import_fibricheck store no location.
 
 @tier        unit
 @purpose.de  Prüft, dass ein Fundusfoto mit GPS-EXIF und ein FibriCheck-PDF mit
-             GPS-Fund keinen Eintrag in location.db oder photo_locations
-             erzeugen und das abgelegte Fundusbild kein GPS mehr enthält.
+             GPS-Fund keinen Eintrag in location.db erzeugen (photo_locations gibt
+             es in health.db nicht mehr) und das abgelegte Fundusbild kein GPS mehr enthält.
 @purpose.en  Checks that a fundus photo with GPS EXIF and a FibriCheck PDF with
-             a GPS finding create no entry in location.db or photo_locations,
-             and that the stored fundus image no longer carries GPS.
+             a GPS finding create no entry in location.db (health.db no longer
+             has photo_locations), and that the stored fundus image no longer carries GPS.
 @method.de   Ablageordner und Datenbanken werden auf tmp_path umgelenkt; der
              Import muss erfolgreich laufen (kein Abfangen von Fehlern).
 @method.en   Storage folders and databases are redirected to tmp_path; the
@@ -122,7 +122,9 @@ class TestFibriCheck:
 
         assert result.rows_inserted == 1
         assert (tmp_path / "fibricheck" / "originals" / "report.pdf").exists()
-        assert conn.execute("SELECT COUNT(*) FROM photo_locations").fetchone()[0] == 0
+        # photo_locations gibt es in health.db nicht mehr; Orte nur in location.db
+        assert conn.execute(
+            "SELECT COUNT(*) FROM sqlite_master WHERE name='photo_locations'").fetchone()[0] == 0
         conn.close()
 
         loc_path, calls = location_db

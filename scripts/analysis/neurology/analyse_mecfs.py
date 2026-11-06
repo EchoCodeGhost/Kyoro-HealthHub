@@ -197,8 +197,8 @@ def load_data(conn, d_from: str, d_to: str) -> dict:
     data["dfa"] = {r[0]: {"avg": r[1], "min": r[2], "rmssd": r[3]} for r in rows}
 
     # Nightly HRV (Schlafqualität / nicht-erholsamer Schlaf)
-    # polar_nightly_hrv ist in dieser DB durchgehend leer (kein Polar-Geraet im
-    # Einsatz) — das Kriterium meldete deshalb immer "keine Daten", obwohl
+    # polar_nightly_hrv ist ohne Polar-Geraet leer — das Kriterium meldete
+    # dann immer "keine Daten", obwohl
     # umfangreiche HRV-Werte in measurements (metric='hrv_rmssd') vorliegen.
     # Faellt jetzt geraeteagnostisch auf measurements zurueck (Nachtfenster
     # 22-08h, gleiches Muster wie analyse_pem_cascade.py::_load_hrv und

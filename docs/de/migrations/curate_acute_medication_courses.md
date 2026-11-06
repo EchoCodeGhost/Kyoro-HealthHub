@@ -7,7 +7,7 @@
 
 ## Zweck
 
-Setzt ``is_chronic=0`` für eine manuell kuratierte Liste bekannter einmaliger Akutkuren (z.B. Antibiotika), damit sie in Auswertungen von laufender Dauermedikation unterschieden werden. Die Spalte ``is_chronic`` selbst wird von ``create_medicine_schema.py`` angelegt/nachmigriert — dieses Skript kuratiert nur Daten, keine Struktur.
+Setzt ``is_chronic=0`` für eine manuell kuratierte Liste bekannter einmaliger Akutkuren (z.B. Antibiotika), damit sie in Auswertungen von dauerhaft eingenommenen Mitteln unterschieden werden. Die Spalte ``is_chronic`` selbst wird von ``create_medicine_schema.py`` angelegt/nachmigriert — dieses Skript kuratiert nur Daten, keine Struktur.
 
 ## Relevanz
 
@@ -15,12 +15,12 @@ Bietet Gesundheitsdatenfunktionen, essentiell für die medizinische Datenverarbe
 
 ## Methode
 
-Reine ``UPDATE``-Anweisungen gegen ``ACUTE_COURSES`` (Liste aus (drug_name, date)-Paaren); setzt is_chronic=0 nur für exakt passende (person, drug_name, date)-Zeilen. Kein DDL.
+Reine ``UPDATE``-Anweisungen für ``clinical.acute_medication_courses`` aus der lokalen Config; setzt is_chronic=0 nur für exakt passende (person, drug_name, date)-Zeilen. Kein DDL.
 
 ## Datenfluss
 
-- **Liest:** `medications`, `(drug_name`, `date`, `person)`
-- **Schreibt:** `medications (UPDATE is_chronic=0 for entries in ACUTE_COURSES)`
+- **Liest:** `health_config.json`, `(clinical.acute_medication_courses)`, `medications`, `(drug_name`, `date`, `person)`
+- **Schreibt:** `medications (UPDATE is_chronic=0 for configured entries)`
 
 ## Grenzen
 

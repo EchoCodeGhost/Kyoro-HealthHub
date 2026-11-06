@@ -1,69 +1,71 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Kyoro-HealthHub contributors
 """
-geo_bundesland.py — Deutsche Bundesländer: Namen, ISO-Codes, Zentroid-Koordinaten
+geo_bundesland.py — Deutsche Bundesländer: Namen, ISO-Codes, Zuordnung von Koordinaten
 
 @tier        infrastructure
-@purpose.de  Kanonische Liste der 16 deutschen Bundesländer (Name, ISO-3166-2-Code,
-             ungefähre Zentroid-Koordinaten) plus Zuordnung von Heimatkoordinaten
-             zum nächstgelegenen Bundesland — analog zu _nearest_region in
-             import_pollen_dwd.py, aber für Bundesland-Ebene statt DWD-Teilregionen.
-@purpose.en  Canonical list of the 16 German federal states (name, ISO 3166-2
-             code, approximate centroid coordinates) plus mapping from home
-             coordinates to the nearest federal state — analogous to
-             _nearest_region in import_pollen_dwd.py, but at federal-state
-             level instead of DWD sub-regions.
-@method.de   Euklidische Distanz zu Landeshauptstadt-Koordinaten (ausreichend
-             genau für eine Bundesland-Zuordnung, kein echtes Polygon-Matching).
-@method.en   Euclidean distance to state-capital coordinates (accurate enough
-             for federal-state assignment, not real polygon matching).
-@reads       Keine Tabellen (statische Daten)
+@purpose.de  Kanonische Liste der 16 deutschen Bundesländer (Name in der
+             Schreibweise der RKI-Datensätze, ISO-3166-2-Code) und Zuordnung
+             von Koordinaten zum Bundesland, für RKI- und AMELAG-Serien.
+@purpose.en  Canonical list of the 16 German federal states (name as spelled
+             in RKI datasets, ISO 3166-2 code) and assignment of coordinates
+             to a federal state, for RKI and AMELAG series.
+@method.de   Die Zuordnung nutzt die weltweite Regionssuche
+             (modules/region_lookup.py, Natural-Earth-Grenzen). Punkte außerhalb
+             Deutschlands ergeben None statt eines benachbarten Bundeslands.
+@method.en   Assignment uses the worldwide region lookup
+             (modules/region_lookup.py, Natural Earth boundaries). Points
+             outside Germany give None instead of a neighbouring state.
+@reads       scripts/modules/geodata/admin1.json.gz (über region_lookup)
 @writes      Keine Tabellen (statische Daten)
-@limits.de   Grenznahe Koordinaten können dem falschen Nachbar-Bundesland
-             zugeordnet werden (Zentroid-Näherung, keine Polygongrenzen).
+@limits.de   Grenzen auf ~2 km vereinfacht, die Quelle selbst ist an Grenzen
+             auf etwa 1–2 km genau: Orte direkt an einer Landes- oder
+             Staatsgrenze können der Nachbareinheit zugeordnet werden.
+@limits.en   Borders simplified to ~2 km and the source itself is accurate to
+             about 1–2 km at borders: places right at a state or national
+             border can be assigned to the neighbouring unit.
 
 @relevance.de  Ermöglicht geographische Funktionen, essentiell für die räumliche Analyse
 @relevance.en  Enables geographical functions, essential for spatial analysis
-@limits.en   Coordinates near a state border can be assigned to the wrong
-             neighboring state (centroid approximation, no polygon borders).
 @usage
-    from modules.geo_bundesland import nearest_bundesland
-    name, code = nearest_bundesland(48.14, 11.58)  # -> ("Bayern", "BY")
+    from modules.geo_bundesland import bundesland_of
+    bundesland_of(48.14, 11.58)  # -> ("Bayern", "BY")
+    bundesland_of(47.80, 13.04)  # -> None (Österreich)
 """
 
-import math
-
 # (Name — wie in RKI-Datensätzen z.B. ARE-Konsultationsinzidenz verwendet,
-#  ISO-3166-2-Code — wie in AMELAG-Einzelstandortdaten verwendet,
-#  Zentroid-Breitengrad, Zentroid-Längengrad)
-BUNDESLAENDER: list[tuple[str, str, float, float]] = [
-    ("Baden-Wuerttemberg",      "BW", 48.78,  9.18),
-    ("Bayern",                  "BY", 48.14, 11.58),
-    ("Berlin",                  "BE", 52.52, 13.40),
-    ("Brandenburg",             "BB", 52.40, 13.06),
-    ("Bremen",                  "HB", 53.08,  8.80),
-    ("Hamburg",                 "HH", 53.55, 10.00),
-    ("Hessen",                  "HE", 50.08,  8.24),
-    ("Mecklenburg-Vorpommern",  "MV", 53.63, 11.41),
-    ("Niedersachsen",           "NI", 52.37,  9.73),
-    ("Nordrhein-Westfalen",     "NW", 51.23,  6.77),
-    ("Rheinland-Pfalz",         "RP", 49.99,  8.27),
-    ("Saarland",                "SL", 49.24,  6.99),
-    ("Sachsen",                 "SN", 51.05, 13.74),
-    ("Sachsen-Anhalt",          "ST", 52.13, 11.64),
-    ("Schleswig-Holstein",      "SH", 54.32, 10.14),
-    ("Thueringen",              "TH", 50.98, 11.03),
+#  ISO-3166-2-Code ohne "DE-" — wie in AMELAG-Einzelstandortdaten verwendet)
+BUNDESLAENDER: list[tuple[str, str]] = [
+    ("Baden-Wuerttemberg",      "BW"),
+    ("Bayern",                  "BY"),
+    ("Berlin",                  "BE"),
+    ("Brandenburg",             "BB"),
+    ("Bremen",                  "HB"),
+    ("Hamburg",                 "HH"),
+    ("Hessen",                  "HE"),
+    ("Mecklenburg-Vorpommern",  "MV"),
+    ("Niedersachsen",           "NI"),
+    ("Nordrhein-Westfalen",     "NW"),
+    ("Rheinland-Pfalz",         "RP"),
+    ("Saarland",                "SL"),
+    ("Sachsen",                 "SN"),
+    ("Sachsen-Anhalt",          "ST"),
+    ("Schleswig-Holstein",      "SH"),
+    ("Thueringen",              "TH"),
 ]
 
-BUNDESLAND_COORDS_BY_NAME: dict[str, tuple[float, float]] = {
-    name: (lat, lon) for name, _code, lat, lon in BUNDESLAENDER
-}
+_NAME_BY_CODE = {code: name for name, code in BUNDESLAENDER}
 
 
-def nearest_bundesland(lat: float, lon: float) -> tuple[str, str]:
-    """Nächstgelegenes Bundesland zu gegebenen Koordinaten.
+def bundesland_of(lat, lon) -> tuple[str, str] | None:
+    """Bundesland an den Koordinaten als (Name, Code), z.B. ("Bayern", "BY").
 
-    Returns (name, iso_code), z.B. ("Bayern", "BY").
+    None, wenn der Punkt nicht in Deutschland liegt oder ungültig ist.
     """
-    best = min(BUNDESLAENDER, key=lambda b: math.hypot(lat - b[2], lon - b[3]))
-    return best[0], best[1]
+    from modules.region_lookup import lookup
+    region = lookup(lat, lon)
+    if not region.startswith("DE-"):
+        return None
+    code = region[3:]
+    name = _NAME_BY_CODE.get(code)
+    return (name, code) if name else None

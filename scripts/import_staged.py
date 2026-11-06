@@ -115,6 +115,8 @@ def import_source(conn: sqlite3.Connection, staging_day: Path,
         elif source == "pollen_dwd":
             from importers.import_pollen_dwd import import_pollen_dwd_from_raw
             region_id = manifest.get("region_id", 122)
+            if region_id is None:
+                return 0
             n = import_pollen_dwd_from_raw(conn, data["content"], region_id)
             print(t(f"  ✓ pollen_dwd: {n} Tage (Region {region_id})",
                     f"  ✓ pollen_dwd: {n} days (region {region_id})"))

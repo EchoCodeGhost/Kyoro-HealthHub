@@ -1208,8 +1208,7 @@ def main():
     # selbstnormalisierendes Verhaeltnis statt zweier getrennter Schwellen —
     # beide Male in unabhaengiger Recherche als Feature genannt ("Herzfrequenz
     # bei gleicher Schrittzahl" / "HR-Anstieg pro Aktivitaetsminute", s. @refs
-    # Wichum et al. 2021 sowie zwei weitere Recherche-Zusammenfassungen der
-    # Nutzerin). Nur an Tagen mit steps >= CARDIAC_COST_MIN_STEPS berechnet,
+    # Wichum et al. 2021). Nur an Tagen mit steps >= CARDIAC_COST_MIN_STEPS berechnet,
     # sonst dominieren einzelne Schritte den Nenner und erzeugen Rauschwerte.
     CARDIAC_COST_MIN_STEPS = int(_PEM_CFG.get("cardiac_cost_min_steps", 200))
     hr_avg_d: dict[str, float] = {}
@@ -2157,8 +2156,7 @@ def main():
                     if drop >= SLEEP_DROP: r += 8
 
             # Aktivitaets-/Funktionsabfall am Folgetag — direktestes PEM-Signal
-            # ueberhaupt (Wichum et al. 2021 sowie zwei unabhaengige Recherchen
-            # der Nutzerin nennen es explizit), bisher gefehlt: die anderen
+            # ueberhaupt (Wichum et al. 2021 nennen es explizit): die anderen
             # Kanaele pruefen nur physiologische Proxies, nicht ob die
             # tatsaechliche Funktionsfaehigkeit eingebrochen ist.
             #
@@ -2185,7 +2183,7 @@ def main():
                         suppressed_drop = max(suppressed_drop or 0.0, act_drop)
 
             # Atemfrequenz (Nacht-Fenster, wie hrv_sdnn_d) — erst ab Apple Watch
-            # Series 9 (22.09.2025) nennenswert verfuegbar, s. @limits.
+            # Series 9 nennenswert verfuegbar, s. @limits.
             if lag_date in resp_d:
                 ref = _rolling_prev(resp_d, lag_date, days=7)
                 if ref:

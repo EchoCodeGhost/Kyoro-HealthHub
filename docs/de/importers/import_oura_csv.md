@@ -26,8 +26,8 @@ Liest die data.zip-Datei aus imports/oura/ oder einem expliziten Pfad. Importier
   health.db (oura_cycle_insights, oura_period_starts,
   oura_cycle_predictions, oura_tags, oura_temperature_raw,
   oura_daytime_stress, oura_sleep_model, oura_vo2max, oura_workouts,
-  oura_contraception, oura_survey, location_stays, sessions,
-  session_metrics, ...)
+  oura_contraception, oura_survey, sessions, session_metrics, ...),
+  location.db (location_stays)
   ```
 
 ## Grenzen

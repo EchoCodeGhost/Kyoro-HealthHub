@@ -104,7 +104,7 @@ def test_default_bundesland_derived_from_home_coordinates(monkeypatch):
     coordinate (found dogfooding: the original default silently hardcoded
     Bavaria, which breaks for anyone else using the project)."""
     class FakeCfg:
-        home_lat, home_lon = 51.23, 6.77  # Nordrhein-Westfalen centroid
+        home_lat, home_lon = 51.23, 6.77  # Düsseldorf, Nordrhein-Westfalen
     monkeypatch.setattr(amelag, "_Cfg", FakeCfg)
 
     assert amelag._default_bundesland() == "NW"
@@ -113,6 +113,14 @@ def test_default_bundesland_derived_from_home_coordinates(monkeypatch):
 def test_default_bundesland_none_when_no_home_coordinate_configured(monkeypatch):
     class FakeCfg:
         home_lat, home_lon = None, None
+    monkeypatch.setattr(amelag, "_Cfg", FakeCfg)
+
+    assert amelag._default_bundesland() is None
+
+
+def test_default_bundesland_none_when_home_is_abroad(monkeypatch):
+    class FakeCfg:
+        home_lat, home_lon = 47.80, 13.04  # Salzburg
     monkeypatch.setattr(amelag, "_Cfg", FakeCfg)
 
     assert amelag._default_bundesland() is None

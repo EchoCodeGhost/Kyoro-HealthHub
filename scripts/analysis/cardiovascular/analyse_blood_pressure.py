@@ -814,10 +814,12 @@ def section_arterial_stiffness(bp, pwv, resting_hr):
         if not (bp_dates & set(pwv.keys())):
             lines += [
                 "",
-                t("  ℹ Keine zeitliche Überlappung mit BP-Messungen "
-                  "(BP bis 2000-01-01, PWV ab 2000-01-02).",
-                  "  ℹ No temporal overlap with BP measurements "
-                  "(BP up to 2000-01-01, PWV from 2000-01-02)."),
+                (t(f"  ℹ Keine zeitliche Überlappung mit BP-Messungen "
+                   f"(BP bis {max(bp_dates)}, PWV ab {min(pwv)}).",
+                   f"  ℹ No temporal overlap with BP measurements "
+                   f"(BP up to {max(bp_dates)}, PWV from {min(pwv)}).")
+                 if bp_dates else
+                 t("  ℹ Keine BP-Messungen im Zeitraum.", "  ℹ No BP measurements in this period.")),
                 t("  PWV zeigt den aktuellen Gefäßsteifigkeitsstatus.",
                   "  PWV reflects current vascular stiffness status."),
             ]

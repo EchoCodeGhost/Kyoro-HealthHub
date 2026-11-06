@@ -41,16 +41,16 @@ Konfiguration (optional in ~/.config/kyoro/health_config.json):
 @relevance.en Supports infection-related data analysis and decision-making through systematic processing of wearable and symptom data
 @purpose.de  Ermittelt Lifetime-Pathogen-Expositionsrisiken aus Reiseverlauf, GPS-Clustern und GPX-Routen durch Abgleich mit Ausbruchs- und Endemie-Daten sowie Klimazonen-Risikomodellen.
 @purpose.en  Estimates lifetime pathogen exposure risks from travel history, GPS clusters and GPX routes by matching against outbreak and endemic patterns data and climate zone risk models.
-@method.de   Geo-Matching (ISO-Land, Koordinaten-Radius, Region-Text) kombiniert mit zeitlichem Überlapp-Score; Aggregation über alle verfügbaren Aufenthaltsquellen (JSON, DB, Google Takeout, GPX).
-@method.en   Geo-matching (ISO country, coordinate radius, region text) combined with temporal overlap score; aggregation over all available stay sources (JSON, DB, Google Takeout, GPX).
+@method.de   Geo-Matching (ISO-Land, Koordinaten-Radius, Region-Text) kombiniert mit zeitlichem Überlapp-Score; Aggregation über alle verfügbaren Aufenthaltsquellen (JSON, DB, Google Takeout, GPX). Koordinaten für externe APIs nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km).
+@method.en   Geo-matching (ISO country, coordinate radius, region text) combined with temporal overlap score; aggregation over all available stay sources (JSON, DB, Google Takeout, GPX). Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km).
 @scoring     Expositions-Score je Pathogen (heuristisch, projektintern):
                Schweregewichte: {"hoch": 1.0, "mittel": 0.6, "niedrig": 0.25}
                Aufenthaltsdauer-Faktor: dur = min(days, 30) / 30
                Komponent-Score: w × (0.3 + 0.7 × dur)
                Lifetime-Score: Summe aller Komponent-Scores je Pathogen
                Basis: projektintern, keine epidemiologische Validierung.
-@limits.de   Heuristische Methode: Heuristisches Geo- und Zeitfenster-Matching ohne epidemiologische Validierung; Schweregewichte (1.0/0.6/0.25) und Score-Formel projektintern; Ausbruchsdaten müssen manuell gepflegt werden; Klimazonen-Risikomodell vereinfacht (Gradbreitenklassen); Ergebnisse nur zur Hypothesengeneration für Arztgespräch (kein Serologieersatz).
-@limits.en   Heuristic method: Heuristic geo and time-window matching without epidemiological validation; severity weights (1.0/0.6/0.25) and score formula are project-internal; outbreak data requires manual maintenance; climate zone risk model is simplified (latitude classes); results only for hypothesis generation in medical consultation (no substitute for serology).
+@limits.de   Heuristische Methode: Heuristisches Geo- und Zeitfenster-Matching ohne epidemiologische Validierung; Schweregewichte (1.0/0.6/0.25) und Score-Formel projektintern; Ausbruchsdaten müssen manuell gepflegt werden; Klimazonen-Risikomodell vereinfacht (Gradbreitenklassen); Ergebnisse nur zur Hypothesengeneration für Arztgespräch (kein Serologieersatz). Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
+@limits.en   Heuristic method: Heuristic geo and time-window matching without epidemiological validation; severity weights (1.0/0.6/0.25) and score formula are project-internal; outbreak data requires manual maintenance; climate zone risk model is simplified (latitude classes); results only for hypothesis generation in medical consultation (no substitute for serology). Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 @reads       outbreak_events, endemic_ref, location_stays, session_tracks
 @writes      analyses/infectious/pathogen_exposure_*.{md,txt}
 
@@ -81,9 +81,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID, KYORO_CONFIG_DIR
-from modules.db import open_db, DB_OPERATIONAL_ERRORS
+from modules.db import attach_location_db, open_db, DB_OPERATIONAL_ERRORS
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 from modules.endemic_matching import (
     geo_dist_km as _geo_dist_km, resolve_radius_km, since_floor_ok as _endemic_since_floor_ok,
     TIMELESS_SOURCES,
@@ -396,13 +396,9 @@ def _save_geocache(cache: dict) -> None:
                              encoding="utf-8")
 
 
-# Zoomstufe 8 liefert nur Land/Bundesland/Kreisebene; dafür reicht ~11 km
-NOMINATIM_PRECISION = 1
-
-
 def _nominatim(lat: float, lon: float, cache: dict) -> dict:
-    # Nur gerundete Koordinaten verlassen den Rechner
-    lat, lon = round_coords(lat, lon, NOMINATIM_PRECISION)
+    # Nur vergröberte Koordinaten verlassen den Rechner (Zoom 8 braucht nur Region)
+    lat, lon = for_external_api(lat, lon)
     key = f"{lat},{lon}"
     if key in cache:
         return cache[key]
@@ -431,8 +427,49 @@ def _nominatim(lat: float, lon: float, cache: dict) -> dict:
         return {}
 
 
+def _nominatim_forward(query: str, cache: dict) -> dict:
+    """Vorwaerts-Geocoding (Text -> lat/lon), Gegenstueck zu _nominatim().
+
+    Noetig fuer manuelle travel_history.json-Eintraege, die nur Freitext
+    (Land/Subregion/Stadt) aber keine Koordinaten tragen -- ohne lat/lon
+    faellt _region_match() beim Ausbruchsabgleich auf einen reinen
+    Land-Match zurueck, der weit entfernte Regionen desselben Landes
+    faelschlich gleichsetzt. Verlaesst den Rechner als Ortsname, nicht als
+    Koordinate (s. Tabelle in docs/PRIVACY_ARCHITECTURE.md)."""
+    key = f"fwd:{query}"
+    if key in cache:
+        return cache[key]
+    params = urllib.parse.urlencode(
+        {"q": query, "format": "json", "limit": 1}
+    )
+    req = urllib.request.Request(
+        f"https://nominatim.openstreetmap.org/search?{params}",
+        headers={"User-Agent": "Kyoro-HealthHub/1.0 (health-pipeline)"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        result = {}
+        if data:
+            result = {"lat": float(data[0]["lat"]), "lon": float(data[0]["lon"])}
+        cache[key] = result
+        time.sleep(1.1)   # Nominatim Rate-Limit
+        return result
+    except Exception:
+        return {}
+
+
 def _enrich_stay(stay: Stay, cache: dict) -> Stay:
     """Ergänzt Klimazone und ggf. Geocoding für Stays ohne Länderdaten."""
+    if stay.lat is None and (stay.city or stay.subregion):
+        # Ohne Stadt oder Subregion keine Abfrage: ein reiner Landname liefert
+        # nur den Landesmittelpunkt, der einen falschen Ortsabgleich vortaeuscht.
+        query_parts = [p for p in (stay.city, stay.subregion, stay.country) if p]
+        query = ", ".join(query_parts)
+        geo = _nominatim_forward(query, cache)
+        if geo:
+            stay.lat = geo.get("lat")
+            stay.lon = geo.get("lon")
     if not stay.climate_zone and stay.country_iso:
         stay.climate_zone = _climate_zone(stay.lat, stay.lon, stay.country_iso)
     if stay.lat and not stay.country_iso:
@@ -641,11 +678,12 @@ def _load_db_stays(conn: sqlite3.Connection, dfrom: str = "1990-01-01") -> list[
     Reiseziele mit vielen aufgezeichneten GPS-Punkten künstlich hochgewichten.
     """
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
             SELECT ls.start_ts, ls.end_ts, ls.lat, ls.lon,
                    g.country, g.country_iso, g.subregion, g.city, g.climate_zone
-            FROM   location_stays ls
-            LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+            FROM   loc.location_stays ls
+            LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
             WHERE  ls.is_home = 0 AND ls.start_ts >= ?
             ORDER  BY ls.start_ts
         """, (dfrom,)).fetchall()
@@ -703,11 +741,12 @@ def _load_home_stays_db(conn: sqlite3.Connection, dfrom: str = "1990-01-01") -> 
     so massiv verzerren, statt den Wohnsitz einmalig zu werten.
     """
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
             SELECT ls.start_ts, ls.end_ts, ls.lat, ls.lon,
                    g.country, g.country_iso, g.subregion, g.city, g.climate_zone
-            FROM   location_stays ls
-            LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+            FROM   loc.location_stays ls
+            LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
             WHERE  ls.is_home = 1 AND (ls.end_ts IS NULL OR ls.end_ts >= ?)
             ORDER  BY ls.start_ts
         """, (dfrom,)).fetchall()
@@ -749,9 +788,10 @@ def _load_db_session_tracks(conn: sqlite3.Connection,
                              dfrom: str = "1990-01-01") -> list[Stay]:
     """Garmin/Polar Workout-GPS aus session_tracks — nur Nicht-Heim-Aktivitäten."""
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
             SELECT s.ts_start, s.ts_end, AVG(t.lat), AVG(t.lon)
-            FROM   session_tracks t
+            FROM   loc.session_tracks t
             JOIN   sessions s ON s.id = t.session_id
             WHERE  s.ts_start >= ?
             GROUP  BY s.id
@@ -1255,7 +1295,7 @@ def _aggregate_exposure(analysis: list[dict]) -> list[dict]:
     scores: dict[str, dict] = {}
 
     def _add(disease: str, level: str, source_tag: str,
-             days: int = 1, slug: str | None = None):
+             days: int = 1, slug: str | None = None, detail: str | None = None):
         key  = _disease_key(disease, slug)
         w    = _SEV_WEIGHT.get(level, 0.3)
         dur  = min(days, 30) / 30
@@ -1263,10 +1303,15 @@ def _aggregate_exposure(analysis: list[dict]) -> list[dict]:
         if key not in scores:
             scores[key] = {"score": 0.0, "level": level,
                            "sources": set(), "stay_count": 0,
-                           "disease": disease, "slug": slug or key}
+                           "disease": disease, "slug": slug or key,
+                           "details": []}
         scores[key]["score"]      += inc
         scores[key]["stay_count"] += 1
         scores[key]["sources"].add(source_tag)
+        if detail:
+            # Datum immer mitfuehren: dieselbe Region kann zu verschiedenen
+            # Zeiten eine andere Erregerlage haben.
+            scores[key]["details"].append(detail)
         # Höchstes Level und aussagekräftigster Name gewinnen
         cur_lvl = scores[key]["level"]
         if _SEV_WEIGHT.get(level, 0) > _SEV_WEIGHT.get(cur_lvl, 0):
@@ -1290,16 +1335,24 @@ def _aggregate_exposure(analysis: list[dict]) -> list[dict]:
             _add(disease, level, f"land:{iso}", days)
 
         # Aktive Ausbrüche
+        stay_label = stay.label
+        stay_when = f"{stay.date_from}" + (f" bis {stay.date_to}" if stay.date_to and stay.date_to != stay.date_from else "")
         for ev in item["outbreaks"]:
             sev = ev.get("severity", "medium")
+            ev_where = ev.get("region") or ev.get("country") or "?"
+            ev_when = ev.get("date_reported") or "?"
+            detail = (f"Aufenthalt {stay_label} ({stay_when}) <-> Ausbruch "
+                      f"{ev_where} gemeldet {ev_when}")
             _add(ev["disease"], sev, f"ausbruch:{ev['source']}", days,
-                 slug=ev.get("syndrome_slug"))
+                 slug=ev.get("syndrome_slug"), detail=detail)
 
         # Endemie-Referenz
         for ev in item["endemic"]:
             sev = ev.get("severity", "low")
+            ev_where = ev.get("region") or ev.get("country") or ev.get("country_iso") or "?"
+            detail = f"Aufenthalt {stay_label} ({stay_when}) in endemischer Region {ev_where}"
             _add(ev["disease"], sev, f"endemie:{ev.get('country_iso','')}", days,
-                 slug=ev.get("syndrome_slug"))
+                 slug=ev.get("syndrome_slug"), detail=detail)
 
     ranked = sorted(scores.values(), key=lambda x: -x["score"])
     for r in ranked:
@@ -1324,6 +1377,12 @@ def save_to_db(conn: sqlite3.Connection, exposure: list[dict],
             computed_at TEXT    NOT NULL
         )
     """)
+    # ALTER TABLE statt Neuanlage, damit vorhandene Zeilen erhalten bleiben;
+    # der Fehler bei bereits vorhandener Spalte wird bewusst verschluckt.
+    try:
+        conn.execute("ALTER TABLE pathogen_exposure_summary ADD COLUMN details TEXT")
+    except DB_OPERATIONAL_ERRORS:
+        pass
     conn.execute(
         "DELETE FROM pathogen_exposure_summary WHERE person = ? AND dfrom = ?",
         (person, dfrom)
@@ -1332,14 +1391,15 @@ def save_to_db(conn: sqlite3.Connection, exposure: list[dict],
     conn.executemany("""
         INSERT INTO pathogen_exposure_summary
             (person, disease, slug, risk_level, score, stay_count, sources,
-             dfrom, computed_at)
-        VALUES (?,?,?,?,?,?,?,?,?)
+             dfrom, computed_at, details)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
     """, [
         (person,
          r["disease"], r.get("slug"), r["level"],
          round(r["score"], 4), r["stay_count"],
          ",".join(r["sources"]),
-         dfrom, now)
+         dfrom, now,
+         " | ".join(r.get("details", [])[:5]))  # Deckel bei 5, sonst uferts bei vielen Treffern aus
         for r in exposure
     ])
     conn.commit()

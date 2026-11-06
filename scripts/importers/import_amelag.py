@@ -32,10 +32,10 @@ import_amelag.py — RKI/UBA Abwassersurveillance AMELAG → health.db (wastewat
 @writes      health.db:wastewater_amelag, health.db:import_log
 @limits.de   Einzelstandort-Datei ist ~50 MB (bundesweit), wird komplett heruntergeladen
              und lokal gefiltert — keine serverseitige Bundesland-Filterung verfügbar.
-             Keine medizinische Interpretation der Viruslast-Werte.
+             Keine medizinische Interpretation der Viruslast-Werte. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 @limits.en   Per-site file is ~50 MB (nationwide), downloaded in full and filtered
              locally — no server-side federal-state filtering available.
-             No medical interpretation of viral-load values.
+             No medical interpretation of viral-load values. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 @usage
     python3 import_amelag.py
     python3 import_amelag.py --bundesland BY
@@ -61,7 +61,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db, DB_ERRORS
 from modules.base import log_import
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from modules.geo_bundesland import nearest_bundesland
+from modules.geo_bundesland import bundesland_of
 
 _NATIONAL_URL = (
     "https://raw.githubusercontent.com/robert-koch-institut/"
@@ -75,12 +75,12 @@ _SITES_URL = (
 
 def _default_bundesland() -> str | None:
     """Bundesland aus der Heimatkoordinate ableiten (kein Hardcoding auf ein
-    bestimmtes Bundesland) — None, wenn keine Heimatkoordinate konfiguriert ist."""
+    bestimmtes Bundesland) — None ohne Heimatkoordinate oder außerhalb Deutschlands."""
     cfg = _Cfg()
     if cfg.home_lat is None or cfg.home_lon is None:
         return None
-    _, code = nearest_bundesland(cfg.home_lat, cfg.home_lon)
-    return code
+    found = bundesland_of(cfg.home_lat, cfg.home_lon)
+    return found[1] if found else None
 
 
 def _fetch_tsv(url: str) -> str | None:

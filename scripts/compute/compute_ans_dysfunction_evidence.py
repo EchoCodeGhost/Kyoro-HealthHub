@@ -69,11 +69,11 @@ Autonome-Dysfunktion-Evidenz-Score — tageweise über die gesamte Historie
              KONTEXT (nicht gescort, nur informativ im components-JSON
              mitgefuehrt): Dekonditionierung (Alltagsaktivitaet/met_minutes
              ggue. eigener Baseline -- URSPRUENGLICH als Stuetzkriterium
-             gescort, nach Nutzerinnen-Einwand korrigiert: im Unterschied zu
+             gescort, dann korrigiert: im Unterschied zu
              den uebrigen Kriterien misst Aktivitaet nur VERHALTEN, nicht die
              ANS-Funktion selbst -- niedrige Aktivitaet kann aus Dysfunktion
              folgen, aber genauso aus jedem anderen Grund; zusaetzlich
-             empirisch bestaetigt: ueberlappte als Stuetzkriterium an 41.5%
+             empirisch bestaetigt: ueberlappte als Stuetzkriterium an vielen
              der relevanten Naechte mit hrv_low, vermutlich Doppelzaehlung
              desselben Phaenomens, s. _load_deconditioning_context());
              Zyklustag (cycle_day, kein ANS-Symptom, sondern moeglicher
@@ -154,11 +154,11 @@ Autonome-Dysfunktion-Evidenz-Score — tageweise über die gesamte Historie
              CONTEXT (not scored, carried informationally in the
              components JSON): deconditioning (daily activity/met_minutes
              vs. own baseline -- ORIGINALLY scored as a support criterion,
-             corrected after user pushback: unlike the other criteria,
+             then corrected: unlike the other criteria,
              activity only measures BEHAVIOUR, not ANS function itself --
              low activity can follow from dysfunction, but just as easily
              from any other reason; additionally confirmed empirically: as
-             a support criterion it overlapped with hrv_low on 41.5% of
+             a support criterion it overlapped with hrv_low on many
              relevant nights, likely double-counting the same underlying
              phenomenon, s. _load_deconditioning_context()); cycle day
              (cycle_day, not an ANS symptom itself, but a possible modulator
@@ -392,7 +392,7 @@ def _load_breathing_disturbance(conn, person, d0, d1) -> dict:
     deshalb getrennte Schwellen, nicht vermischt. Alle drei Schwellenpaare
     sind NICHT neu erfunden, sondern 1:1 aus compute_af_evidence.py::
     compute_scores() uebernommen (dort bereits als Atemstoerungs-Stuetzsignal
-    kalibriert). Polar liefert in dieser DB nachweislich KEIN
+    kalibriert). Polar liefert nachweislich KEIN
     Atemstoerungssignal, auch nicht nach Suche in session_metrics (s.
     Coverage-Check in main())."""
     apple = conn.execute(
@@ -431,8 +431,8 @@ def _load_breathing_disturbance(conn, person, d0, d1) -> dict:
 
 def _load_spo2(conn, person, d0, d1) -> dict:
     """Nur naechtliches SpO2 (korrigiert -- vorher daily_context.spo2_avg_pct,
-    ein GANZTAGES-Mittel ueber alle Tagesstunden; die Nutzerin wollte das
-    Kriterium bewusst auf die Nacht beschraenken, weil Kyoro fuer SpO2
+    ein GANZTAGES-Mittel ueber alle Tagesstunden; das Kriterium ist bewusst
+    auf die Nacht beschraenkt, weil Kyoro fuer SpO2
     ueberhaupt keine durchgehende Tagesabdeckung hat -- keins der Geraete
     misst SpO2 standardmaessig ganztaegig, s. compute_sleep_spo2.py-
     Docstring). Quelle measurements.metric='sleep_spo2_min'
@@ -488,7 +488,7 @@ def _load_deconditioning_context(conn, person, d0, d1) -> dict:
     plausiblen VERSTAERKER/RISIKOFAKTOR, aber nicht zu einem BEWEIS, dass
     die Dysfunktion vorliegt (dieselbe Unterscheidung wie bei Zyklustag/
     Medikamenten/Laborwerten unten). Empirischer Zusatzbefund, der die
-    Korrektur bestaetigt: als Stuetzkriterium ueberlappte es an 41.5% der
+    Korrektur bestaetigt: als Stuetzkriterium ueberlappte es an vielen der
     relevanten Naechte mit hrv_low -- beide haetten wahrscheinlich dasselbe
     zugrundeliegende Phaenomen doppelt gezaehlt. personal_baseline.met_min
     als Referenz (kommt aus measurements.metric='met_minutes', tagesweise
@@ -712,8 +712,8 @@ def compute_scores(conn, person, d0, d1) -> list:
 
 def _print_coverage_check(conn, person: str) -> None:
     """Deckt ab, was der Score NICHT sagen kann, weil Daten fehlen --
-    explizit ausgegeben statt stillschweigend wegzulassen (Nutzerinnen-
-    Vorgabe: 'Daten nicht vorhanden, Testung empfohlen' statt Schweigen)."""
+    explizit ausgegeben statt stillschweigend wegzulassen
+    ('Daten nicht vorhanden, Testung empfohlen' statt Schweigen)."""
     print(t("\n── Kanal-Abdeckung ──────────────────────────────────────────",
             "\n── Channel coverage ─────────────────────────────────────────"))
 

@@ -293,6 +293,15 @@ class _OpenVINOProvider(LLMProvider):
         default_vlm   = str(self._path).replace("-genai", "-vlm-genai")
         self._vlm_path      = Path(llm.get("openvino_vlm_path", default_vlm))
         self._template_key  = llm.get("openvino_template", "chatml")
+        # Qwen3-style "thinking" models can spend very long (open-ended)
+        # generation on a hidden <think>...</think> block before the actual
+        # answer -- for short, deterministic extraction tasks (JSON-only
+        # output) this can run away well past max_new_tokens' worth of
+        # useful output. The standard workaround (same one Qwen's own
+        # chat template applies for enable_thinking=False) is to make the
+        # prompt already contain an empty, closed think block, so the model
+        # continues straight to the answer instead of opening a new one.
+        self._disable_thinking = bool(llm.get("openvino_disable_thinking", False))
         self._pipe_instance     = None
         self._vlm_pipe_instance = None
 
@@ -320,6 +329,8 @@ class _OpenVINOProvider(LLMProvider):
         import openvino_genai as ov_genai
         template = _OPENVINO_TEMPLATES.get(self._template_key, _OPENVINO_TEMPLATES["chatml"])
         prompt = template.format(sys=system, usr=user)
+        if self._disable_thinking:
+            prompt += "<think>\n\n</think>\n\n"
         cfg = ov_genai.GenerationConfig()
         cfg.max_new_tokens     = max_tokens
         cfg.temperature        = 0.3

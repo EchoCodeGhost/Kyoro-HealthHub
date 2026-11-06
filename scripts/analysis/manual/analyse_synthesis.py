@@ -318,7 +318,7 @@ def _patient_context(lang: str) -> str:
 # ändert (z.B. analyse_muster.py → analyse_overview.py, Unterordner "muster"
 # → "overview"), bleibt der alte Ordnername sonst ein für immer verwaister
 # Themen-Bucket, der als eigenes "aktuellstes" Thema neben dem Nachfolger
-# weiterläuft (gefunden 02.08.2026, s. auch die Staleness-Warnung in
+# weiterläuft (s. auch die Staleness-Warnung in
 # _collect_reports() für noch unentdeckte Fälle dieser Art). Hier eintragen,
 # sobald ein weiterer Fall auffällt — es gibt keinen Weg, das automatisch zu
 # erkennen, da der Themenname bewusst vom Skript-Dateinamen entkoppelt ist.

@@ -201,6 +201,23 @@ else:
     ok(t("Playwright-Chromium installiert", "Playwright Chromium installed"))
 
 
+# ── 2a2. ocrmypdf (für scripts/utils/sort_scan_batch.py) ────────────────────
+
+step(t("ocrmypdf prüfen (für scripts/utils/sort_scan_batch.py)",
+       "Checking ocrmypdf (for scripts/utils/sort_scan_batch.py)"))
+if shutil.which("ocrmypdf") is None:
+    warn(t("ocrmypdf nicht gefunden (nicht fatal — nur die Sortierung "
+           "gescannter Dokumentstapel ist betroffen, alle anderen Skripte "
+           "laufen trotzdem). Das ist ein System-Paket, kein pip-Paket. "
+           "Nachinstallieren mit:",
+           "ocrmypdf not found (not fatal — only scanned-document batch "
+           "sorting is affected, every other script still works. This is a "
+           "system package, not a pip package. Install with:"))
+    print("    sudo apt-get install ocrmypdf")
+else:
+    ok(t("ocrmypdf gefunden", "ocrmypdf found"))
+
+
 # ── 2b. Git hooks ────────────────────────────────────────────────────────────
 
 step(t("Git-Hooks aktivieren", "Enabling git hooks"))
@@ -411,7 +428,7 @@ print(t(
 
          python3 scripts/utils/manage/personal/manage_travel_history.py add
 
-       Oder aus Wearable-Daten in die location_stays-Tabelle ableiten:
+       Oder aus Wearable-Daten in die location_stays-Tabelle (location.db) ableiten:
 
          python3 scripts/importers/import_travel_environment.py --help
 
@@ -587,7 +604,7 @@ print(t(
 
          python3 scripts/utils/manage/personal/manage_travel_history.py add
 
-       Or derive it from wearable data into the location_stays table:
+       Or derive it from wearable data into the location_stays table (location.db):
 
          python3 scripts/importers/import_travel_environment.py --help
 

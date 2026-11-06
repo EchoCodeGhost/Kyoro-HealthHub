@@ -114,32 +114,32 @@
       "Medical Diagnoses: 'illness '",
       "Medical Diagnoses: 'disease '"
     ],
-    "docstring_hash": "b65298a900408d4366e20fa195c2292d1a4c17dbe199d02a3321190a84f08d48"
+    "docstring_hash": "9bd7efb343b2c42fbd78b10c8935b5acafa1bb92dd10085bb7e45e5da16b8459"
   },
   "scripts/analysis/infectious/analyse_outbreak_exposure.py": {
     "approved": [
       "Medical Diagnoses: 'disease '",
       "Geographic Locations: 'Praxis'"
     ],
-    "docstring_hash": "9b04057e5e8215ffc4aed936bf85c84e48d9e09c3be26d250d779c1074ee950d"
+    "docstring_hash": "b56cfbdb57640d7b08d2eaccf9529af0d368ea36c139c9fb810851e9a25c111b"
   },
   "scripts/analysis/infectious/analyse_pathogen_exposure.py": {
     "approved": [
       "Medical Diagnoses: 'disease '"
     ],
-    "docstring_hash": "8463de400e213a1026cd8e0a29ea1d4cb1741183ced10fa82313eee778bc306f"
+    "docstring_hash": "71c1ffff2e28723ad0d33e551fc0b86004040a74d2aa98971dcfec2f35098264"
   },
   "scripts/analysis/infectious/analyse_postcovid_sleep_wearable.py": {
     "approved": [
       "Age Information: 'Adult'"
     ],
-    "docstring_hash": "ab80484fd67954f583938f3502cb512ec4eff520d4aad0b3fd6beb331eab1d44"
+    "docstring_hash": "837d895b40d6eef5c0599ce1807c90581d362ca3a5203755ecbac7ca79d49903"
   },
   "scripts/analysis/infectious/analyse_postinfectious_diagnose.py": {
     "approved": [
       "Medical Diagnoses: 'Diagnosis '"
     ],
-    "docstring_hash": "3b7cb21374b1518e20152311ac1e3c8acd0c649837a83ba8bcea030818a4fa10"
+    "docstring_hash": "94805d2a0bb7f160332f638de9c9f166fad479aaddc9dd84eac87340edaff97b"
   },
   "scripts/analysis/longevity/__init__.py": {
     "approved": [
@@ -209,7 +209,7 @@
       "Medical Diagnoses: 'Diagnosis '",
       "Medical Diagnoses: 'Treatment '"
     ],
-    "docstring_hash": "07fd3fa240cec89b98cf3bcca8fd5f4dbdbca00cc7a62fe559e7635248feebd3"
+    "docstring_hash": "6ccdda5612dd6a174935628e95a1d00827534bb5c31a1638ed234890f8feaea1"
   },
   "scripts/compute/compute_calibrate_sources.py": {
     "approved": [
@@ -344,6 +344,12 @@
     ],
     "docstring_hash": "9cb1109a9d857f8b668f12f73148658627f5b1cad7a6104aafcb571e6c8e0f19"
   },
+  "scripts/modules/icd10_catalog.py": {
+    "approved": [
+      "Medical Diagnoses: 'diagnosis '"
+    ],
+    "docstring_hash": "24e03aa5c8da6147ebcee146cdfb9cda78305fa46dd7f25b1519500125916f20"
+  },
   "scripts/modules/identity_resolver.py": {
     "approved": [
       "Age Information: 'kind'"
@@ -355,6 +361,28 @@
       "Age Information: 'child'"
     ],
     "docstring_hash": "a2dc4e05868b79cd5121b2fc6a45e9a5464d53425d6f8608cd6de49ae494ac78"
+  },
+  "scripts/modules/review_notes.py": {
+    "approved": [
+      "Medical Diagnoses: 'patient '"
+    ],
+    "docstring_hash": "e337d479db4d8c8b80fd7a784bd3b7cd9514cb0772b994ec8889117198d047a1"
+  },
+  "scripts/utils/apply_icd_corrections.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnose '",
+      "Medical Diagnoses: 'diagnosis '",
+      "Age Information: 'kind'"
+    ],
+    "docstring_hash": "29faad8b13f580b58360f11c9d0f2a3d1e65c361d4c3550ddecad9b432c67a14"
+  },
+  "scripts/utils/check_icd_codes.py": {
+    "approved": [
+      "Medical Diagnoses: 'Diagnose '",
+      "Medical Diagnoses: 'diagnosis '",
+      "Medical Diagnoses: 'diagnosis\n             '"
+    ],
+    "docstring_hash": "0e64461e8aa653f2bf539a3c62e2e5c56fc46e40e13527d57ed2ab842e5502bc"
   },
   "scripts/utils/check_outbreak_source_health.py": {
     "approved": [

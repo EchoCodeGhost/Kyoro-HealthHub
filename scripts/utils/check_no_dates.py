@@ -26,8 +26,8 @@ check_no_dates — Enforces the no-embedded-dates/versions convention (CONTRIBUT
              "birthdate" im Config-Template) — Tausende Fehlalarme. Stattdessen: (1)
              Statuswort (Fixed/Resolved/Ordered/Bestellt/Behoben/Gefunden/Repariert/
              Dead/Benchmarked/Flagged/Befund/Finding/Korrigiert/Corrected/
-             Ergänzt/…) vor oder nach einem Datum (Volldatum ODER
-             Monatsdatum YYYY-MM), case-insensitive, mit bis zu 4 Füllwörtern
+             Ergänzt/…) vor oder nach einem Datum (Volldatum, Monatsdatum YYYY-MM
+             ODER TT.MM.JJJJ), case-insensitive, mit bis zu 4 Füllwörtern
              dazwischen erlaubt — fängt sowohl "Fixed 2026-07-18" als auch "Found in
              production data 2026-07-20" oder "2026-07-22 live verifiziert"; (2) "As
              of"/"Stand:"/"seit"/"since" vor einem Datum; (3) Dateiname mit
@@ -46,7 +46,10 @@ check_no_dates — Enforces the no-embedded-dates/versions convention (CONTRIBUT
              Datum X, Datenquelle deckt Zeitraum bis Y ab) hätten sonst
              Fehlalarme ausgelöst. Scannt git-getrackte Dateien (git ls-files) —
              private/gitignorte Verzeichnisse (intern/, data/, …) fallen automatisch
-             raus. Exit-Code: 0 = sauber, 1 = Findings gefunden.
+             raus. Zusätzlich: Vermerke, was die Person gesagt oder gewollt hat
+             ("Nutzerinnen-Anfrage"). Eine Zeile mit "no-date-check: <Grund>" ist
+             ausgenommen, etwa der Stand einer zitierten Quelle.
+             Exit-Code: 0 = sauber, 1 = Findings gefunden.
 @method.en   Word-adjacent regex patterns instead of a blanket date scan: a bare
              "\\d{4}-\\d{2}-\\d{2}" pattern would match every legitimate data field
              (clinical.events, `--from 2024-01-01` examples in @usage blocks,
@@ -54,7 +57,7 @@ check_no_dates — Enforces the no-embedded-dates/versions convention (CONTRIBUT
              Instead: (1) a status word (Fixed/Resolved/Ordered/Bestellt/Behoben/
              Found/Repaired/Dead/Benchmarked/Flagged/Befund/Finding/Korrigiert/
              Corrected/Ergänzt/…) before or after a date (full
-             date OR month-only YYYY-MM), case-insensitive, with up to 4 filler
+             date, month-only YYYY-MM OR DD.MM.YYYY), case-insensitive, with up to 4 filler
              words allowed in between — catches "Fixed 2026-07-18" as well as
              "Found in production data 2026-07-20" or "2026-07-22 live verified";
              (2) "As of"/"Stand:"/"seit"/"since" immediately before a date; (3) a
@@ -73,14 +76,17 @@ check_no_dates — Enforces the no-embedded-dates/versions convention (CONTRIBUT
              from date X, a data source covering a period up to date Y) would have
              false-positived. Scans git-tracked files (git ls-files) — private/
              gitignored directories (intern/, data/, …) fall out automatically.
+             Also: notes recording what the person said or wanted
+             ("Nutzerinnen-Anfrage"). A line with "no-date-check: <reason>" is
+             exempt, for example the status date of a cited source.
              Exit code: 0 = clean, 1 = findings found.
 @reads       all git-tracked .py/.md files in the scanned directory
 @writes      stdout (report and JSON output)
 @limits.de   Wortliste (Statuswörter, Zitat-Signalwörter, Mengen-Substantive) ist
              nicht erschöpfend — ungewöhnliche Formulierungen können durchrutschen.
-             Zeilenbasiert: ein Statuswort und ein Datum, die über zwei Kommentar-
-             /Docstring-Zeilen verteilt sind (z.B. "...(N rows, back to\n#
-             YYYY-MM-DD)"), werden NICHT erkannt. Kategorie 6 (Zahl+Datum) verlangt
+             Weitgehend zeilenbasiert: über zwei Zeilen wird nur erkannt, wenn das
+             Statuswort die Vorzeile beendet und das Datum die Zeile beginnt.
+             Kategorie 6 (Zahl+Datum) verlangt
              ein explizites Mengen-Substantiv direkt nach der Zahl — ein Datensatz-
              Fakt ohne ein solches Substantiv auf derselben Zeile wie das Datum (z.B.
              "gemessen: N Zeilen über mehrere Geräte-IDs" ohne Datum in der Zeile)
@@ -89,9 +95,9 @@ check_no_dates — Enforces the no-embedded-dates/versions convention (CONTRIBUT
              ohne Kausalbezug). Prüft nicht, ob ein gefundenes Datum tatsächlich
              stimmt/veraltet ist — nur ob eines der Muster überhaupt vorkommt.
 @limits.en   Word list (status words, citation signal words, quantity nouns) is not
-             exhaustive — unusual phrasings can slip through. Line-based: a status
-             word and a date split across two comment/docstring lines (e.g.
-             "...(N rows, back to\n# YYYY-MM-DD)") are NOT detected. Category 6
+             exhaustive — unusual phrasings can slip through. Largely line-based: across
+             two lines it only detects a status word ending one line and a date
+             starting the next. Category 6
              (count+date) requires an explicit quantity noun right after the number —
              a record-count fact with no such noun on the same line as the date
              (e.g. "measured: N rows across several device IDs" with no date on
@@ -121,7 +127,10 @@ _DATE_RE = r"\d{4}-\d{2}-\d{2}"
 # Monatsdatum (YYYY-MM) ohne Tag, z.B. "2026-07" — negative Lookahead auf "-DD"
 # verhindert Doppel-Treffer auf einem vollen Datum (das faengt schon _DATE_RE).
 _DATE_MONTH_RE = r"\d{4}-(?:0[1-9]|1[0-2])(?!-\d{2})"
-_DATE_ANY_RE = rf"(?:{_DATE_RE}|{_DATE_MONTH_RE})"
+# Deutsches Format (TT.MM.JJJJ); Lookarounds schliessen Versionsnummern und
+# Dezimalzahlen aus, die zufaellig so aussehen.
+_DATE_DOTTED_RE = r"(?<![\d.])\d{1,2}\.\d{1,2}\.(?:19|20)\d{2}(?![\d.])"
+_DATE_ANY_RE = rf"(?:{_DATE_RE}|{_DATE_MONTH_RE}|{_DATE_DOTTED_RE})"
 
 _STATUS_WORDS = [
     # English
@@ -129,13 +138,17 @@ _STATUS_WORDS = [
     "Implemented", "Completed", "Done", "Ordered", "Received", "Published",
     "Released", "Merged", "Reviewed", "Verified", "Confirmed", "Tested", "Started",
     "Migrated", "Renamed", "Introduced", "Found", "Repaired", "Dead",
-    "Benchmarked", "Benchmark", "Flagged", "Finding", "Corrected",
+    "Benchmarked", "Benchmark", "Flagged", "Finding", "Corrected", "Fix", "Session",
     # Deutsch
     "Behoben", "Gelöst", "Hinzugefügt", "Aktualisiert", "Geändert", "Entfernt",
     "Implementiert", "Abgeschlossen", "Fertig", "Bestellt", "Erhalten",
     "Veröffentlicht", "Gemergt", "Geprüft", "Verifiziert", "Bestätigt", "Getestet",
     "Begonnen", "Migriert", "Umbenannt", "Eingeführt", "Gefunden", "Repariert",
-    "Markiert", "Befund", "Korrigiert", "Ergänzt",
+    "Markiert", "Befund", "Korrigiert", "Ergänzt", "Gefixt", "Fund", "Sitzung",
+    "Anfrage", "Einwand",
+    # Deutsch ohne Umlaute, wie in vielen Kommentaren im Repo
+    "Geloest", "Hinzugefuegt", "Geaendert", "Veroeffentlicht", "Geprueft",
+    "Bestaetigt", "Eingefuehrt", "Ergaenzt",
 ]
 _status_alt = "|".join(re.escape(w) for w in _STATUS_WORDS)
 # Bis zu 4 Fuellwoerter zwischen Statuswort und Datum, in beide Richtungen
@@ -146,6 +159,22 @@ _FILLER = r"(?:[\wäöüÄÖÜß'’/.-]+\s+){0,4}"
 _CITATION_MARKERS = re.compile(
     r"doi:|AWMF|RKI\b|ESC\b|ESH\b|WHO\b|ISO\s?3166|RFC\s?\d|USPSTF|"
     r"guideline|Leitlinie|et al\.?|Task Force",
+    re.IGNORECASE,
+)
+
+# Haelt eine Zeile bewusst von der Pruefung frei, z.B. wenn sie den Stand einer
+# externen Quelle zitiert. Der Grund steht direkt dahinter und ist so sichtbar.
+_ALLOW_MARKER = "no-date-check:"
+
+# Vermerke, die festhalten, was die Person gesagt oder gewollt hat. Das gehoert in
+# die Commit-Historie, nicht in ein oeffentliches Repo. Die Rolle an sich ("die
+# Nutzerin" als Begriff fuer die Person mit den Daten) ist kein Treffer.
+_PERSONAL_NOTE_RE = re.compile(
+    r"\bNutzer(?:in|innen)?-(?:Anfrage|Einwand|Entscheidung|Hinweis|Vorgabe|Wunsch|Seite)\b"
+    r"|\bNutzerinnen-$"
+    r"|\b(?:die|der)\s+Nutzerin\s+(?:wollte|nachfragte|bestaetigt|bestätigt|nennen|erwähnte|erwaehnte)\b"
+    r"|\bbis\s+die\s+Nutzerin\b"
+    r"|\(Nutzerin\s*[:)]",
     re.IGNORECASE,
 )
 
@@ -176,6 +205,14 @@ _STATIC_CHECKS = [
              '"seit <Datum>" — Git-Historie trägt das schon (Ausnahme: echtes Datenfeld, kein Changelog-Hinweis)'),
             (re.compile(rf"(?<!-)\b[Ss]ince\s+{_DATE_ANY_RE}\b"),
              '"since <Datum>" — Git-Historie trägt das schon (Ausnahme: echtes Datenfeld, kein Changelog-Hinweis)'),
+        ],
+    },
+    {
+        "category": "Persönlicher Vermerk",
+        "patterns": [
+            (_PERSONAL_NOTE_RE,
+             'Vermerk, was die Person gesagt oder gewollt hat (→ sachlich begründen, die '
+             "Vorgeschichte gehört in die Commit-Historie)"),
         ],
     },
     {
@@ -226,7 +263,7 @@ _STATIC_CHECKS = [
 # Datei), keine echten Verstöße.
 _SELF_EXCLUDE = {
     "check_no_dates.py", "CONTRIBUTING.md", "CONTRIBUTING_DE.md",
-    "check_no_dates.md",
+    "check_no_dates.md", "test_check_no_dates.py",
 }
 
 _SKIP_DIRS = {
@@ -237,6 +274,10 @@ _SKIP_DIRS = {
 _SKIP_PATH_PREFIXES: tuple[str, ...] = ()
 
 _DEFAULT_EXTENSIONS = (".py", ".md")
+
+# Umbruch mitten im Vermerk: "... gefixt\n# 02.11.2026 (...)".
+_WRAPPED_STATUS_RE = re.compile(rf"\b(?:{_status_alt})\b\s*$", re.IGNORECASE)
+_WRAPPED_DATE_RE = re.compile(rf"(?:#\s*)?\(?{_DATE_ANY_RE}\b")
 
 # Dateiname mit Datum vor der Endung, z.B. "plan_x_2026-07-14.md"
 _DATED_FILENAME_RE = re.compile(r"[-_]\d{4}-\d{2}-\d{2}(?=\.[A-Za-z0-9]+$)")
@@ -280,9 +321,21 @@ def scan_file(path: Path) -> list[dict]:
     except Exception:
         return findings
 
+    previous = ""
     for lineno, line in enumerate(text.splitlines(), start=1):
         stripped = line.strip()
-        if not stripped:
+        wrapped = previous
+        previous = stripped
+        if wrapped and _WRAPPED_DATE_RE.match(stripped) and _WRAPPED_STATUS_RE.search(wrapped) \
+                and _ALLOW_MARKER not in line:
+            findings.append({
+                "file": str(path),
+                "line": lineno,
+                "category": _STATIC_CHECKS[0]["category"],
+                "label": "Statuswort am Ende der Vorzeile, Datum am Anfang dieser Zeile",
+                "text": stripped[:160],
+            })
+        if not stripped or _ALLOW_MARKER in line:
             continue
         for check in _STATIC_CHECKS:
             if check.get("exempt_citations") and _CITATION_MARKERS.search(line):

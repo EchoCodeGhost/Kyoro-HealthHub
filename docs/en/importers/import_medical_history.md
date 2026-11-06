@@ -15,7 +15,7 @@ Enables import of health data, essential for comprehensive data analysis
 
 ## Method
 
-Reads imports/manual/timeline_symptome.txt and uses a LOCAL LLM to extract dated events into imports/manual/life_events.json for user review and import. IMPORTANT: This script processes sensitive personal health data. It will refuse to run with any external/cloud LLM provider. Only local providers are permitted: openvino, ovms, ollama, lmstudio.
+Reads imports/manual/timeline_symptome.txt and uses a LOCAL LLM to extract dated events into imports/manual/life_events.json for user review and import. IMPORTANT: This script processes sensitive personal health data. It will refuse to run with any external/cloud LLM provider — for provider "multi" it checks the actually-routed backend (modules.llm.resolve_local_backend), not just the top-level string. Only local providers are permitted: openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx.
 
 ## Data flow
 

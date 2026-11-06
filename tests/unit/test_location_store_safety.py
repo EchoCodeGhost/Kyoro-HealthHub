@@ -91,15 +91,15 @@ class TestTokenSalt:
 class TestRegion:
     def test_inside_germany(self):
         from modules.location_store import region_of
-        assert region_of(48.12345, 11.54321) == "Bayern"
+        assert region_of(48.12345, 11.54321) == "DE-BY"
 
     def test_outside_germany(self):
         from modules.location_store import region_of
-        assert region_of(28.12345, -14.12345) in ("Ausland", "Abroad")
+        assert region_of(28.12345, -14.12345) == "XX"
 
     def test_invalid(self):
         from modules.location_store import region_of
-        assert region_of(None, None) in ("Unbekannt", "Unknown")
+        assert region_of(None, None) == "XX"
 
 
 class TestRecordSchemaAndDuplicates:
@@ -124,6 +124,20 @@ class TestRecordSchemaAndDuplicates:
                        "2026-01-01", person="PER-00000000")
         n = sqlite3.connect(path).execute("SELECT COUNT(*) FROM location_registry").fetchone()[0]
         assert n == 1
+
+    def test_same_original_hash_is_not_inserted_twice(self, tmp_path, monkeypatch):
+        _setup(tmp_path, monkeypatch)
+        path, opener = _loc_db(tmp_path)
+        from modules.location_store import record
+        with patch("modules.location_store.open_location_db", opener):
+            for original in ("a" * 64, "a" * 64, "b" * 64):
+                assert record("import_skin", ".jpg", 48.123456, 11.543210,
+                              "2026-01-01T10:00:00+00:00", "2026-01-01",
+                              original_sha256=original, stored_sha256="c" * 64,
+                              source_file="imports/x/a.jpg", person="PER-00000000")
+        hashes = [r[0] for r in sqlite3.connect(path).execute(
+            "SELECT original_sha256 FROM location_registry ORDER BY id")]
+        assert hashes == ["a" * 64, "b" * 64]
 
     def test_policy_none_writes_nothing(self, tmp_path, monkeypatch):
         _setup(tmp_path, monkeypatch)

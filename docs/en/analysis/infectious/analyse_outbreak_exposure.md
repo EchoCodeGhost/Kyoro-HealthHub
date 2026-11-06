@@ -36,7 +36,7 @@ Basis: projektintern, keine epidemiologische Validierung.
 
 ## Limitations
 
-Heuristic method: Coordinate matching uses Haversine formula; outbreak data must be manually maintained in outbreak_events; no substitute for serological confirmation; results to be interpreted as hypothesis generation only; incubation buffer (60 days) covers most diseases but is not calibrated per pathogen. Home-residence score is a separate, unvalidated heuristic (share of outbreak duration falling within the residence period), not directly comparable to the trip score.
+Heuristic method: Coordinate matching uses Haversine formula; outbreak data must be manually maintained in outbreak_events; no substitute for serological confirmation; results to be interpreted as hypothesis generation only; incubation buffer (60 days) covers most diseases but is not calibrated per pathogen. Home-residence score is a separate, unvalidated heuristic (share of outbreak duration falling within the residence period), not directly comparable to the trip score. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 
 ## References
 

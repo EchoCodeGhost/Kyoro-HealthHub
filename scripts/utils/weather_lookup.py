@@ -7,8 +7,8 @@ Wetter-Lookup for beliebige Zeitpunkte and Koordinaten.
 @tier        infrastructure
 @purpose.de  Ermöglicht Wetterdaten-Abfragen für beliebige Zeitpunkte und Koordinaten
 @purpose.en  Enables weather data queries for arbitrary timestamps and coordinates
-@method.de   Strategie: Innerhalb HOME_RADIUS_M → lokale Wetterstation; außerhalb → Open-Meteo Archive API mit Caching in weather_remote
-@method.en   Strategy: Within HOME_RADIUS_M → local weather station; outside → Open-Meteo Archive API with caching in weather_remote
+@method.de   Strategie: Innerhalb HOME_RADIUS_M → lokale Wetterstation; außerhalb → Open-Meteo Archive API mit Caching in weather_remote. Koordinaten für externe APIs nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km).
+@method.en   Strategy: Within HOME_RADIUS_M → local weather station; outside → Open-Meteo Archive API with caching in weather_remote. Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km).
 @limits.de   Genauigkeit abhängig von Open-Meteo-Daten und lokaler Station
 
 @relevance.de  Ermöglicht die Suche und Referenzierung von Daten, essentiell für die Datenintegration
@@ -47,6 +47,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
+from modules.location_store import for_external_api
 
 _cfg          = _Cfg()
 HOME_LAT      = _cfg.home_lat or 0.0
@@ -85,11 +86,6 @@ def _setup_remote_table(conn: sqlite3.Connection):
         )
     """)
     conn.commit()
-
-
-def _round_coords(lat, lon):
-    from utils.anonymize import round_coords
-    return round_coords(lat, lon)
 
 
 def _get_home_weather(conn: sqlite3.Connection, dt: datetime) -> dict | None:
@@ -169,7 +165,7 @@ def _get_remote_weather(conn: sqlite3.Connection, dt: datetime,
                         lat: float, lon: float) -> dict | None:
     """Open-Meteo: erst Cache prüfen, then API."""
     _setup_remote_table(conn)
-    rlat, rlon = _round_coords(lat, lon)
+    rlat, rlon = for_external_api(lat, lon)
     hour_ts = dt.replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00:00+00:00")
 
     # Cache prüfen

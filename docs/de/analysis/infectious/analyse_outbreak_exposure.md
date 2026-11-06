@@ -36,7 +36,7 @@ Basis: projektintern, keine epidemiologische Validierung.
 
 ## Grenzen
 
-Heuristische Methode: Koordinaten-Matching via Haversine; Ausbruchsdaten müssen manuell in outbreak_events gepflegt werden; kein Serologienachweis ersetzbar; Ergebnisse nur als Hypothesengeneration zu verstehen; Inkubationspuffer (60 Tage) deckt die meisten Erkrankungen ab, ist aber nicht krankheitsspezifisch kalibriert. Wohnsitz-Score ist eine eigene, unvalidierte Heuristik (Anteil der Ausbruchsdauer, der in die Wohnsitzzeit fällt), nicht direkt mit dem Reise-Score vergleichbar.
+Heuristische Methode: Koordinaten-Matching via Haversine; Ausbruchsdaten müssen manuell in outbreak_events gepflegt werden; kein Serologienachweis ersetzbar; Ergebnisse nur als Hypothesengeneration zu verstehen; Inkubationspuffer (60 Tage) deckt die meisten Erkrankungen ab, ist aber nicht krankheitsspezifisch kalibriert. Wohnsitz-Score ist eine eigene, unvalidierte Heuristik (Anteil der Ausbruchsdauer, der in die Wohnsitzzeit fällt), nicht direkt mit dem Reise-Score vergleichbar. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 
 ## Referenzen
 

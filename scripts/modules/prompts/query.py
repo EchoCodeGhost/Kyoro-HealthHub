@@ -128,7 +128,6 @@ weather_remote: ts, lat, lon, temp_c, precip_mm, windspeed_kmh, pressure_hpa, so
 air_quality: date, pm25_mean, pm10_mean, no2_mean, o3_mean, aqi_eu_mean, source
 pollen: date, birch, alder, grass, mugwort, ragweed, source
 home_environment: date, entity_id, sensor_type, mean_value, min_value, max_value, unit, source
-location_history: datetime, date, hour, state, lat, lon, city, person, source
 devices: device_id, brand, model, sensor_type, person  -- Geräte-Stammdaten
 persons: person_id, display_name, timezone, active
 

@@ -112,22 +112,16 @@ def resolve_timezone(conn: sqlite3.Connection, person: str,
     """Return IANA timezone for person at optional timestamp ts.
 
     Lookup order:
-    1. location_stays: stay covering ts (if ts given) → travel-aware timezone
+    1. location.db::location_stays: stay covering ts (if ts given) → travel-aware timezone
     2. persons table: home timezone
     3. default (if None: cfg.home_timezone, fallback UTC)
     """
     if ts:
-        try:
-            row = conn.execute("""
-                SELECT timezone FROM location_stays
-                WHERE person=? AND timezone IS NOT NULL
-                  AND start_ts <= ? AND (end_ts IS NULL OR end_ts >= ?)
-                ORDER BY start_ts DESC LIMIT 1
-            """, (person, ts, ts)).fetchone()
-            if row and row[0]:
-                return row[0]
-        except DB_OPERATIONAL_ERRORS:
-            pass
+        # Aufenthalte liegen in location.db (eigene Verbindung, s. stay_timezone)
+        from modules.location_store import stay_timezone
+        tz = stay_timezone(person, ts)
+        if tz:
+            return tz
 
     try:
         row = conn.execute(

@@ -421,7 +421,7 @@ def _load_name_lists() -> dict:
     # Fallback to built-in lists if file is missing or invalid
     return {
         "common_first_names": [
-            'Erika', 'Michael', 'Erika', 'Alexander', 'Thomas', 'Andreas',
+            'Michael', 'Alexander', 'Thomas', 'Andreas',
             'Stefan', 'Christian', 'Daniel', 'Markus', 'Jan', 'Peter',
             'Anna', 'Julia', 'Lisa', 'Sarah', 'Laura', 'Maria', 'Sophie',
             'Hanna', 'Emma', 'Lea', 'Mia', 'Lena', 'Hannah', 'Johanna'
@@ -670,14 +670,23 @@ def check_anonymization_compliance(db_conn_or_path: sqlite3.Connection | str | P
         
         # 2. Check GPS precision (more than 5 decimal places indicates high precision)
         # Count lat/lon values with more than 5 decimal places
-        issues['high_precision_gps'] = con.execute(
-            """
-            SELECT COUNT(*) FROM session_tracks 
-            WHERE lat IS NOT NULL 
-            AND (LENGTH(CAST(lat AS TEXT)) - INSTR(CAST(lat AS TEXT), '.') > 6
-                 OR LENGTH(CAST(lon AS TEXT)) - INSTR(CAST(lon AS TEXT), '.') > 6)
-            """
-        ).fetchone()[0]
+        # Tracks liegen in location.db (eigene Verbindung)
+        try:
+            from modules.db import open_location_db
+            loc_con = open_location_db()
+            try:
+                issues['high_precision_gps'] = loc_con.execute(
+                    """
+                    SELECT COUNT(*) FROM session_tracks
+                    WHERE lat IS NOT NULL
+                    AND (LENGTH(CAST(lat AS TEXT)) - INSTR(CAST(lat AS TEXT), '.') > 6
+                         OR LENGTH(CAST(lon AS TEXT)) - INSTR(CAST(lon AS TEXT), '.') > 6)
+                    """
+                ).fetchone()[0]
+            finally:
+                loc_con.close()
+        except sqlite3.Error:
+            issues['high_precision_gps'] = 0
         
         # 3. Check for unpseudonymized devices (no SN- prefix in serial)
         issues['unpseudonymized_devices'] = con.execute(

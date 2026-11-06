@@ -133,7 +133,7 @@ def load_data(conn, d_from, d_to):
 
 # Aktivitätsproxy aus Schritten, wenn keine MET-Minuten-Daten vorliegen (Polar-
 # exklusive Metrik). Formel war im Docstring (@scoring) dokumentiert, aber
-# nirgends implementiert — das Kriterium fiel in dieser DB (kein Polar-Gerät)
+# nirgends implementiert — das Kriterium fiel ohne Polar-Gerät
 # deshalb durchgehend auf "keine Aktivität" zurück, obwohl taeglich
 # Schrittdaten vorlagen. STEPS_PROXY_BASELINE ist die Schwelle "leichte
 # Alltagsaktivität" als Nullpunkt (WHO-nah, heuristisch, nicht kalibriert).
@@ -179,9 +179,8 @@ def build_report(rows, stress, pem, symptome, d_from, d_to, met_bl=None):
     def avg(lst): return round(sum(lst) / len(lst), 1) if lst else None
 
     # Aktivitätslast je Tag: MET-Minuten (Polar), sonst Steps-Proxy (s. @scoring
-    # im Docstring). met_minutes ist eine Polar-exklusive Metrik und in dieser DB
-    # komplett leer (kein Polar-Gerät im Einsatz), waehrend Schrittdaten
-    # durchgehend vorliegen. "Tage mit Aktivität" wertete vorher ausschliesslich
+    # im Docstring). met_minutes ist eine Polar-exklusive Metrik und ohne Polar-Gerät
+    # komplett leer, waehrend Schrittdaten meist vorliegen. "Tage mit Aktivität" wertete vorher ausschliesslich
     # r[2] (met_minutes) aus und war damit strukturell immer 0 — der Bericht
     # meldete "0 Aktivitätstage", obwohl taeglich Schrittdaten vorlagen. Faellt
     # jetzt geraete-/metrikagnostisch auf den Steps-Proxy zurueck.
@@ -347,7 +346,7 @@ def _plot(rows, stress, pem, d_from, d_to):
             spine.set_edgecolor("#444")
 
     # Aktivitätslast: MET-Minuten, sonst Steps-Proxy (s. build_report) — met_minutes
-    # ist in dieser DB durchgehend leer (kein Polar-Gerät), das Panel blieb vorher
+    # ist ohne Polar-Gerät leer, das Panel blieb vorher
     # deshalb immer leer, obwohl Schrittdaten vorlagen.
     use_met = any(r[2] for r in rows)
     dts, loads = [], []

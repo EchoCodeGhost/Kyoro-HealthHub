@@ -196,7 +196,7 @@ def test_location_db_path_from_config(tmp_path, monkeypatch):
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_template_importers_exist_as_files(tmp_path, monkeypatch):
     """Every importer key in location_privacy.example.json (not starting with _ and not fetch_daily)
-    corresponds to an existing scripts/importers/<name>.py file."""
+    corresponds to an existing scripts/importers/<name>.py or scripts/utils/<name>.py file."""
     import json
     
     # Load the template
@@ -212,13 +212,13 @@ def test_template_importers_exist_as_files(tmp_path, monkeypatch):
         if not name.startswith("_") and name != "fetch_daily"
     ]
     
-    # Check that each importer has a corresponding .py file
-    importers_dir = repo_root / "scripts" / "importers"
-    
+    # Check that each importer has a corresponding .py file: importers live in
+    # scripts/importers/, a few writers (e.g. track_location) in scripts/utils/
+    search_dirs = [repo_root / "scripts" / "importers", repo_root / "scripts" / "utils"]
+
     missing_files = []
     for name in importer_names:
-        expected_file = importers_dir / f"{name}.py"
-        if not expected_file.exists():
+        if not any((d / f"{name}.py").exists() for d in search_dirs):
             missing_files.append(name)
     
     assert missing_files == [], f"Missing importer files: {missing_files}"

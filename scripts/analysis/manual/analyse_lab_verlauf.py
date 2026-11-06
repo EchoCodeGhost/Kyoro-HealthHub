@@ -7,18 +7,30 @@ analyse_lab_verlauf.py — Zeitlicher Verlauf aller Laborwerte als Tabelle + Plo
 @tier        heuristic
 @purpose.de  Erstellt eine Verlaufstabelle aller Laborwerte aus lab_manual:
              Zeilen = Parameter (nach Kategorie gruppiert), Spalten = Messdaten.
-             Auffällige Werte (↑ / ↓) werden markiert.
+             Auffällige Werte (↑ / ↓) werden markiert. Auswahl per Datumsbereich
+             (--from/--to) und/oder einzelnen Parametern (--parameter, wiederholbar)
+             möglich, zusätzlich zur bestehenden Kategorie-Filterung.
 @purpose.en  Creates a longitudinal table of all lab values from lab_manual:
              rows = parameters (grouped by category), columns = measurement dates.
-             Out-of-range values (↑ / ↓) are flagged.
+             Out-of-range values (↑ / ↓) are flagged. Selectable by date range
+             (--from/--to) and/or individual parameters (--parameter, repeatable),
+             in addition to the existing category filter.
 @method.de   Liest lab_manual aus medicine.db, pivotiert nach (kategorie, parameter) × datum,
-             gibt je Kategorie eine Tabelle aus und erzeugt optional Plots.
+             gibt je Kategorie eine Tabelle aus und erzeugt optional Plots. Schreibt
+             zusätzlich zur Markdown-Tabelle immer eine echte .ods-Datei (via odfpy,
+             bereits Projekt-Dependency) — EIN großes Tabellenblatt, alle Parameter als
+             Zeilen, alle Messdaten als Spalten (dd-mm-yyyy), Kategorie/Einheit/Referenz
+             als eigene Spalten zum Filtern/Sortieren in Calc selbst.
              Qualitative Werte (neg/pos) werden als Text dargestellt, nicht geplottet.
 @method.en   Reads lab_manual from medicine.db, pivots by (kategorie, parameter) × date,
-             prints one table per category, optionally generates plots.
+             prints one table per category, optionally generates plots. In addition to
+             the Markdown table, always writes a real .ods file (via odfpy, already a
+             project dependency) — ONE sheet, all parameters as rows, all measurement
+             dates as columns (dd-mm-yyyy), category/unit/reference as their own
+             columns for filtering/sorting within Calc itself.
              Qualitative values (neg/pos) are shown as text, not plotted.
 @reads       medicine.db (lab_manual)
-@writes      Analyseergebnisse als Markdown (analyses/manual/), optional PNG
+@writes      Analyseergebnisse als Markdown + .ods (analyses/manual/), optional PNG
 @limits.de   Referenzwerte kommen direkt aus der DB (per Import gesetzt) und können
              zwischen Laboren variieren. Qualitative Parameter werden nicht geplottet.
 
@@ -36,6 +48,8 @@ analyse_lab_verlauf.py — Zeitlicher Verlauf aller Laborwerte als Tabelle + Plo
     python3 scripts/analysis/manual/analyse_lab_verlauf.py --plot
     python3 scripts/analysis/manual/analyse_lab_verlauf.py --kategorie Blutbild
     python3 scripts/analysis/manual/analyse_lab_verlauf.py --from 2024-01-01 --plot
+    python3 scripts/analysis/manual/analyse_lab_verlauf.py --from 2020-01-01 --to 2026-12-31
+    python3 scripts/analysis/manual/analyse_lab_verlauf.py --parameter TSH --parameter CRP --from 2020-01-01 --to 2026-12-31
     python3 scripts/analysis/manual/analyse_lab_verlauf.py --no-llm
     python3 scripts/analysis/manual/analyse_lab_verlauf.py --exclude-source import_urine_strip
 """
@@ -76,8 +90,8 @@ _CATEGORY_ORDER = [
 
 # ── Daten laden ───────────────────────────────────────────────────────────────
 
-def _load(date_from: date, kategorie_filter: str | None,
-          exclude_sources: list[str]) -> list[tuple]:
+def _load(date_from: date, date_to: date | None, kategorie_filter: str | None,
+          parameter_filter: list[str] | None, exclude_sources: list[str]) -> list[tuple]:
     """Gibt [(date, kategorie, parameter, wert, wert_num, einheit, ref_min, ref_max, status)] zurück."""
     conn   = open_lab_db()
     query  = """
@@ -88,9 +102,18 @@ def _load(date_from: date, kategorie_filter: str | None,
     """
     params: list = [OWN_PERSON_ID, date_from.isoformat()]
 
+    if date_to:
+        query += " AND date <= ?"
+        params.append(date_to.isoformat())
+
     if kategorie_filter:
         query += " AND kategorie=?"
         params.append(kategorie_filter)
+
+    if parameter_filter:
+        placeholders = ",".join("?" * len(parameter_filter))
+        query += f" AND LOWER(parameter) IN ({placeholders})"
+        params.extend(p.lower() for p in parameter_filter)
 
     if exclude_sources:
         placeholders = ",".join("?" * len(exclude_sources))
@@ -209,6 +232,83 @@ def _render_category(kat: str, kat_data: dict, dates: list[str],
         lines.append(row)
 
     return lines
+
+
+# ── LibreOffice-Calc-Export (.ods) ──────────────────────────────────────────
+
+def _fmt_date_ddmmyyyy(iso_date: str) -> str:
+    y, m, d = iso_date.split("-")
+    return f"{d}-{m}-{y}"
+
+
+def _write_ods(data: dict, dates: list[str], units: dict, refs: dict, out_path: Path) -> None:
+    """EIN großes Tabellenblatt: Zeilen = alle Parameter (über alle Kategorien
+    hinweg), Spalten = alle Messdaten (dd-mm-yyyy). Kategorie/Einheit/Referenz
+    stehen als eigene Spalten dabei, damit man in Calc selbst filtern/sortieren
+    kann, statt Kategorien auf separate Tabs zu verteilen."""
+    from odf.opendocument import OpenDocumentSpreadsheet
+    from odf.table import Table, TableRow, TableCell
+    from odf.text import P
+
+    def text_cell(value: str) -> TableCell:
+        cell = TableCell(valuetype="string")
+        cell.addElement(P(text=value))
+        return cell
+
+    def value_cell(wert: str, wert_num, status: str) -> TableCell:
+        flag = _flag(status, wert, wert_num)
+        if wert_num is not None:
+            cell = TableCell(valuetype="float", value=wert_num)
+            cell.addElement(P(text=f"{wert_num:g}{flag}"))
+        else:
+            cell = TableCell(valuetype="string")
+            cell.addElement(P(text=f"{wert}{flag}"))
+        return cell
+
+    doc = OpenDocumentSpreadsheet()
+    all_kats = set(data.keys())
+    ordered  = [k for k in _CATEGORY_ORDER if k in all_kats]
+    ordered += sorted(all_kats - set(_CATEGORY_ORDER))
+
+    table = Table(name=t("Laborverlauf", "Lab History")[:31])
+
+    header = TableRow()
+    for label in (t("Parameter", "Parameter"), t("Kategorie", "Category"),
+                  t("Einheit", "Unit"), t("Referenz", "Reference")):
+        header.addElement(text_cell(label))
+    for d in dates:
+        header.addElement(text_cell(_fmt_date_ddmmyyyy(d)))
+    table.addElement(header)
+
+    for kat in ordered:
+        kat_data = data[kat]
+        for param in sorted(kat_data.keys()):
+            param_data = kat_data[param]
+            einheit    = units.get((param, kat), "")
+            ref        = refs.get((param, kat), (None, None))
+            ref_str    = ""
+            if ref[0] is not None and ref[1] is not None:
+                ref_str = f"{ref[0]}–{ref[1]}"
+            elif ref[0] is not None:
+                ref_str = f"≥{ref[0]}"
+            elif ref[1] is not None:
+                ref_str = f"≤{ref[1]}"
+
+            row = TableRow()
+            row.addElement(text_cell(param))
+            row.addElement(text_cell(kat))
+            row.addElement(text_cell(einheit))
+            row.addElement(text_cell(ref_str))
+            for d in dates:
+                if d in param_data:
+                    wert, wert_num, status = param_data[d]
+                    row.addElement(value_cell(wert, wert_num, status))
+                else:
+                    row.addElement(text_cell(""))
+            table.addElement(row)
+
+    doc.spreadsheet.addElement(table)
+    doc.save(str(out_path))
 
 
 def _render(data: dict, dates: list[str], units: dict, refs: dict, lang: str) -> str:
@@ -390,11 +490,19 @@ def main() -> None:
                       "Longitudinal lab value table from all lab_manual entries")
     )
     ap.add_argument("--from", dest="date_from", default=None,
-                    help=t("Daten ab Datum (YYYY-MM-DD), Standard: alle",
-                           "Data from date (YYYY-MM-DD), default: all"))
+                    help=t("Daten ab Datum (YYYY-MM-DD), Standard: Geburtsdatum aus Config",
+                           "Data from date (YYYY-MM-DD), default: birthdate from config"))
+    ap.add_argument("--to", dest="date_to", default=None,
+                    help=t("Daten bis Datum (YYYY-MM-DD), Standard: alle",
+                           "Data up to date (YYYY-MM-DD), default: all"))
     ap.add_argument("--kategorie", default=None,
                     help=t("Nur diese Kategorie anzeigen (z. B. Blutbild)",
                            "Show only this category (e.g. Blutbild)"))
+    ap.add_argument("--parameter", metavar="NAME", action="append", default=None,
+                    help=t("Nur diesen Parameter anzeigen (wiederholbar, z. B. --parameter TSH --parameter CRP; "
+                           "Groß-/Kleinschreibung egal)",
+                           "Show only this parameter (repeatable, e.g. --parameter TSH --parameter CRP; "
+                           "case-insensitive)"))
     ap.add_argument("--plot", action="store_true",
                     help=t("Plots pro Kategorie erzeugen", "Generate plots per category"))
     ap.add_argument("--no-llm", action="store_true",
@@ -408,12 +516,22 @@ def main() -> None:
     apply_lang_from_args(args)
     lang = getattr(args, "lang", "de")
 
-    date_from = (date.fromisoformat(args.date_from) if args.date_from
-                 else date(1970, 1, 1))
+    if args.date_from:
+        date_from = date.fromisoformat(args.date_from)
+    elif cfg.birthdate:
+        date_from = date.fromisoformat(cfg.birthdate)
+    else:
+        date_from = date(1900, 1, 1)  # Fallback nur falls Geburtsdatum nicht konfiguriert ist
+    date_to = date.fromisoformat(args.date_to) if args.date_to else None
 
-    rows = _load(date_from, args.kategorie, args.exclude_sources)
+    rows = _load(date_from, date_to, args.kategorie, args.parameter, args.exclude_sources)
     if not rows:
-        msg_filter = f" (Kategorie: {args.kategorie})" if args.kategorie else ""
+        filters = []
+        if args.kategorie:
+            filters.append(f"Kategorie: {args.kategorie}")
+        if args.parameter:
+            filters.append(f"Parameter: {', '.join(args.parameter)}")
+        msg_filter = f" ({'; '.join(filters)})" if filters else ""
         print(t(f"Keine Laborwerte in medicine.db gefunden{msg_filter}.",
                 f"No lab values found in medicine.db{msg_filter}."))
         sys.exit(0)
@@ -449,6 +567,10 @@ def main() -> None:
 
     out_path.write_text(full, encoding="utf-8")
     print(t(f"\n→ Bericht: {out_path}", f"\n→ Report: {out_path}"))
+
+    ods_path = out_path.with_suffix(".ods")
+    _write_ods(data, dates, units, refs, ods_path)
+    print(t(f"→ LibreOffice-Calc-Tabelle: {ods_path}", f"→ LibreOffice Calc table: {ods_path}"))
 
 
 if __name__ == "__main__":

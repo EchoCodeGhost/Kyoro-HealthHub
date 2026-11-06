@@ -66,7 +66,7 @@ def _scrub_embedded_images(pdf: "pikepdf.Pdf") -> tuple[int, list[dict]]:
 
     Gibt (Anzahl gescrubbter Bilder, Liste von {"date","gps"}-Funden vor dem
     Stripping) zurück — GPS/Datum werden vorher aus dem EXIF gelesen, damit
-    Aufrufer sie (gerundet) in photo_locations speichern können.
+    Aufrufer sie über das Ortsregister (location_store) speichern können.
     """
     scrubbed = 0
     locations: list[dict] = []

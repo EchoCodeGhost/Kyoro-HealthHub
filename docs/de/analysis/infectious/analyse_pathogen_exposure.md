@@ -15,7 +15,7 @@ Unterstützt die infektionsbezogene Datenanalyse und Entscheidungsfindung durch 
 
 ## Methode
 
-Geo-Matching (ISO-Land, Koordinaten-Radius, Region-Text) kombiniert mit zeitlichem Überlapp-Score; Aggregation über alle verfügbaren Aufenthaltsquellen (JSON, DB, Google Takeout, GPX).
+Geo-Matching (ISO-Land, Koordinaten-Radius, Region-Text) kombiniert mit zeitlichem Überlapp-Score; Aggregation über alle verfügbaren Aufenthaltsquellen (JSON, DB, Google Takeout, GPX). Koordinaten für externe APIs nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km).
 
 ## Berechnung
 
@@ -35,7 +35,7 @@ Basis: projektintern, keine epidemiologische Validierung.
 
 ## Grenzen
 
-Heuristische Methode: Heuristisches Geo- und Zeitfenster-Matching ohne epidemiologische Validierung; Schweregewichte (1.0/0.6/0.25) und Score-Formel projektintern; Ausbruchsdaten müssen manuell gepflegt werden; Klimazonen-Risikomodell vereinfacht (Gradbreitenklassen); Ergebnisse nur zur Hypothesengeneration für Arztgespräch (kein Serologieersatz).
+Heuristische Methode: Heuristisches Geo- und Zeitfenster-Matching ohne epidemiologische Validierung; Schweregewichte (1.0/0.6/0.25) und Score-Formel projektintern; Ausbruchsdaten müssen manuell gepflegt werden; Klimazonen-Risikomodell vereinfacht (Gradbreitenklassen); Ergebnisse nur zur Hypothesengeneration für Arztgespräch (kein Serologieersatz). Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 
 ## Referenzen
 

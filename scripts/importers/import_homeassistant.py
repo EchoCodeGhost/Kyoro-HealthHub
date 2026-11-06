@@ -49,7 +49,7 @@ from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, load as _load_cfg, KYORO_CONFIG_DIR
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.secure_io import write_private_text
 from modules.location_store import for_external_api
@@ -1089,9 +1089,10 @@ def import_reise_weather(conn: sqlite3.Connection,
     # Häufigste Nicht-Zuhause-Position aus location_history pro day
     location_history_coords: dict[str, tuple[float, float, str]] = {}
     try:
+        attach_location_db(conn)
         for row in conn.execute("""
             SELECT date, lat, lon, city, COUNT(*) n
-            FROM location_history
+            FROM loc.location_history
             WHERE state != 'home'
             GROUP BY date, ROUND(lat,2), ROUND(lon,2)
             ORDER BY date, n DESC"""):

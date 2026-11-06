@@ -117,7 +117,9 @@ def test_location_columns_replaced_with_region(mock_location_privacy_config):
         assert "id" in row
     
     # Region sollte berechnet sein
-    assert result_rows[0]["region"] in ["Bayern", "Unbekannt", "Unknown", "Abroad"]
+    assert result_rows[0]["region"] == "DE-BY"
+    assert result_rows[0]["region_name"] in ("Bayern", "Bavaria")
+    assert result_rows[1]["region"] == "DE-BY"
     
     assert removed_count == 4  # 2 Zeilen × 2 Spalten
 
@@ -260,8 +262,9 @@ def test_region_uses_matching_pairs(mock_location_privacy_config):
     result_rows, removed_count = _redact_location_columns(rows, "test_region_profile")
 
     row = result_rows[0]
-    assert row["start_region"] == "Bayern"
-    assert row["end_region"] in ("Ausland", "Abroad")
+    assert row["start_region"] == "DE-BY"
+    assert row["start_region_name"] in ("Bayern", "Bavaria")
+    assert row["end_region"] == "XX"
     assert "orphan_region" not in row and "region" not in row
     assert not any(k.endswith(("_lat", "_lon")) for k in row)
     assert removed_count == 5

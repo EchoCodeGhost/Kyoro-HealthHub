@@ -24,7 +24,7 @@ Downloads two TSV files from GitHub: the nationwide aggregated curve (small, ~10
 
 ## Limitations
 
-Per-site file is ~50 MB (nationwide), downloaded in full and filtered locally — no server-side federal-state filtering available. No medical interpretation of viral-load values.
+Per-site file is ~50 MB (nationwide), downloaded in full and filtered locally — no server-side federal-state filtering available. No medical interpretation of viral-load values. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
 
 ## References
 

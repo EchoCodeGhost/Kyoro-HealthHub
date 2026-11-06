@@ -109,7 +109,7 @@ def parse_ecg_csv(path: Path) -> tuple[dict, list[float]] | None:
             if key in ("Name", "Geburtstag", "Birthday", "Date of Birth"):
                 pass
             elif key in ("Aufzeichnungsdatum", "Recording Date"):
-                # "2025-09-22 19:12:10 +0200" → UTC → "2025-09-22T17:12:10"
+                # "2000-07-02 19:12:10 +0200" → UTC → "2000-07-02T17:12:10"
                 try:
                     parsed = datetime.strptime(val_raw.strip(), "%Y-%m-%d %H:%M:%S %z")
                     meta["datetime"] = parsed.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")

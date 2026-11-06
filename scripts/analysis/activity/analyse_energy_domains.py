@@ -110,7 +110,7 @@ def _load_energy(conn, person: str, date_from: str, date_to: str) -> list[dict]:
 def _load_hrv(conn, person: str, date_from: str, date_to: str) -> dict[str, float]:
     """date → avg rmssd.
 
-    ppi_hrv_advanced (RR-Intervall-basierte DFA/HRV-Analyse) ist in dieser DB fast
+    ppi_hrv_advanced (RR-Intervall-basierte DFA/HRV-Analyse) ist oft fast
     durchgehend leer — sie braucht Rohdaten aus speziellen Brustgurt-Sessions, die
     selten sind. Als "HRV-Tage" fuer die Kopfzeile war das faelschlich die einzige
     Quelle, wodurch der Bericht z.B. "0 HRV-Tage" meldete, obwohl umfangreiche
@@ -132,7 +132,7 @@ def _n_in_basis(series: dict, basis_dates: set) -> int:
     """Anzahl Tage aus `series`, die auch in der Basis (daily_energy_summary-Tage)
     liegen. HRV-/PEM-Abfragen laufen unabhaengig ueber denselben Kalenderzeitraum,
     decken aber andere (teils mehr) Tage ab als daily_energy_summary — pem_evidence_scores
-    etwa deckt in dieser DB einen deutlich laengeren Zeitraum ab als
+    etwa kann einen deutlich laengeren Zeitraum abdecken als
     daily_energy_summary. Ohne Schnittmenge stand in der Kopfzeile z.B. "365
     PEM-Tage" neben "366 Tage" Basis, obwohl die Mengen nicht ineinander
     verschachtelt sind — das las sich wie ein Teilmengenverhaeltnis, das es nicht
