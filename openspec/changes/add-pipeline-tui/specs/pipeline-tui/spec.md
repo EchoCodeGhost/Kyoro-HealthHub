@@ -235,8 +235,16 @@ The dashboard SHALL show last-run status per stage, a hint when compute is older
 - **THEN** the dashboard says that analyses may be outdated or empty and offers the compute action
 
 #### Scenario: Sanitising is not an import
-- **WHEN** the newest `import_log` rows are `post_import_*` entries
+- **WHEN** the newest `import_log` rows are `post_import_*` or `compute_*` entries
 - **THEN** they are ignored when determining the latest import
+
+#### Scenario: Import without new data
+- **WHEN** the latest import inserted no rows
+- **THEN** it does not make compute look outdated
+
+#### Scenario: Single compute script
+- **WHEN** one compute script ran after the latest import and the others did not
+- **THEN** the dashboard still says that compute is outdated
 
 #### Scenario: Different timestamp formats
 - **WHEN** `import_log` and `compute_log` store timestamps in different formats

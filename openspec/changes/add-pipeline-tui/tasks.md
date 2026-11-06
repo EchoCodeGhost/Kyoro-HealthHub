@@ -25,8 +25,8 @@
 - [x] 2.4 Implement `runner.py`: piped mode with `stdin=DEVNULL`, `PYTHONUNBUFFERED=1` and `MPLBACKEND=Agg`, `KYORO_LANG` passthrough, own session, SIGTERM then SIGKILL on cancel, single-job lock
 - [x] 2.5 Implement interactive mode through `App.suspend()`, and service mode outside the job lock
 - [x] 2.6 Tests with real subprocesses: output arrives before exit, cancel ends the child of an orchestrator, `input()` in piped mode fails visibly, shell characters stay literal
-- [ ] 2.7 Add a read-only opener to `modules/db.py` that installs no triggers, and implement `status.py` on it with `PRAGMA query_only=ON`, reading all three log tables; test locked, missing and undecryptable databases and missing log tables
-- [ ] 2.8 Tests for `status.py`: timestamps in both formats compare correctly as UTC, `post_import_*` rows are ignored, on-demand rows do not make compute or analysis look current
+- [x] 2.7 Add a read-only opener to `modules/db.py` that installs no triggers, and implement `status.py` on it with `PRAGMA query_only=ON`, reading all three log tables; test locked, missing and undecryptable databases and missing log tables
+- [x] 2.8 Tests for `status.py`: timestamps in both formats compare correctly as UTC, `post_import_*` rows are ignored, on-demand rows do not make compute or analysis look current
 - [ ] 2.9 Implement the job log widget with a line limit and ANSI handling, the field-driven flag form, and the start dialog naming script, arguments and whether it writes
 - [ ] 2.10 Show elapsed time in the job view during every run, and offer the per-script output files after an `analyse_all.py` run, read-only
 
@@ -58,7 +58,7 @@
 - [ ] 5.6 Export screen: profiles read at runtime, including `aliases`; time range, person, format, output directory
 - [ ] 5.7 Dashboard: last-run status, stale hint, skipped scripts from `REQUIRES_INFECTION_DATE`
 - [ ] 5.8 Resolve the open question on empty-inbox behaviour of `process_inbox --import`, then implement the daily workflow with one question at its start, including remote AI consent, mandatory preview and pause on failure
-- [ ] 5.9 Implement the person selection from the databases through the read-only opener, with display names from `identity_resolver`, hidden with one person, and nothing stored; test one and several persons
+- [ ] 5.9 Show the person selection from `status.read_person_choices()` in the forms, loaded in a background worker, hidden with one person, and nothing stored; pilot test with one and several persons
 - [ ] 5.10 Pilot tests per screen: expected argument list per action, start dialog before every job and once per sequence, no process after cancelling it, disabled states, keyboard-only navigation, quit confirmation with a running job
 - [ ] 5.11 Results browser: scripts from `ANALYSE_SCRIPTS`, runs newest first, Markdown reports, output files including old `.log` files, plots through `xdg-open` or `open` with the path as fallback, the no-report state, and the output locations of on-demand scripts
 
