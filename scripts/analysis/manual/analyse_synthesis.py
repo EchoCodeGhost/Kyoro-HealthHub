@@ -1485,17 +1485,14 @@ def run(since: date, top_lines: int, bottom_lines: int,
     prompt = _build_prompt(reports, since, lang)
 
     if dry_run:
-        print(t("\n=== DRY RUN — Prompt (gekürzt) ===\n",
-                "\n=== DRY RUN — Prompt (truncated) ===\n"))
-        print(prompt[:3000])
+        print(t("\n=== DRY RUN — kein LLM-Aufruf, Prompt-Inhalt wird nicht angezeigt ===",
+                "\n=== DRY RUN — no LLM call, prompt content is not shown ==="))
         if _scrub_enabled():
             _, d_addr, d_names, d_ids, d_locs = _scrub_for_cloud(prompt)
             print(t(f"\n[Bereinigung vor dem Senden: {d_addr} Adresse(n), {d_names} Name(n), "
                     f"{d_ids} Telefon-/Versichertennr., {d_locs} Ort(e)/Koordinaten würden entfernt]",
                     f"\n[Scrubbing before sending: {d_addr} address(es), {d_names} name(s), "
                     f"{d_ids} phone/insurance number(s), {d_locs} place(s)/coordinate(s) would be removed]"))
-        print(t(f"\n[… {max(0, len(prompt)-3000)} weitere Zeichen …]",
-                f"\n[… {max(0, len(prompt)-3000)} more characters …]"))
         print(t(f"\nPrompt gesamt: {len(prompt):,} Zeichen | {len(reports)} Analysen",
                 f"\nTotal prompt: {len(prompt):,} chars | {len(reports)} analyses"))
         return
@@ -1600,7 +1597,8 @@ def main() -> None:
                     help=t("Zeilen vom Berichtsende (0 = vollständig, kein Beschnitt)",
                            "Lines from report end (0 = full report, no truncation)"))
     ap.add_argument("--dry-run", action="store_true",
-                    help=t("Prompt anzeigen, kein LLM-Aufruf", "Show prompt, no LLM call"))
+                    help=t("Prompt-Umfang und Bereinigung zählen, kein LLM-Aufruf",
+                           "Count prompt size and scrubbing, no LLM call"))
     ap.add_argument("--no-panel", action="store_true",
                     help=t("Panel-Modus deaktivieren, auch wenn konfiguriert",
                            "Disable panel mode even if configured"))

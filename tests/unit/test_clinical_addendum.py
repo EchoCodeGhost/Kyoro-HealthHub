@@ -16,6 +16,8 @@ written (and thus mtime-stamped) a few minutes later.
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
 import analysis.manual.analyse_clinical_addendum as addendum
@@ -74,6 +76,22 @@ def test_raises_when_no_canonical_report_exists(tmp_path, monkeypatch):
     (tmp_path / "synthesis_20260816_1350_patientenversion.md").write_text(
         "only a derived file", encoding="utf-8")
 
-    import pytest
     with pytest.raises(FileNotFoundError):
         addendum._find_latest_synthesis()
+
+
+def test_dry_run_prints_size_but_no_prompt_content(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(addendum, "SYNTHESIS_DIR", tmp_path)
+    report = tmp_path / "synthesis_20260816_1350.md"
+    report.write_text("technical report", encoding="utf-8")
+    prompt = "MARKER-PROMPT-CONTENT " * 10
+    monkeypatch.setattr(addendum, "_load_observations", lambda: {"item": "synthetic"})
+    monkeypatch.setattr(addendum, "_format_observations", lambda obs, lang: "synthetic")
+    monkeypatch.setattr(addendum, "_build_prompt", lambda *a: prompt)
+    monkeypatch.setattr(addendum, "_call_llm", lambda *a: pytest.fail("LLM called in dry run"))
+
+    addendum.run(report, "en", dry_run=True)
+
+    out = capsys.readouterr().out
+    assert "MARKER-PROMPT-CONTENT" not in out
+    assert f"{len(prompt):,}" in out
