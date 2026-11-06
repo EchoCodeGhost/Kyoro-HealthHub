@@ -22,9 +22,9 @@
 - [ ] 2.1 Add `textual` with a major-version bound to `requirements.txt`
 - [ ] 2.2 Create `scripts/kyoro_tui.py` with the bilingual install hint when `textual` is missing, and a test for it
 - [ ] 2.3 Create `scripts/tui/` with SPDX headers and structured docstrings accepted by `check_docstrings.py`
-- [ ] 2.4 Implement `runner.py`: piped mode with `stdin=DEVNULL`, `PYTHONUNBUFFERED=1` and `MPLBACKEND=Agg`, `KYORO_LANG` passthrough, own session, SIGTERM then SIGKILL on cancel, single-job lock
-- [ ] 2.5 Implement interactive mode through `App.suspend()`, and service mode outside the job lock
-- [ ] 2.6 Tests with real subprocesses: output arrives before exit, cancel ends the child of an orchestrator, `input()` in piped mode fails visibly, shell characters stay literal
+- [x] 2.4 Implement `runner.py`: piped mode with `stdin=DEVNULL`, `PYTHONUNBUFFERED=1` and `MPLBACKEND=Agg`, `KYORO_LANG` passthrough, own session, SIGTERM then SIGKILL on cancel, single-job lock
+- [x] 2.5 Implement interactive mode through `App.suspend()`, and service mode outside the job lock
+- [x] 2.6 Tests with real subprocesses: output arrives before exit, cancel ends the child of an orchestrator, `input()` in piped mode fails visibly, shell characters stay literal
 - [ ] 2.7 Add a read-only opener to `modules/db.py` that installs no triggers, and implement `status.py` on it with `PRAGMA query_only=ON`, reading all three log tables; test locked, missing and undecryptable databases and missing log tables
 - [ ] 2.8 Tests for `status.py`: timestamps in both formats compare correctly as UTC, `post_import_*` rows are ignored, on-demand rows do not make compute or analysis look current
 - [ ] 2.9 Implement the job log widget with a line limit and ANSI handling, the field-driven flag form, and the confirmation dialog
@@ -32,7 +32,7 @@
 
 ## 3. Manifest and drift checks
 
-- [ ] 3.1 Implement `ScriptEntry`, the field types and `EXCLUDED` in `manifests.py`
+- [x] 3.1 Implement `ScriptEntry`, the field types and `EXCLUDED` in `manifests.py`
 - [ ] 3.2 Read each script's argparse and add entries for all manual importers, including those also run automatically (lab results, HRV logger, ECG logger, Kubios, manual genetics, Aniva)
 - [ ] 3.3 Add entries for the 5 on-demand compute scripts and the 11 on-demand analysis scripts
 - [ ] 3.4 Add the utility entries from design decision 11, confirming the correct mode from each script's source; give `EXCLUDED` a reason per entry

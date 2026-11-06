@@ -99,11 +99,14 @@ A test module enforces:
 - **Live output has three granularities.** Directly run scripts stream line by line. `import_all.py` and `compute_all.py` show a child's output when that child ends. `analyse_all.py` shows only progress, so the job view offers the per-script output file afterwards, read-only. The job view always shows elapsed time, so a long step does not look hung. Streaming inside `run_pipeline_script()` is out of scope, because its stderr handling and import-log compliance check depend on the captured result.
 - **Plots:** piped jobs run with `MPLBACKEND=Agg`, as `analyse_all.py` does for its children, so no plot window opens and nothing fails over SSH.
 
+- **Waiting for a job:** the runner waits for the process to exit, not for `Process.wait()`, which also waits for the pipes to close and would hang on a grandchild holding them open. After a short drain period, remaining output of such a grandchild is read and discarded, so it cannot block on a full pipe.
+- **Service output** is always read, for the same reason.
+
 *Alternative:* a pseudo-terminal widget for interactive scripts. Rejected as far more code than `App.suspend()`, which exists in the current Textual release.
 
 ### 5. Safety is an allowlist
 
-Only flags declared in a manifest can be passed, so blocked flags cannot be reached from the UI. The blocked set covers privacy-weakening or secret-exposing options (`--no-scrub`, `--host`, `--writable`, `--api-key`, `--show-mappings`, `--fix` on check scripts, `--no-backup`, `--accept-terms`) and is asserted by test.
+Only flags declared in a manifest can be passed, so blocked flags cannot be reached from the UI. The blocked set covers privacy-weakening or secret-exposing options (`--no-scrub`, `--host`, `--writable`, `--api-key`, `--show-mappings`, `--fix` on check scripts, `--no-backup`, `--accept-terms`), plus `--yes` and `--no-confirm`, which would bypass a script's prompts. An entry declaring such a flag cannot be created, and this is asserted by test.
 
 Out of the TUI entirely, listed in `EXCLUDED`: `decrypt_db`, `scrub_*`, `migrate_*`, `pseudonymize_*`, `reduce_gps_precision`, `create_*_schema`, `apply_icd_corrections`, `promote_anamnese_findings`, plus `calibration/`, `medical/` and `cluster/`.
 
