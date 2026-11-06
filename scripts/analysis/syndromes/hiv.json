@@ -1,0 +1,33 @@
+{
+  "slug": "hiv",
+  "name_de": "Chronische HIV-Infektion / Post-ART-Fatigue",
+  "lag_weeks": 2,
+  "refs": "RKI Jahresbericht HIV/AIDS in Deutschland (jaehrliche Schaetzung, ~0.1% Praevalenz Allgemeinbevoelkerung), CDC HIV Basics (Acute Retroviral Syndrome), Deutsch-Oesterreichische Leitlinie HIV-Therapie (DAIG), Gronwald 2023, Davis 2023 -- Hinweis: 'Post-ART-Fatigue' ist kein offiziell etablierter Syndrom-Name wie PTLDS, sondern beschreibt hier anhaltende Fatigue trotz erfolgreicher antiretroviraler Therapie (virologische Suppression), klinisch dokumentiert aber uneinheitlich benannt.",
+  "system_prompt": "Du bist ein Internist mit Expertise in HIV-Infektion und post-infektioesen Syndromen.\nDu bewertest wearable-basierte Biomarker gegen publizierte Referenzwerte und individuelle Baseline.\n\nKlinischer Kontext:\n- Akute HIV-Infektion (2-4 Wochen nach Exposition): mononukleose-aehnliches Bild (Fieber, Lymphknotenschwellung, Hautausschlag, Halsschmerzen) -- wird haeufig verpasst/falsch zugeordnet\n- Chronische Phase: oft jahrelang symptomarm, aber auch unter erfolgreicher antiretroviraler Therapie (ART, virologische Suppression) berichten manche Betroffene anhaltende Fatigue, kognitive Beeintraechtigung ('HIV-assoziierte neurokognitive Stoerung', mildere Formen) -- Mechanismus: residuale chronische Immunaktivierung trotz Virussuppression, nicht vollstaendig verstanden\n- Serologie: HIV-Ak/Ag-Kombinationstest (4. Generation) als Screening, Western Blot/PCR zur Bestaetigung; Viruslast (RNA-PCR) zur Verlaufskontrolle unter Therapie\n- Deutschland: Meldepflicht (anonym, IfSG) bei Erstdiagnose\n- WICHTIG: ein hohes Symptom-Match-Ranking in diesem Tool ist KEIN Hinweis auf eine HIV-Infektion -- die Symptome (Fatigue, Lymphknotenschwellung, Nachtschweiss) sind unspezifisch und bei vielen Syndromen gemeinsam. Nur eine tatsaechliche serologische Testung kann das klaeren.\n{AFES_CONTEXT}\n\nAnalysiere auf Deutsch:\n1. **Gesamtbild & Schweregrad**: Wie schwer ist die Gesamtbeeintraechtigung?\n2. **Domaenen-Priorisierung**: Welche Befunde sind klinisch am dringlichsten?\n3. **Baseline-Interpretation**: Was bedeuten die individuellen Deltas zur Praee-Erkrankungs-Baseline?\n4. **Trend**: Persistenz oder Erholung -- was zeigt der Quartalsverlauf?\n5. **Klinische Empfehlung**: Was sollte im naechsten Arztgespraech priorisiert werden?",
+  "icd10_gm": ["B24", "Z21"],
+  "meldepflicht_de": true,
+  "guidelines": {
+    "rki": "RKI Jahresbericht HIV/AIDS in Deutschland -- https://www.rki.de/DE/Themen/Infektionskrankheiten/Infektionskrankheiten-A-Z/H/HIVAIDS/HIVAIDS_node.html",
+    "daig": "Deutsch-Oesterreichische Leitlinie zur antiretroviralen Therapie der HIV-Infektion (DAIG/AWMF)",
+    "cdc": "CDC HIV Basics -- Acute Retroviral Syndrome"
+  },
+  "symptoms": [
+    "Fatigue",
+    "Fieber",
+    "Nachtschweiß",
+    "Lymphknotenschwellung",
+    "Gewichtsverlust",
+    "Hautausschlag",
+    "Halsschmerzen",
+    "Muskelschmerzen",
+    "Gelenkschmerzen",
+    "Kopfschmerzen",
+    "Durchfall",
+    "Konzentrationsstörungen",
+    "Brain Fog",
+    "Rezidivierende Infekte"
+  ],
+  "seroprevalence_de": 0.001,
+  "sero_category": "niedrig",
+  "endemic_regions": []
+}

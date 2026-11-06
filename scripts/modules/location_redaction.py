@@ -78,8 +78,8 @@ _COORDS = {
         r"(?:\s*[,;/]?\s*\d{1,3}\s*°\s*\d{1,2}\s*['′’]\s*(?:\d{1,2}(?:[.,]\d+)?\s*[\"″”]\s*)?[EWOewo])?"
     ),
     "labelled": (
-        r"(?<![\w])(?:GPS|Koordinaten|Lat(?:itude)?|Lon(?:gitude)?|Lng|Breitengrad|Längengrad)"
-        r"[ \t]*[:=]?[ \t]*-?\d{1,3}[.,]\d+(?:[ \t]*[,;/][ \t]*-?\d{1,3}[.,]\d+)?"
+        r"(?<![\w])(?i:GPS|Koordinaten|Lat(?:itude)?|Lon(?:gitude)?|Lng|Breitengrad|Längengrad)"
+        r"[\"']?[ \t]*[:=]?[ \t]*-?\d{1,3}[.,]\d+(?:[ \t]*[,;/][ \t]*-?\d{1,3}[.,]\d+)?"
     ),
 }
 _COORD_RX = [re.compile(v) for v in _COORDS.values()]

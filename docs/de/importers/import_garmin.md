@@ -20,7 +20,7 @@ Liest Garmin-Daten aus den von garmin_download.py erstellten Dateien. Schlaf →
 ## Datenfluss
 
 - **Liest:** `Garmin-Exportdateien`, `(JSON/CSV)`
-- **Schreibt:** `health.db (sessions, session_metrics, measurements)`
+- **Schreibt:** `health.db (sessions, session_metrics, measurements), location.db (session_tracks)`
 
 ## Grenzen
 

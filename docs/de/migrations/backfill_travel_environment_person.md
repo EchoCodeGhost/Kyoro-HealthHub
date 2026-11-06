@@ -7,7 +7,7 @@
 
 ## Zweck
 
-Setzt historische Zeilen in pollen, biometeo und air_quality, die noch den Schema-Default person='unknown' tragen, rückwirkend auf die echte Personen-Pseudonym-ID — auf ausdrücklichen Wunsch der Nutzerin, nach Abwägung gegen die generelle Ausschlussregel für 'unknown' in pseudonymize_device_person_identifiers.py (s. @limits).
+Setzt historische Zeilen in pollen, biometeo und air_quality, die noch den Schema-Default person='unknown' tragen, rückwirkend auf die echte Personen-Pseudonym-ID — nach Abwägung gegen die generelle Ausschlussregel für 'unknown' in pseudonymize_device_person_identifiers.py (s. @limits).
 
 ## Relevanz
 
@@ -24,7 +24,7 @@ import_airquality.py (der alleinige Schreiber dieser drei Tabellen) defaultet pe
 
 ## Grenzen
 
-Weicht bewusst von der generellen Regel in pseudonymize_device_person_identifiers.py ab, die 'unknown' NICHT pseudonymisiert (dortige Begründung: 'unknown' bedeutet "keine Person erfasst", nicht "eine bestimmte Person" — eine Umwandlung würde einen fehlenden Wert als echte Identität ausgeben). Für DIESE drei Tabellen ist die Lage anders: es gab in diesem Projekt bisher ausschließlich Daten einer einzigen Person, und die betroffenen Zeilen stammen nachweislich aus Aufenthalten/Abrufen für die Nutzerin selbst (nicht aus einer geteilten oder unbekannten Quelle) — deshalb hier auf ausdrücklichen Wunsch rückwirkend korrigiert. Diese Ausnahme gilt NUR für diese drei Tabellen, nicht generell für 'unknown' im Projekt. Einmalig gedacht; sicher wiederholt ausführbar (kein Effekt mehr, sobald keine 'unknown'-Zeilen mehr existieren).
+Weicht bewusst von der generellen Regel in pseudonymize_device_person_identifiers.py ab, die 'unknown' NICHT pseudonymisiert (dortige Begründung: 'unknown' bedeutet "keine Person erfasst", nicht "eine bestimmte Person" — eine Umwandlung würde einen fehlenden Wert als echte Identität ausgeben). Für DIESE drei Tabellen ist die Lage anders: es gab in diesem Projekt bisher ausschließlich Daten einer einzigen Person, und die betroffenen Zeilen stammen nachweislich aus Aufenthalten/Abrufen für die Person selbst (nicht aus einer geteilten oder unbekannten Quelle) — deshalb hier rückwirkend korrigiert. Diese Ausnahme gilt NUR für diese drei Tabellen, nicht generell für 'unknown' im Projekt. Einmalig gedacht; sicher wiederholt ausführbar (kein Effekt mehr, sobald keine 'unknown'-Zeilen mehr existieren).
 
 ## Aufruf
 

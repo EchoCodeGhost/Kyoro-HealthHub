@@ -15,16 +15,16 @@ Wesentlich für die Speicherung von GPS-Daten in einer separaten Datenbank
 
 ## Methode
 
-Erstellt die Tabellen location_registry und location_tokens (falls benötigt). Nutzt CREATE TABLE IF NOT EXISTS.
+Erstellt die Tabelle location_registry und die Ortsdaten-Tabellen session_tracks, location_history, location_stays und location_stays_geocoded mit CREATE TABLE IF NOT EXISTS. Eine Tabelle ohne region-Spalte (früheres Schema) wird einmalig neu aufgebaut (lat/lon nullbar, region aus den gespeicherten Koordinaten).
 
 ## Datenfluss
 
 - **Liest:** `location.db`, `(wenn`, `existiert`, `zum`, `Prüfen)`
-- **Schreibt:** `location.db (neue Tabellen)`
+- **Schreibt:** `location.db (Tabellen, Indizes; einmaliger Umbau location_registry)`
 
 ## Grenzen
 
-Keine Datenmigration — nur Schema-Erstellung
+Beim Umbau wird die Region aus bereits gerundeten Koordinaten bestimmt; an Grenzen kann sie von der Region des Originalpunkts abweichen.
 
 ## Aufruf
 

@@ -15,7 +15,7 @@ Kernmodul für Ortsdaten-Privatsphäre, essentiell für alle Importer
 
 ## Methode
 
-resolve_policy liefert die geltende Policy für einen Importer/Dateityp. record speichert einen Ort im Registry (mit Precision-Anwendung und Zonen). region_of liefert das Bundesland/Land für Koordinaten. location_token generiert deterministische Tokens für Zellen. for_prompt und filter_prompt_text setzen die Outbound-Regeln durch.
+resolve_policy liefert die geltende Policy für einen Importer/Dateityp. record speichert einen Ort im Registry (mit Precision-Anwendung und Zonen). region_of liefert den ISO-3166-Code der Region (weltweit, offline). location_token generiert deterministische Tokens für Zellen. for_prompt und filter_prompt_text setzen die Outbound-Regeln durch.
 
 ## Datenfluss
 

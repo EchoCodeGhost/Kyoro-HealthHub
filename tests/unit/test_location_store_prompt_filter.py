@@ -214,10 +214,10 @@ class TestForExternalApi:
     """Tests für for_external_api()."""
 
     @pytest.mark.filterwarnings("ignore::UserWarning")
-    def test_uses_default_precision_2(self, tmp_path, monkeypatch):
-        """Standard-Präzision ist 2."""
+    def test_uses_default_precision_1(self, tmp_path, monkeypatch):
+        """Standard-Präzision ist 1 (~11 km)."""
         config_dir = _create_test_config(tmp_path)
-        _create_test_location_privacy(tmp_path, {})
+        _create_test_location_privacy(tmp_path, {"external_api": {}})
         
         monkeypatch.setattr("health_config.KYORO_CONFIG_DIR", config_dir)
         
@@ -227,8 +227,53 @@ class TestForExternalApi:
         
         lat, lon = for_external_api(48.123456, 11.543210)
         
-        assert lat == 48.12
-        assert lon == 11.54
+        assert lat == 48.1
+        assert lon == 11.5
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_place_lookup_uses_place_precision_2(self, tmp_path, monkeypatch):
+        """Ortsnamen-Abfragen nutzen standardmäßig 2 Stellen."""
+        config_dir = _create_test_config(tmp_path)
+        _create_test_location_privacy(tmp_path, {"external_api": {}})
+
+        monkeypatch.setattr("health_config.KYORO_CONFIG_DIR", config_dir)
+
+        from modules.location_store import for_external_api
+        from health_config import load
+        load.cache_clear()
+
+        assert for_external_api(48.123456, 11.543210, place=True) == (48.12, 11.54)
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_missing_policy_file_uses_1(self, tmp_path, monkeypatch):
+        """Ohne location_privacy.json gilt 1 Stelle."""
+        config_dir = _create_test_config(tmp_path)
+        (config_dir / "location_privacy.json").unlink(missing_ok=True)
+
+        monkeypatch.setattr("health_config.KYORO_CONFIG_DIR", config_dir)
+
+        from modules.location_store import for_external_api
+        from health_config import load
+        load.cache_clear()
+
+        assert for_external_api(48.123456, 11.543210) == (48.1, 11.5)
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_configured_place_precision(self, tmp_path, monkeypatch):
+        """place_precision aus der Datei gilt nur für place=True."""
+        config_dir = _create_test_config(tmp_path)
+        _create_test_location_privacy(tmp_path, {
+            "external_api": {"precision": 0, "place_precision": 1}
+        })
+
+        monkeypatch.setattr("health_config.KYORO_CONFIG_DIR", config_dir)
+
+        from modules.location_store import for_external_api
+        from health_config import load
+        load.cache_clear()
+
+        assert for_external_api(48.123456, 11.543210) == (48.0, 12.0)
+        assert for_external_api(48.123456, 11.543210, place=True) == (48.1, 11.5)
 
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_uses_configured_precision(self, tmp_path, monkeypatch):

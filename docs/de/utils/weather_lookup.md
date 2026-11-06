@@ -15,7 +15,7 @@ Ermöglicht die Suche und Referenzierung von Daten, essentiell für die Datenint
 
 ## Methode
 
-Strategie: Innerhalb HOME_RADIUS_M → lokale Wetterstation; außerhalb → Open-Meteo Archive API mit Caching in weather_remote
+Strategie: Innerhalb HOME_RADIUS_M → lokale Wetterstation; außerhalb → Open-Meteo Archive API mit Caching in weather_remote. Koordinaten für externe APIs nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km).
 
 ## Datenfluss
 

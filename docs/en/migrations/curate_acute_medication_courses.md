@@ -15,12 +15,12 @@ Provides health data functions, essential for medical data processing
 
 ## Method
 
-Plain ``UPDATE`` statements against ``ACUTE_COURSES`` (list of (drug_name, date) pairs); sets is_chronic=0 only for exactly matching (person, drug_name, date) rows. No DDL.
+Plain ``UPDATE`` statements for ``clinical.acute_medication_courses`` from local config; sets is_chronic=0 only for exactly matching (person, drug_name, date) rows. No DDL.
 
 ## Data flow
 
-- **Reads:** `medications`, `(drug_name`, `date`, `person)`
-- **Writes:** `medications (UPDATE is_chronic=0 for entries in ACUTE_COURSES)`
+- **Reads:** `health_config.json`, `(clinical.acute_medication_courses)`, `medications`, `(drug_name`, `date`, `person)`
+- **Writes:** `medications (UPDATE is_chronic=0 for configured entries)`
 
 ## Limitations
 

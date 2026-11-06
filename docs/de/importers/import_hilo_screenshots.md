@@ -24,7 +24,7 @@ Einmalimport der Hilo-App-Blutdruckdaten aus manuell abgelesenen Screenshots. Ze
 
 ## Grenzen
 
-Einmaliger Import. Zeitraum bereits abgeschlossen. Nutzerin verwendete im Importzeitraum sowohl das manschettenlose Hilo Band als auch die Hilo-Manschette parallel; die Screenshots erlauben keine verlaessliche Zuordnung pro Messung zu einem der beiden Geraete, daher device_id="hilo_unspecified" statt einer fälschlich spezifischen Zuordnung (frueher irrtuemlich "omron_bp").
+Einmaliger Import. Zeitraum bereits abgeschlossen. Im Importzeitraum liefen das manschettenlose Hilo Band und die Hilo-Manschette parallel; die Screenshots erlauben keine verlaessliche Zuordnung pro Messung zu einem der beiden Geraete, daher device_id="hilo_unspecified" statt einer fälschlich spezifischen Zuordnung (frueher irrtuemlich "omron_bp").
 
 ## Aufruf
 

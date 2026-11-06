@@ -18,9 +18,18 @@ def _isolated(monkeypatch, tmp_path):
     "48.13514, 11.58198", "N 48.13514 E 11.58198", "N 48.1351 E 11.5820",
     "48.1351° N, 11.5820° E", "48°08'06\"N 11°34'55\"E", "GPS: 48.1351, 11.5820",
     "Koordinaten 48,1351 / 11,5820", "-33.86882, 151.20929", "Lat 48.13514",
+    "lat 48.13514", "LATITUDE=48.13514", "gps: 48.1351, 11.5820",
 ])
 def test_coordinates_are_redacted(text):
     assert lr.redact_locations(text) == lr.COORD_PLACEHOLDER
+
+
+@pytest.mark.parametrize("text", [
+    "lat 48.13512, lon 11.58204", '"lat": 48.13512, "lng": 11.58204',
+])
+def test_separately_labelled_coordinates_are_redacted(text):
+    redacted = lr.redact_locations(text)
+    assert "48.13512" not in redacted and "11.58204" not in redacted
 
 
 @pytest.mark.parametrize("text", [

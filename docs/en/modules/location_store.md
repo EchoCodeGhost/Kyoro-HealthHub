@@ -15,7 +15,7 @@ Core module for location privacy, essential for all importers
 
 ## Method
 
-resolve_policy returns the applicable policy for an importer/file type. record stores a location in the registry (applying precision and zones). region_of returns the federal state/country for coordinates. location_token generates deterministic tokens for cells. for_prompt and filter_prompt_text enforce the outbound rules.
+resolve_policy returns the applicable policy for an importer/file type. record stores a location in the registry (applying precision and zones). region_of returns the ISO 3166 region code (worldwide, offline). location_token generates deterministic tokens for cells. for_prompt and filter_prompt_text enforce the outbound rules.
 
 ## Data flow
 

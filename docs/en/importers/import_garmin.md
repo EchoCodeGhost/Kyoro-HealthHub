@@ -20,7 +20,7 @@ Reads Garmin data from files created by garmin_download.py. Sleep → sessions +
 ## Data flow
 
 - **Reads:** `Garmin-Exportdateien`, `(JSON/CSV)`
-- **Writes:** `health.db (sessions, session_metrics, measurements)`
+- **Writes:** `health.db (sessions, session_metrics, measurements), location.db (session_tracks)`
 
 ## Limitations
 

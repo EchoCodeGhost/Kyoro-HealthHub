@@ -2,21 +2,23 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Kyoro-HealthHub contributors
 """
-import_tracks.py — GPX → session_tracks (+ neue Sessions falls kein Match)
+import_tracks.py — GPX → location.db::session_tracks (+ neue Sessions falls kein Match)
 
 @tier        infrastructure
-@purpose.de  Importiert GPX-Track-Daten in die session_tracks Tabelle und erstellt bei Bedarf neue Sessions
-@purpose.en  Imports GPX track data into session_tracks table and creates new sessions if no match found
+@purpose.de  Importiert GPX-Track-Daten in location.db::session_tracks und erstellt bei Bedarf neue Sessions in health.db
+@purpose.en  Imports GPX track data into location.db::session_tracks and creates new sessions in health.db if no match found
 @method.de   Verarbeitet GPX-Dateien aus verschiedenen Quellen (Garmin GPSMAP, Polar Flow, Apple Health, Garmin InReach).
              Jede GPX-Datei wird einem bestehenden Training-Session ueber Zeitueberlappung (±30 min) zugeordnet.
              Falls kein Match: neue Session wird mit ID Format gpx_YYYY-MM-DD_stem angelegt.
-             Track-Punkte werden bei >3000 Punkten downgesampelt. Koordinaten werden anonymisiert (round_coords).
+             Track-Punkte werden bei >3000 Punkten downgesampelt. Genauigkeit und Privatsphäre-Zonen
+             wendet location_store.store_track_points() nach location_privacy.json an.
 @method.en   Processes GPX files from various sources (Garmin GPSMAP, Polar Flow, Apple Health, Garmin InReach).
              Each GPX file is matched to an existing training session via time overlap (±30 min).
              If no match: new session is created with ID format gpx_YYYY-MM-DD_stem.
-             Track points are downsampled when exceeding 3000 points. Coordinates are anonymized (round_coords).
+             Track points are downsampled when exceeding 3000 points. Precision and privacy zones are
+             applied by location_store.store_track_points() per location_privacy.json.
 @reads       GPX-Dateien aus garmin_gpsmap, polar_gpx, apple_health_export/workout-routes, garmin_gdpr/INREACH Verzeichnissen
-@writes      sessions, session_tracks, import_log
+@writes      health.db: sessions, import_log; location.db: session_tracks
 @limits.de   Abhaengig von GPX-Datei Struktur. Zeit-Matching funktioniert nur bei korrekter Timezone.
              Downsampling kann Details verlieren.
              run()/import_tracks_dir() reichten person schon vorher korrekt durch
@@ -45,10 +47,10 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import ImportResult, tz_from_coords, log_import
-from utils.anonymize import round_coords
+from modules.location_store import store_track_points
 
 _cfg = _Cfg()
 
@@ -242,22 +244,14 @@ def import_tracks_dir(conn: sqlite3.Connection, gpx_dir: Path,
         sid, is_new = _ensure_session(conn, gpx_path, points, name, creator, person)
 
         pts = _downsample(points, MAX_TRACK_PTS)
-        rows = [
-            (sid,
-             p['ts'].strftime('%Y-%m-%dT%H:%M:%S+00:00'),
-             round_coords(p['lat'], p['lon'], precision=5)[0] if p['lat'] is not None and p['lon'] is not None else None,
-             round_coords(p['lat'], p['lon'], precision=5)[1] if p['lat'] is not None and p['lon'] is not None else None,
-             p['ele'], None)
-            for p in pts
-        ]
-        conn.executemany(
-            "INSERT OR IGNORE INTO session_tracks "
-            "(session_id, ts, lat, lon, elevation_m, speed_ms) "
-            "VALUES (?,?,?,?,?,?)",
-            rows
+        # Policy, Rundung und Privatsphäre-Zonen übernimmt location_store
+        stored = store_track_points(
+            "import_tracks", sid,
+            ((p['ts'].strftime('%Y-%m-%dT%H:%M:%S+00:00'), p['lat'], p['lon'], p['ele'], None)
+             for p in pts),
+            file_type=".gpx",
         )
-        conn.commit()
-        result.rows_inserted += len(rows)
+        result.rows_inserted += stored
         if is_new:
             result.rows_skipped += 0  # new sessions counted in inserted tracks
 
@@ -326,8 +320,9 @@ def main() -> None:
             result.rows_inserted += r.rows_inserted
 
     # Stats
+    attach_location_db(conn)
     r = conn.execute(
-        "SELECT COUNT(DISTINCT session_id), COUNT(*) FROM session_tracks"
+        "SELECT COUNT(DISTINCT session_id), COUNT(*) FROM loc.session_tracks"
     ).fetchone()
     print(t(f"\n  session_tracks: {r[1]:,} Punkte in {r[0]} Sessions",
             f"\n  session_tracks: {r[1]:,} points in {r[0]} sessions"))

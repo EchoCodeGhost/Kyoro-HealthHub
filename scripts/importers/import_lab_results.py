@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Kyoro-HealthHub contributors
 """
-Laborbefunde PDF → Review-CSV oder health.db
+Laborbefunde PDF → Review-CSV oder medicine.db (lab_manual)
 
 @tier        infrastructure
 @purpose.de  Importiert Laborbefunde aus PDF-Dateien
@@ -15,7 +15,13 @@ Laborbefunde PDF → Review-CSV oder health.db
              3. python medical_query.py labor
                 to liest alle CSVs direkt, keine DB noetig
              4. python import_lab_results.py --db datei.pdf
-                to Speichert die Daten direkt in der DB
+                to Speichert die Daten direkt in medicine.db (Tabelle
+                lab_manual, dieselbe Tabelle wie andere Laborwert-Importer —
+                frueher eine eigene lab_results-Tabelle in health.db, das
+                widersprach der DB-Aufteilungsregel und wurde korrigiert).
+                --dry-run zeigt vor dem echten Import, welche
+                (Datum, Parameter, Labor, Person)-Kombinationen schon
+                existieren, ohne etwas zu schreiben.
 @method.en   Workflow:
              1. python import_lab_results.py file.pdf
                 to Kyoro-HealthHub/Laborbefunde/YYYY-MM-DD_lab_ocr.csv
@@ -24,19 +30,57 @@ Laborbefunde PDF → Review-CSV oder health.db
              3. python medical_query.py labor
                 to reads all CSVs directly, no DB needed
              4. python import_lab_results.py --db file.pdf
-                to saves data directly in the database
-@reads       PDF-Dateien (Laborbefunde)
-@writes      CSV-Dateien oder lab_results in health.db
-@limits.de   OCR kann ungenau sein. Manuelle Korrektur erforderlich.
+                to saves data directly into medicine.db (lab_manual table,
+                the same table other lab-value importers already use —
+                previously its own lab_results table in health.db, which
+                violated the DB-split convention and was corrected).
+                --dry-run reports which (date, parameter,
+                labor, person) combinations already exist before any real
+                import, without writing anything.
+@reads       lab_manual (medicine.db) — nur für --dry-run und Duplikat-Check via INSERT OR IGNORE
+@writes      CSV-Dateien oder lab_manual in medicine.db
+@limits.de   OCR kann ungenau sein. Manuelle Korrektur erforderlich. Der
+             Duplikat-Schutz (UNIQUE auf Datum+Parameter+Labor+Person) greift
+             nur bei exakt gleichem Datum — ein OCR-Lesefehler im Datum bei
+             einem erneuten Scan desselben Befunds wird nicht erkannt. Der
+             VLM-Fallback (bei niedriger OCR-Qualität) läuft
+             ausschließlich mit lokalem LLM-Provider (openvino/ovms/ollama/
+             lmstudio/mlx) — bei konfiguriertem Cloud-Provider wird der
+             Fallback übersprungen, nicht etwa das Bild trotzdem gesendet.
+             Geht nicht gut mit historischen Trend-Berichten um, die mehrere
+             Datums-Spalten pro Parameter in einer Zeile haben (ein Datum
+             pro Seite wird angenommen) — dafür braucht es einen eigenen,
+             noch zu planenden Importer. Der Labor-/Praxisname (--labor
+             oder Dateiname-Fallback) wird über
+             modules/provider_scrubbing.py pseudonymisiert, aber nur wenn
+             er in der lokalen Provider-Registry steht — ein noch nicht
+             registrierter Name landet unverändert in lab_manual.labor
+             (kein Datenverlust, aber auch keine garantierte Erkennung).
+@limits.en   OCR may be inaccurate. Manual correction required. Duplicate
+             protection (UNIQUE on date+parameter+labor+person) only
+             triggers on an exact date match — an OCR misread of the date on
+             a repeat scan of the same report is not caught. The VLM
+             fallback (on low OCR quality) runs exclusively with a local LLM
+             provider (openvino/ovms/ollama/lmstudio/mlx) —
+             with a cloud provider configured, the fallback is skipped
+             rather than sending the image anyway. Does not handle
+             historical trend reports with multiple date columns per
+             parameter row well (assumes one date per page) — that needs
+             its own, not-yet-planned importer. The lab/practice name
+             (--labor or the filename fallback) is pseudonymized via
+             modules/provider_scrubbing.py, but only if it's in the local
+             provider registry — an unregistered name lands unchanged in
+             lab_manual.labor (no data loss, but no guaranteed detection
+             either).
 
 @relevance.de  Ermöglicht den Import von Laborergebnissen, essentiell für die Integration klinischer Daten
 @relevance.en  Enables import of laboratory results, essential for integration of clinical data
-@limits.en   OCR may be inaccurate. Manual correction required.
 @usage
     python import_lab_results.py datei.pdf
     python import_lab_results.py *.pdf
     python import_lab_results.py --datum YYYY-MM-DD alter_befund.pdf
     python import_lab_results.py --db datei.pdf
+    python import_lab_results.py --db --dry-run datei.pdf
 """
 
 import argparse
@@ -49,7 +93,10 @@ sys.path.insert(0, str(Path(__file__).parents[1]))
 from modules.base import log_import, resolve_person
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from health_config import Config as _Cfg
-from modules.db import open_db
+from modules.db import open_medicine_db
+from modules.llm import require_local_llm
+from modules.provider_scrubbing import scrub_provider_text
+
 try:  # Metadaten + sichtbare Adressen; Fallback: nur Metadaten
     from modules.media_redaction import scrub_pdf as _scrub_pdf_metadata
 except ImportError:  # pragma: no cover
@@ -574,62 +621,72 @@ def rows_to_csv(rows: list[dict], out_path: Path) -> None:
             f"     {len(rows)} parameters — please review, then: python medical_query.py labor"))
 
 
-def rows_to_db(rows: list[dict], conn, person: str) -> None:
-    """Schreibt OCR-Resultse in die Datenbank und ordnet sie dem Benutzer zu."""
-    
-    # Erstelle die Tabelle, falls sie nicht existiert
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS lab_results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            datum TEXT NOT NULL,
-            parameter TEXT NOT NULL,
-            kategorie TEXT,
-            wert REAL,
-            qualitativ TEXT,
-            einheit TEXT,
-            ref_min REAL,
-            ref_max REAL,
-            ref_text TEXT,
-            status TEXT,
-            hinweis TEXT,
-            labor TEXT,
-            quelle TEXT,
-            pdf_datei TEXT,
-            person TEXT NOT NULL,
-            UNIQUE(datum, parameter, person)
+def _row_to_lab_manual_tuple(r: dict, person: str) -> tuple:
+    """Mappt ein OCR/VLM-Resultat-Dict auf die Spalten der bestehenden
+    lab_manual-Tabelle (medicine.db) — dieselbe Tabelle, die auch andere
+    Laborwert-Importer nutzen, keine eigene Tabelle fuer diesen Importer."""
+    wert_str = str(r["wert"]) if r["wert"] is not None else (r["qualitativ"] or "")
+    kommentar_parts = [p for p in (r.get("hinweis"), r.get("ref_text")) if p]
+    kommentar_parts.append(f"quelle={r.get('quelle')}, pdf={r.get('pdf_datei')}")
+    kommentar = "; ".join(kommentar_parts)
+    return (
+        r["datum"], r["parameter"], r["kategorie"], wert_str, r["wert"],
+        r["einheit"], r["ref_min"], r["ref_max"], r["labor"] or "unbekannt",
+        r["status"], kommentar, person, r.get("quelle") or "pdf",
+    )
+
+
+def check_duplicates(rows: list[dict], conn, person: str) -> tuple[list[dict], list[dict]]:
+    """Prueft (date, parameter, labor, person) gegen die bestehende lab_manual-
+    Tabelle. Gibt (neu, bereits_vorhanden) zurueck — schreibt nichts."""
+    neu, vorhanden = [], []
+    for r in rows:
+        labor = r["labor"] or "unbekannt"
+        cur = conn.execute(
+            "SELECT 1 FROM lab_manual WHERE date = ? AND parameter = ? AND labor = ? AND person = ?",
+            (r["datum"], r["parameter"], labor, person),
         )
-    """)
-    
-    # Füge die Daten in die Datenbank ein
+        (vorhanden if cur.fetchone() else neu).append(r)
+    return neu, vorhanden
+
+
+def rows_to_db(rows: list[dict], conn, person: str, dry_run: bool = False) -> int:
+    """Schreibt OCR-Resultate nach medicine.db (lab_manual) — oder zeigt bei
+    dry_run=True nur, was passieren wuerde, ohne etwas zu schreiben.
+    Gibt die Anzahl tatsaechlich (bzw. im Dry-Run: hypothetisch) neu
+    eingefuegter Zeilen zurueck."""
+    neu, vorhanden = check_duplicates(rows, conn, person)
+
+    if dry_run:
+        print(t(
+            f"  [DRY-RUN] {len(neu)} neu, {len(vorhanden)} bereits in lab_manual vorhanden (werden uebersprungen)",
+            f"  [DRY-RUN] {len(neu)} new, {len(vorhanden)} already in lab_manual (would be skipped)",
+        ))
+        for r in vorhanden[:10]:
+            print(f"    = {r['datum']}  {r['parameter']}  ({r['labor'] or 'unbekannt'})")
+        if len(vorhanden) > 10:
+            print(t(f"    … und {len(vorhanden) - 10} weitere", f"    … and {len(vorhanden) - 10} more"))
+        return len(neu)
+
     for r in rows:
         conn.execute(
             """
-            INSERT OR IGNORE INTO lab_results (
-                datum, parameter, kategorie, wert, qualitativ, einheit,
-                ref_min, ref_max, ref_text, status, hinweis, labor, quelle, pdf_datei, person
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR IGNORE INTO lab_manual (
+                date, parameter, kategorie, wert, wert_num, einheit,
+                ref_min, ref_max, labor, status, kommentar, person, source
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (
-                r["datum"],
-                r["parameter"],
-                r["kategorie"],
-                r["wert"],
-                r["qualitativ"],
-                r["einheit"],
-                r["ref_min"],
-                r["ref_max"],
-                r.get("ref_text"),
-                r["status"],
-                r["hinweis"],
-                r["labor"],
-                r["quelle"],
-                r["pdf_datei"],
-                person
-            )
+            _row_to_lab_manual_tuple(r, person),
         )
-    
+
     conn.commit()
-    print(f"  → {len(rows)} Parameter in die Datenbank geschrieben")
+    print(t(
+        f"  → {len(neu)} neue Parameter in medicine.db (lab_manual) geschrieben, "
+        f"{len(vorhanden)} bereits vorhanden übersprungen",
+        f"  → {len(neu)} new parameters written to medicine.db (lab_manual), "
+        f"{len(vorhanden)} already existing skipped",
+    ))
+    return len(neu)
 
 
 
@@ -643,6 +700,14 @@ def _ocr_pdf(pdf_path: Path, datum: str | None, labor: str | None) -> list[dict]
         return []
 
     labor = labor or pdf_path.stem
+    # Bekannte Labor-/Praxisnamen aus der lokalen Registry pseudonymisieren,
+    # bevor sie in lab_manual.labor landen (siehe provider-text-scrubbing-
+    # Change). Ein noch nicht registrierter Name bleibt unverändert -- kein
+    # Datenverlust, aber auch keine Garantie, dass jeder Laborname erkannt
+    # wird (siehe provider_scrubbing.py @limits).
+    _scrub = scrub_provider_text(labor)
+    if _scrub.provider_pseudonym:
+        labor = _scrub.provider_pseudonym
     if datum is None:
         m = re.search(r'(\d{4})-(\d{2})-(\d{2})', pdf_path.name)
         if m:
@@ -669,7 +734,9 @@ def _ocr_pdf(pdf_path: Path, datum: str | None, labor: str | None) -> list[dict]
                     f"  Seite {i+1}: OCR-Qualität {score:.0%} < {vlm_threshold:.0%} — VLM-Fallback",
                     f"  Page {i+1}: OCR quality {score:.0%} < {vlm_threshold:.0%} — VLM fallback",
                 ))
-                vlm_rows = _vlm_pdf_page(page, datum, labor, pdf_path.name)
+                vlm_rows = []
+                if require_local_llm("Laborbefund-Bild (VLM-Fallback)"):
+                    vlm_rows = _vlm_pdf_page(page, datum, labor, pdf_path.name)
                 if vlm_rows:
                     rows = vlm_rows
                     print(t(f"  Seite {i+1}: {len(rows)} Parameter (VLM)",
@@ -708,13 +775,20 @@ def main():
     parser.add_argument("--labor", metavar="NAME",       help="Labor-Name")
     parser.add_argument("--vlm-threshold", metavar="0-1", type=float, default=0.5,
                         help="OCR-Qualitätsschwelle für VLM-Fallback (0=aus, 1=immer; Standard: 0.5)")
-    parser.add_argument("--db", action="store_true", help="Daten direkt in die Datenbank speichern")
+    parser.add_argument("--db", action="store_true", help="Daten direkt in medicine.db (lab_manual) speichern")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Nur mit --db: zeigt, was neu waere / schon existiert, schreibt nichts")
     parser.add_argument("--person", default=None, help="Ziel-Person (Default: OWN_PERSON_ID)")
     add_lang_arg(parser)
 
     args = parser.parse_args()
     apply_lang_from_args(args)
     person = resolve_person(args.person)
+
+    if args.dry_run and not args.db:
+        print(t("--dry-run braucht --db (sonst gibt es keine DB, gegen die geprueft werden koennte).",
+                "--dry-run requires --db (otherwise there's no DB to check against)."))
+        sys.exit(1)
 
     _ocr_pdf._vlm_threshold = args.vlm_threshold if args.vlm_threshold > 0 else None
 
@@ -724,7 +798,7 @@ def main():
     conn = None
     total_rows = 0
     if args.db:
-        conn = open_db()
+        conn = open_medicine_db()
 
     for pdf_str in args.pdfs:
         pdf_path = Path(pdf_str)
@@ -735,12 +809,14 @@ def main():
         if rows:
             datum = rows[0]["datum"]
             if args.db:
-                rows_to_db(rows, conn, person)
-                total_rows += len(rows)
-                ziel = ORIGINALE_DIR / pdf_path.name
-                _archive_original(pdf_path, ziel, person)
-                print(t(f"  → Original verschoben nach: Originale/{pdf_path.name}",
-                        f"  → Original moved to: Originale/{pdf_path.name}"))
+                print(t(f"  {pdf_path.name}:", f"  {pdf_path.name}:"))
+                n_new = rows_to_db(rows, conn, person, dry_run=args.dry_run)
+                total_rows += n_new
+                if not args.dry_run:
+                    ziel = ORIGINALE_DIR / pdf_path.name
+                    _archive_original(pdf_path, ziel, person)
+                    print(t(f"  → Original verschoben nach: Originale/{pdf_path.name}",
+                            f"  → Original moved to: Originale/{pdf_path.name}"))
             else:
                 out   = PDF_DIR / f"{datum}_lab_ocr.csv"
                 rows_to_csv(rows, out)
@@ -750,8 +826,12 @@ def main():
                         f"  → Original moved to: Originale/{pdf_path.name}"))
 
     if conn:
-        log_import(conn, "import_lab_results", ", ".join(args.pdfs), total_rows, person=person)
-        conn.commit()
+        if not args.dry_run:
+            log_import(conn, "import_lab_results", ", ".join(args.pdfs), total_rows, person=person)
+            conn.commit()
+        else:
+            print(t(f"\n[DRY-RUN] Insgesamt {total_rows} neue Parameter wuerden importiert — nichts geschrieben.",
+                    f"\n[DRY-RUN] {total_rows} new parameters would be imported in total — nothing written."))
         conn.close()
 
 

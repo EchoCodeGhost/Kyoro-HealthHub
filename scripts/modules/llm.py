@@ -99,6 +99,101 @@ def ai_label(provider_name: str | None = None) -> str:
     return t(_AI_LABEL_DE, _AI_LABEL_EN).format(model=name, ts=ts)
 
 
+# Marker routed via multi_routing to a dedicated local-only multi_backends
+# entry (see templates/health_config.example.json) — importer scripts that
+# extract sensitive free text (lab values, diagnoses, calendar text) include
+# this in their system prompt so the "multi" provider's keyword router sends
+# them to that entry instead of "default"/"medical", which may be remote.
+IMPORTER_LOCAL_TAG = "kyoro_importer_local_only"
+
+_LOCAL_PROVIDER_EXAMPLES = "openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx"
+
+
+def resolve_local_backend(backend_key: str = "importer") -> tuple[bool, str]:
+    """Checks whether the EFFECTIVE backend for sensitive importer/extraction
+    calls is local — correctly follows "multi" indirection instead of only
+    inspecting the top-level provider string (which would just say "multi"),
+    and asks the actual provider CLASS (`.is_local`) rather than maintaining
+    a separate hardcoded provider-name list that can silently drift out of
+    sync with utils/llm_provider.py (found exactly this drift while writing
+    this function: an earlier hardcoded set here was missing "llamacpp" and
+    "exo", both genuinely local).
+
+    For provider == "multi": looks up multi_backends[backend_key] (falling
+    back to multi_backends["default"] if that key isn't configured) and
+    checks THAT backend's own instantiated provider.
+
+    Returns (is_local, effective_provider_name).
+    """
+    llm_cfg = _cfg.llm_config
+    provider = (llm_cfg.get("provider") or "openvino").lower().strip()
+
+    if provider == "multi":
+        backends = llm_cfg.get("multi_backends", {})
+        sub_cfg = backends.get(backend_key) or backends.get("default") or {}
+        effective = (sub_cfg.get("provider") or "").lower().strip()
+        probe_cfg = {"llm": sub_cfg}
+    else:
+        effective = provider
+        probe_cfg = {"llm": llm_cfg}
+
+    try:
+        instance = LLMProvider.from_config(probe_cfg)
+        is_local = bool(getattr(instance, "is_local", False))
+    except Exception:
+        is_local = False
+
+    return is_local, effective
+
+
+def require_local_llm(purpose: str, backend_key: str = "importer") -> bool:
+    """Non-fatal guard for sensitive extraction calls (lab/diagnosis/
+    calendar text, scanned documents): returns True only if the effective
+    backend (following "multi" routing) is local. Prints a bilingual
+    explanation and returns False otherwise — callers decide whether to
+    skip the LLM step or abort; they must never send the data anyway."""
+    is_local, effective = resolve_local_backend(backend_key)
+    if is_local:
+        return True
+    print(t(
+        f"  Lokaler LLM-Provider erforderlich fuer: {purpose}. Effektiver "
+        f"Provider ist '{effective}' (nicht lokal) — Aufruf wird NICHT "
+        f"gesendet. Lokalen Provider konfigurieren (z.B. "
+        f"{_LOCAL_PROVIDER_EXAMPLES}), oder bei 'multi' einen "
+        f"lokalen Eintrag unter multi_backends['{backend_key}'] anlegen.",
+        f"  Local LLM provider required for: {purpose}. Effective provider "
+        f"is '{effective}' (not local) — call will NOT be sent. Configure a "
+        f"local provider (e.g. {_LOCAL_PROVIDER_EXAMPLES}), or for "
+        f"'multi', add a local entry under multi_backends['{backend_key}'].",
+    ))
+    return False
+
+
+def call_llm_importer_only(
+    prompt: str,
+    *,
+    system: str | None = None,
+    purpose: str = "sensitive data extraction",
+    max_tokens: int = 2000,
+    **kwargs,
+) -> str | None:
+    """Wrapper for importer/extraction scripts handling sensitive free text
+    (lab values, diagnoses, calendar entries, scanned documents). Verifies
+    the effective backend is local (resolve_local_backend) BEFORE sending,
+    and tags the system prompt with IMPORTER_LOCAL_TAG so the "multi"
+    provider's own keyword router also lands on the same local backend
+    rather than "default"/"medical" (which may be remote) — the guard check
+    and the actual routed call must agree on which backend is used.
+
+    Returns None (never raises) if no local backend is available; the
+    caller decides how to proceed (skip this item, abort the run), never to
+    fall back to a remote provider."""
+    if not require_local_llm(purpose):
+        return None
+    tagged_system = f"[{IMPORTER_LOCAL_TAG}]\n{system}" if system else f"[{IMPORTER_LOCAL_TAG}]"
+    return call_llm(prompt, system=tagged_system, max_tokens=max_tokens, **kwargs)
+
+
 def _text_provider() -> LLMProvider:
     global _text_provider_instance
     if _text_provider_instance is None:

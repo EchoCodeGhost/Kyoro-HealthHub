@@ -26,7 +26,7 @@ Location type: home | travel | mixed
 
 ## Datenfluss
 
-- **Liest:** `sessions`, `session_metrics`, `pollen`, `air_quality`, `biometeo`, `session_tracks`, `location_stays`, `symptoms`
+- **Liest:** `sessions`, `session_metrics`, `pollen`, `air_quality`, `biometeo`, `symptoms;`, `location.db:`, `session_tracks`, `location_stays`
 - **Schreibt:** `analyses/activity/*.{md,png}`
 
 ## Grenzen

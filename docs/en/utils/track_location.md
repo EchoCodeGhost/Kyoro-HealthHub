@@ -15,12 +15,12 @@ Enables tracking and analysis of location data, essential for mobility analysis
 
 ## Method
 
-Queries current location from Home Assistant every few hours; stores in location_history; weather importer uses this data for Open-Meteo location determination
+Queries current location from Home Assistant every few hours; stores via location_store in location.db::location_history (precision and zones per location_privacy.json, importer track_location); weather importer uses this data for Open-Meteo location determination. Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km; place names 2 digits).
 
 ## Data flow
 
 - **Reads:** `~/.config/kyoro/travel_history.json`, `ext.`, `Geolocation-APIs`
-- **Writes:** `~/.config/kyoro/travel_history.json`
+- **Writes:** `~/.config/kyoro/travel_history.json, location.db::location_history`
 
 ## Limitations
 

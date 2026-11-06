@@ -27,7 +27,7 @@ def test_titled_and_labelled_names(text, gone):
     assert nr.PLACEHOLDER in out and gone not in out
 
 
-@pytest.mark.parametrize("text", ["CRP 1.2 mg/l", "Befund vom 01.02.2026", "Frau und Mann", "Name: "])
+@pytest.mark.parametrize("text", ["CRP 1.2 mg/l", "Befund vom 01.02.2026", "Frau und Mann", "Name: "])  # no-date-check: Testeingabe
 def test_no_false_positive(text):
     assert nr.redact_names(text) == text
 

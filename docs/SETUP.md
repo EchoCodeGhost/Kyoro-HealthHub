@@ -227,6 +227,60 @@ Optional external APIs are configured under the `"apis"` block:
 |-----|-------------|
 | `apis.aemet_api_key` | AEMET Open Data API key (Spain weather — optional) |
 
+### Location Privacy Settings
+
+Location data sent to external services is coarsened to protect privacy.
+Configure in `~/.config/kyoro/location_privacy.json` (created from
+`templates/location_privacy.example.json`):
+
+```json
+{
+  "external_api": {
+    "precision": 1,
+    "place_precision": 2,
+    "services": {
+      "google_pollen": false
+    }
+  }
+}
+```
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `external_api.precision` | Decimal places for coordinates sent to external services (~11 km at 1) | 1 |
+| `external_api.place_precision` | Decimal places for place-name reverse geocoding (~1 km at 2) | 2 |
+| `external_api.services.google_pollen` | Enable Google Pollen API (requires API key, opt-in) | false |
+
+**Google Pollen**: Must be explicitly enabled (`true`) to send location data to Google.
+Without this, pollen data from Google is skipped silently.
+
+**DWD Pollen Region**: Configure the German Weather Service pollen region in
+`health_config.json`:
+
+```json
+{
+  "environment": {
+    "dwd_pollen_region": 123
+  }
+}
+```
+
+List available regions:
+```bash
+python3 scripts/importers/import_pollen_dwd.py --list-regions
+```
+
+Mecklenburg-Vorpommern (20) and Brandenburg/Berlin (50) have no sub-regions at
+the DWD; there the ID is that of the state.
+
+If not set, the region is estimated from home coordinates with a warning.
+If the home location is outside Germany, DWD pollen is skipped.
+
+While travelling (`travel_log.json` or detected stays), `fetch_daily.py` uses
+the region of the travel location as long as it is in Germany; abroad, DWD
+pollen is skipped and pollen values come from Open-Meteo. The region is
+determined locally; the DWD never learns a location.
+
 ## Database key and security
 
 ### Encryption

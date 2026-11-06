@@ -345,8 +345,10 @@ def run(synthesis_path: Path | None, lang: str, dry_run: bool) -> None:
     prompt   = _build_prompt(synthesis_core, obs_text, synthesis_path, lang)
 
     if dry_run:
-        print(t("Dry-run — kein LLM-Aufruf.", "Dry-run — no LLM call."))
-        print(f"\n--- PROMPT ({len(prompt)} Zeichen) ---\n{prompt[:2000]}\n[…]")
+        print(t("Dry-run — kein LLM-Aufruf, Prompt-Inhalt wird nicht angezeigt.",
+                "Dry-run — no LLM call, prompt content is not shown."))
+        print(t(f"Prompt gesamt: {len(prompt):,} Zeichen",
+                f"Total prompt: {len(prompt):,} chars"))
         return
 
     print(t("Klinisches Addendum wird generiert …", "Generating clinical addendum …"))
@@ -390,7 +392,8 @@ def main() -> None:
         ),
     )
     parser.add_argument("--dry-run", action="store_true",
-                        help=t("Prompt anzeigen ohne LLM-Aufruf", "Show prompt without LLM call"))
+                        help=t("Prompt-Umfang zählen, kein LLM-Aufruf",
+                               "Count prompt size, no LLM call"))
     add_lang_arg(parser)
     args = parser.parse_args()
     apply_lang_from_args(args)

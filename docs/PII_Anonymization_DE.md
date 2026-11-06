@@ -177,15 +177,172 @@ Laborfreitext entfernt. Probelauf: `python -m utils.pseudonymize_providers --dry
 
 ### 5. GPS-Präzisionsreduzierung
 
-**Zweck**: Rundet nachträglich zu hochauflösende GPS-Punkte in `session_tracks` (>5 Nachkommastellen)
-auf 5 Nachkommastellen (~1,1 m Raster) herab — für Altdaten, die vor Einführung des
-automatischen Roundings importiert wurden. Neue Track-Importe runden bereits beim Schreiben
-via `round_coords()` aus `utils/anonymize.py` (siehe `import_tracks.py`).
+**Zweck**: Rundet nachträglich zu hochauflösende GPS-Punkte in `location.db::session_tracks`
+(>5 Nachkommastellen) auf 5 Nachkommastellen (~1,1 m Raster) herab — für Altdaten, die vor
+Einführung des automatischen Roundings importiert wurden. Neue Track-Importe runden bereits beim
+Schreiben über `location_store.store_track_points()` (siehe Abschnitt 5c).
 
 **Verwendung**:
 ```bash
 python3 scripts/utils/reduce_gps_precision.py --dry-run
 python3 scripts/utils/reduce_gps_precision.py
+```
+
+### 5b. Standort-Datenschutz und Vergröberung für externe Abfragen
+
+**Zweck**: Steuert die Genauigkeit von Standortdaten, die an externe Dienste gesendet
+werden, und speichert Regionsinformationen für die lokal-first-Analyse.
+
+Kyoro-HealthHub verwendet `location_privacy.json`, um zu konfigurieren, wie
+Standortdaten behandelt werden:
+
+- **`external_api.precision`**: Standardgenauigkeit für Koordinaten, die an externe
+  Dienste gesendet werden (Standard: 1 Dezimalstelle, ~11 km Raster). Niedrigere
+  Werte = gröbere Genauigkeit.
+- **`external_api.place_precision`**: Genauigkeit für die Rückwärtsgeokodierung von
+  Ortsnamen (Standard: 2 Dezimalstellen, ~1 km). Wird verwendet, wenn
+  `place=True` an `for_external_api()` übergeben wird.
+- **`external_api.services`**: Opt-in-Flags für Dienste, die API-Schlüssel
+  erfordern. Aktuell: `google_pollen` (Standard: `false`). Muss explizit
+  aktiviert werden, um Standortdaten an Google zu senden.
+
+**Regionsspeicherung**: Standorte werden mit ISO-3166-2-Regionscodes (weltweit)
+über `region_of()` aus `location_store.py` gespeichert. Für Einheiten, die
+kleiner als die gespeicherte Genauigkeitszelle sind, wird nur der
+Ländercode gespeichert. Dies ermöglicht lokal-first-Analysen ohne das
+Senden von Koordinaten an externe Dienste.
+
+**Konfigurationsdatei**: `~/.config/kyoro/location_privacy.json` (wird von
+`onboard.py` aus `templates/location_privacy.example.json` erstellt).
+
+**Beispielkonfiguration**:
+```json
+{
+  "external_api": {
+    "precision": 1,
+    "place_precision": 2,
+    "services": {
+      "google_pollen": false
+    }
+  }
+}
+```
+
+### 5c. Ortsregister und externe KI-Anbieter
+
+**Zweck**: Hält Orte, die Importer finden (zum Beispiel GPS-Angaben in
+Fotos), an einer Stelle fest, mit einer Genauigkeit, die Sie je Importer
+festlegen, und steuert, welche Orte an einen externen KI-Anbieter oder in
+einen Export gelangen dürfen.
+
+**Ortsregister (`location.db`)**: Importer schreiben Orte über
+`location_store.record()` in die Tabelle `location_registry` in
+`data/location.db` (Pfad: `paths.location_db`). Die Datenbank ist wie
+`health.db` mit SQLCipher verschlüsselt, wenn `db_key` gesetzt ist. Jeder
+Eintrag enthält Importer und Dateityp, die relative Quelldatei, den
+SHA-256-Hash der Originaldatei (vor dem Entfernen der Metadaten) und der
+abgelegten Datei (danach), Datum, die gerundeten Koordinaten, die
+angewendete Genauigkeit, die ISO-3166-Region, einen Verweis auf den
+zugehörigen Datensatz (zum Beispiel eine Zeile in `imaging_files`) und das
+Personen-Pseudonym. Die Genauigkeit wird vor dem Schreiben angewendet und
+lässt sich nicht rückgängig machen. Duplikate werden übersprungen
+(`INSERT OR IGNORE`). Foto-Orte landen nicht mehr in
+`health.db::photo_locations`; vorhandene Zeilen lassen sich mit
+`scripts/migrations/migrate_photo_locations_to_registry.py` übertragen
+(zuerst `--dry-run`).
+
+Sport-Tracks, Aufenthalte und Standortverlauf (`session_tracks`,
+`location_stays`, `location_stays_geocoded`, `location_history`) sind
+ebenfalls Tabellen in `location.db`. Importer schreiben sie über
+`location_store.store_track_points()`, `store_stays()` und
+`store_location_history()`, die Einstellung und Privatsphäre-Zonen anwenden.
+Skripte, die sie mit `health.db`-Tabellen verknüpfen, hängen `location.db`
+als `loc` an (`modules.db.attach_location_db()`) und fragen
+`loc.session_tracks` usw. ab. Installationen, bei denen diese Tabellen noch
+in `health.db` liegen, ziehen sie mit
+`scripts/migrations/migrate_location_tables_to_location_db.py` um:
+standardmäßig Trockenlauf; `--execute` legt ein Backup an (oder prüft eines,
+das mit `--backup` angegeben wird), kopiert die Zeilen unverändert, gleicht
+jede Zeile und eine Prüfsumme ab, verschiebt die Audit-Log-Kopien dieser
+Zeilen (sie enthalten Koordinaten) und löscht die Tabellen erst danach aus
+`health.db`. `scripts/utils/check_location_columns.py` bestätigt, dass
+`health.db` und `medicine.db` keine persönlichen Koordinaten enthalten;
+Ausnahmen sind Umwelttabellen mit dem vergröberten Abfragepunkt als
+Schlüssel (höchstens 2 Nachkommastellen) und Ausbruchsmeldungen
+(öffentliche Orte).
+
+**Einstellung je Importer und Dateityp** (`importers` und `default` in
+`location_privacy.json`): Die Einstellung wird in der Reihenfolge Importer +
+Dateityp → Importer `"*"` → `default` aufgelöst. Möglich sind:
+
+- `precision` 0–5: Nachkommastellen von Breite/Länge (0 ≈ 111 km,
+  1 ≈ 11 km, 2 ≈ 1,1 km, 3 ≈ 110 m, 4 ≈ 11 m, 5 ≈ 1 m)
+- `store: "region"`: nur die ISO-3166-Region, keine Koordinaten
+- `store: "none"`: es wird nichts gespeichert
+
+Importer ohne Eintrag und eine fehlende `location_privacy.json` speichern
+keinen Ort. Ein Foto-Ort wird nur mit echtem Aufnahmedatum gespeichert
+(EXIF-Datum oder `--date`).
+
+**Privatsphäre-Zonen** (`zones`), wie bei Strava: Mit `enabled` true werden
+Punkte innerhalb von `radius_m` (Standard 500 m) um eine Zone nicht
+gespeichert (`inside: "hide"`, Standard) oder mit `zone_precision`
+gespeichert (`"coarsen"`). Das gilt nur für Importer, deren Genauigkeit
+feiner als `zone_precision` ist (Standard 2, etwa 1 km).
+Zonen-Mittelpunkte sind die Wohnposition (`location.lat`/`lon` in
+`health_config.json`) und die Einträge in `zones.centres` (Koordinaten je
+Ortsname: ein Ort aus `privacy_check.patient_places` über seinen Namen,
+eine Adresse aus `privacy_check.patient_addresses` über die ganze Adresse
+oder ihren Ort). Jeder Mittelpunkt wird fest um bis zu den halben Radius
+verschoben, berechnet aus dem Salz in `identity.db`, damit der Rand, an dem
+Tracks abgeschnitten werden, den Ort nicht verrät; der echte Mittelpunkt
+liegt immer in der Zone. Konfigurierte Orte ohne Eintrag bekommen keine
+Zone; jeder Lauf meldet, wie viele es sind, ohne Namen. Es gibt keine
+Online-Geokodierung, und Zonen-Mittelpunkte werden nie gespeichert. Auf
+Einträge, die vor dem Einrichten einer Zone gespeichert wurden, lassen sich
+die Zonen mit `scripts/migrations/apply_privacy_zones.py` anwenden:
+Registereinträge und Trackpunkte in einer Zone werden gelöscht (mit
+`"coarsen"` vergröbert), Aufenthalte und Standortverlauf nur vergröbert,
+nie gelöscht, damit Wohnzeiträume und die Wohnort-Erkennung erhalten
+bleiben (standardmäßig Trockenlauf, `--execute` zum Ausführen;
+unumkehrbar, es werden keine Koordinaten ins Audit-Log kopiert).
+
+**Externe KI-Anbieter** (`llm`): Bevor ein Prompt an einen externen Anbieter
+geht (`is_local` false), schickt `modules/llm.py::call_llm` Prompt und
+Systemtext durch `location_store.filter_prompt_text()`. Die Stufe kommt aus
+`llm.allow` für das aufrufende Skript (Skriptname ohne `.py` oder ein
+ausdrückliches `caller=`), sonst aus `llm.default` (`none`):
+
+| Stufe | Koordinaten im Text | Konfigurierte Ortsnamen |
+|---|---|---|
+| `none` (Standard) | entfernt | entfernt |
+| `region` | entfernt | entfernt |
+| N (0–5) | auf N Nachkommastellen gerundet | entfernt |
+| `token` | durch ein Ort-Token ersetzt | entfernt |
+
+Das Ort-Token ist ein HMAC der Rasterzelle mit dem Salz aus `identity.db`;
+ohne Salz gibt es kein Token, und die Koordinaten werden entfernt. Skripte,
+die Ortsdaten im Prompt brauchen, lesen sie über
+`location_store.for_prompt()`, das dieselbe Freigabeliste anwendet. Bilder
+werden vor dem Senden an einen externen Anbieter ohne Metadaten neu
+kodiert; lässt sich ein Bild nicht bereinigen, wird es nicht gesendet.
+Lokale Anbieter werden nicht gefiltert.
+
+**Exporte** (`exports.allow`): `export_health.py` entfernt Ortsspalten, außer
+das Exportprofil steht mit einer Stufe (`region` oder eine Genauigkeit) in
+`exports.allow`.
+
+**Beispiel**:
+```json
+{
+  "default": {"store": "none"},
+  "importers": {
+    "import_skin": {"*": {"precision": 2}},
+    "import_lab_results": {"*": {"store": "none"}}
+  },
+  "llm": {"default": "none", "allow": {"analyse_travel": "region"}},
+  "exports": {"allow": {"travel_analysis": "region"}}
+}
 ```
 
 ## Pseudonymisierungsfunktionen

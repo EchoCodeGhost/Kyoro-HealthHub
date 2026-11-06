@@ -37,6 +37,10 @@
     "lat":  47.9990,
     "lon":  7.8421
   },
+  "environment": {
+    "_comment": "Umgebungs-spezifische Einstellungen. dwd_pollen_region: DWD-Teilregion (Ganzzahl) für Pollen-Datenabruf. Wird verwendet, falls --region nicht angegeben ist und der Wohnort in Deutschland liegt.",
+    "dwd_pollen_region": null
+  },
   "devices": {
     "polar":         true,
     "apple_health":  true,
@@ -67,15 +71,20 @@
       "provider": "multi",
       "multi_backends": {
         "default": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8080/v1", "llamacpp_model": "local-model", "timeout": 0 },
-        "medical": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8081/v1", "llamacpp_model": "local-model", "timeout": 300 }
+        "medical": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8081/v1", "llamacpp_model": "local-model", "timeout": 300 },
+        "importer": { "provider": "llamacpp", "llamacpp_url": "http://localhost:8081/v1", "llamacpp_model": "local-model", "timeout": 300 }
       },
       "multi_routing": {
+        "_comment": "order matters: first match wins, 'importer' must stay before 'medical' so the sentinel tag always wins over an incidental 'labor'/'befund' match in an importer script's own prompt text",
+        "importer": ["kyoro_importer_local_only"],
         "medical": ["labor", "diagnos", "medikament", "klinisch", "befund", "symptom", "therapie", "blutbild", "laborwert"]
       }
     },
     "provider": "openvino",
     "openvino_path":   "/path/to/llm-model-genai",
     "openvino_device": "GPU",
+    "_openvino_disable_thinking_comment": "optional, default false -- set true for Qwen3-style 'thinking' models when used for short deterministic extraction tasks (e.g. JSON-only output), otherwise the hidden <think> phase can run far longer than the actual answer needs",
+    "openvino_disable_thinking": false,
     "openrouter_api_key":  "sk-or-...",
     "openrouter_model":    "meta-llama/llama-3.1-8b-instruct:free",
     "anthropic_api_key":   "sk-ant-...",
@@ -355,6 +364,8 @@
     }
   },
   "clinical": {
+    "exposure_markers": [],
+    "acute_medication_courses": [],
     "_reference_devices_note": "Optional: per-metric calibration/reference device_id (must exist in device_registry above). Unset metrics fall back to the project's hardcoded default anchor (see compute_calibrate_sources.py ANCHORS, compute_pem.py's HRV source hierarchy) — leaving this empty changes nothing. For compute_calibrate_sources.py to resolve a configured device into an anchor, that device_registry entry also needs 'source_apps' set (see _device_registry_note above); without it, that metric still falls back to the hardcoded default.",
     "reference_devices": {},
     "hrv_baseline_from": null,
@@ -470,32 +481,14 @@
       {
         "slug": "ornithose",
         "description": "SYNTHETIC EXAMPLE: pet birds in the household for several years",
-        "level": "high",
-        "notes": "Describe the exposure and why it raises the prior above the population baseline."
-      },
-      {
-        "slug": "q_fieber",
-        "description": "SYNTHETIC EXAMPLE: pet birds in the household for several years",
-        "level": "high",
+        "level": "medium",
         "notes": "Describe the exposure and why it raises the prior above the population baseline."
       },
       {
         "slug": "fsme",
         "description": "SYNTHETIC EXAMPLE: living in a risk area, regular hiking",
-        "level": "high",
-        "notes": "Describe the exposure and why it raises the prior above the population baseline."
-      },
-      {
-        "slug": "borreliose",
-        "description": "SYNTHETIC EXAMPLE: living in a risk area, regular hiking",
         "level": "medium",
-        "notes": "Describe the exposure and why it raises the prior above the population baseline."
-      },
-      {
-        "slug": "rickettsia",
-        "description": "SYNTHETIC EXAMPLE: living in a risk area, regular hiking",
-        "level": "medium",
-        "notes": "Describe the exposure and why it raises the prior above the population baseline."
+        "notes": "Note vaccination gaps or missing antibody tests here."
       }
     ],
     "_legacy_note": "event_date1/2 and infection_date are derived automatically from events[]. Only set these if you do not use events[].",
@@ -563,6 +556,10 @@
   "_privacy_check_note": "forbidden_identifiers: Python identifier fragments that must not appear in source code (e.g. diagnosis names used as variable/constant names). The check script (check_source_privacy.py) reads these at runtime and stays diagnosis-agnostic itself.",
   "privacy_check": {
     "forbidden_identifiers": []
+  },
+  "_scan_sorting_note": "extra_lab_company_markers: names of specific lab companies/practices (regional ones as much as nationwide chains, and especially any lab name that itself hints at a specialty/diagnosis) for scripts/utils/sort_scan_batch.py's page classifier. Deliberately NOT hardcoded in that script (a lab name is a personal identifier — it hints at location/provider network, and a specialty-named lab hints at a diagnosis) — only generic legal-form/field terms live in source, real names go here.",
+  "scan_sorting": {
+    "extra_lab_company_markers": []
   },
   "_synthesis_panel_note": "Multi-model consult panel config for scripts/analysis/manual/analyse_synthesis.py (Config.synthesis_panel). PRIMARY source is ~/.config/kyoro/synthesis_panel.json (no manage_*.py script for it yet — hand-edit the JSON directly, it's a 4-line file). The inline synthesis_panel block below is only a fallback if that external file doesn't exist. Schema: enabled (bool) — turns the multi-model panel on/off, panel disabled falls back to a single _call_llm() with chair_model; members (list of OpenRouter model IDs) — each independently reads the specialist reports category-by-category (own notes, own final opinion, never sees peers mid-process) before the chair sees any of it; chair_model (OpenRouter model ID) — reads raw data only (AI interpretation sections stripped) in its own category rounds, only compares against the members' finished opinions in the final round.",
   "synthesis_panel": {

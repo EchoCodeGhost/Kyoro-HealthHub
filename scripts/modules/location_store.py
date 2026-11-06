@@ -12,12 +12,12 @@ location_store.py — Zentrale GPS/Ortsdaten-Registrierung und Policy-Enforcemen
              All GPS coordinates are stored here only, never in health.db or medicine.db.
 @method.de   resolve_policy liefert die geltende Policy für einen Importer/Dateityp.
              record speichert einen Ort im Registry (mit Precision-Anwendung und Zonen).
-             region_of liefert das Bundesland/Land für Koordinaten.
+             region_of liefert den ISO-3166-Code der Region (weltweit, offline).
              location_token generiert deterministische Tokens für Zellen.
              for_prompt und filter_prompt_text setzen die Outbound-Regeln durch.
 @method.en   resolve_policy returns the applicable policy for an importer/file type.
              record stores a location in the registry (applying precision and zones).
-             region_of returns the federal state/country for coordinates.
+             region_of returns the ISO 3166 region code (worldwide, offline).
              location_token generates deterministic tokens for cells.
              for_prompt and filter_prompt_text enforce the outbound rules.
 @reads       location.db, location_privacy.json, identity.db (für Salt)
@@ -71,7 +71,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config
-from modules.db import open_location_db
+from modules.db import DB_ERRORS, open_location_db
 from modules.i18n import t
 
 # Template-Muster für Platzhalter
@@ -91,80 +91,105 @@ def _get_zones_config() -> dict:
     return privacy_cfg.get("zones", {})
 
 
+# Konfigurierte Orte ohne Zonen-Mittelpunkt nur einmal je Lauf melden
+_missing_centres_warned = False
+_ZIP_TOWN = re.compile(r"(?:D[-\s])?\d{5}\s+([^,;\n]+)")
+
+
+def _norm_place(name: str) -> str:
+    return " ".join(str(name).split()).casefold()
+
+
+def _personal_places() -> tuple[list, list[str], tuple[float, float] | None]:
+    """Liest patient_places, patient_addresses und die Wohnposition aus der Konfiguration."""
+    cfg = Config()
+    privacy_check = cfg._cfg.get("privacy_check", {}) or {}
+    places = list(privacy_check.get("patient_places", []) or [])
+    addresses = [str(a) for a in privacy_check.get("patient_addresses", []) or [] if str(a).strip()]
+    location = cfg._cfg.get("location", {}) or {}
+    home = None
+    if location.get("lat") is not None and location.get("lon") is not None:
+        try:
+            home = (float(location["lat"]), float(location["lon"]))
+        except (TypeError, ValueError):
+            home = None
+    return places, addresses, home
+
+
+def _point(lat, lon) -> tuple[float, float] | None:
+    try:
+        return float(lat), float(lon)
+    except (TypeError, ValueError):
+        return None
+
+
 def _get_centre_coordinates() -> list[tuple[float, float]]:
-    """Lädt alle Zonen-Zentren aus der Konfiguration.
-    
-    Zentren kommen aus:
-    1. zones.centres aus location_privacy.json (mit Koordinaten)
-    2. privacy_check.patient_places (wenn in health_config.json)
-    3. privacy_check.patient_addresses (wenn in health_config.json)
-    
+    """Lädt alle Zonen-Mittelpunkte aus der Konfiguration (nur im Speicher).
+
+    Mittelpunkte kommen aus:
+    1. zones.centres in location_privacy.json: Koordinaten je Ortsname
+    2. Einträgen in privacy_check.patient_places, die selbst lat/lon haben
+    3. der Wohnposition (location.lat/lon in health_config.json)
+
+    Orte aus privacy_check.patient_places und Adressen aus
+    privacy_check.patient_addresses (Adresse oder Ort hinter der PLZ) ohne
+    Eintrag in zones.centres bekommen keine Zone; das wird einmal je Lauf
+    gemeldet, nur mit Anzahl. Es gibt keine Online-Geokodierung.
+
     Returns:
         Liste von (lat, lon) Tuples
     """
+    global _missing_centres_warned
     zones_cfg = _get_zones_config()
-    centres = []
-    
-    # 1. Aus zones.centres
-    if "centres" in zones_cfg:
-        for centre_name, centre_data in zones_cfg["centres"].items():
-            # Überspringe Kommentare (Beginnt mit _)
-            if centre_name.startswith("_"):
-                continue
-            if isinstance(centre_data, dict):
-                lat = centre_data.get("lat")
-                lon = centre_data.get("lon")
-                if lat is not None and lon is not None:
-                    try:
-                        centres.append((float(lat), float(lon)))
-                    except (ValueError, TypeError):
-                        warnings.warn(
-                            t(f"Ungültige Koordinaten für Zonen-Zentrum '{centre_name}'.",
-                              f"Invalid coordinates for zone centre '{centre_name}'.")
-                        )
-    
-    # 2. Aus privacy_check.patient_places und patient_addresses
-    cfg = Config()
-    full_cfg = cfg._cfg
-    
-    # patient_places
-    patient_places = full_cfg.get("privacy_check", {}).get("patient_places", [])
-    for i, place in enumerate(patient_places):
+    centres: list[tuple[float, float]] = []
+    named: set[str] = set()
+
+    invalid = 0
+    for name, data in (zones_cfg.get("centres") or {}).items():
+        if str(name).startswith("_") or not isinstance(data, dict):
+            continue
+        point = _point(data.get("lat"), data.get("lon"))
+        if point is None:
+            invalid += 1
+            continue
+        centres.append(point)
+        named.add(_norm_place(name))
+    if invalid:
+        warnings.warn(
+            t(f"{invalid} Zonen-Mittelpunkt(e) in zones.centres ohne gültige Koordinaten — übersprungen.",
+              f"{invalid} zone centre(s) in zones.centres without valid coordinates — skipped."))
+
+    places, addresses, home = _personal_places()
+    missing = 0
+    for place in places:
         if isinstance(place, dict):
             # 0.0 ist eine gültige Koordinate, daher kein "or"
             lat = place.get("lat") if place.get("lat") is not None else place.get("latitude")
             lon = place.get("lon") if place.get("lon") is not None else place.get("longitude")
-            if lat is not None and lon is not None:
-                try:
-                    centres.append((float(lat), float(lon)))
-                except (ValueError, TypeError):
-                    warnings.warn(
-                        t(f"Ungültige Koordinaten für patient_places Eintrag #{i}.",
-                          f"Invalid coordinates for patient_places entry #{i}.")
-                    )
-    
-    # patient_addresses
-    patient_addresses = full_cfg.get("privacy_check", {}).get("patient_addresses", [])
-    for i, addr in enumerate(patient_addresses):
-        if isinstance(addr, dict):
-            # 0.0 ist eine gültige Koordinate, daher kein "or"
-            lat = addr.get("lat") if addr.get("lat") is not None else addr.get("latitude")
-            lon = addr.get("lon") if addr.get("lon") is not None else addr.get("longitude")
-            if lat is not None and lon is not None:
-                try:
-                    centres.append((float(lat), float(lon)))
-                except (ValueError, TypeError):
-                    warnings.warn(
-                        t(f"Ungültige Koordinaten für patient_addresses Eintrag #{i}.",
-                          f"Invalid coordinates for patient_addresses entry #{i}.")
-                    )
-    
-    # Home location aus Config
-    home_lat = cfg.home_lat
-    home_lon = cfg.home_lon
-    if home_lat is not None and home_lon is not None:
-        centres.append((float(home_lat), float(home_lon)))
-    
+            point = _point(lat, lon)
+            if point is not None:
+                centres.append(point)
+                continue
+            name = place.get("name", "")
+        else:
+            name = place
+        if _norm_place(name) not in named:
+            missing += 1
+    for address in addresses:
+        keys = {_norm_place(address)} | {_norm_place(m.group(1)) for m in _ZIP_TOWN.finditer(address)}
+        if not keys & named:
+            missing += 1
+    if missing and not _missing_centres_warned:
+        _missing_centres_warned = True
+        warnings.warn(
+            t(f"{missing} konfigurierte(r) Ort(e) ohne Koordinaten in zones.centres — "
+              f"dort gilt keine Privatsphäre-Zone.",
+              f"{missing} configured place(s) without coordinates in zones.centres — "
+              f"no privacy zone applies there."))
+
+    if home is not None:
+        centres.append(home)
+
     return centres
 
 
@@ -202,39 +227,80 @@ def _is_in_zone(lat: float, lon: float, centre_lat: float, centre_lon: float, ra
     return distance_m <= radius_m
 
 
-def _apply_zone_precision(lat: float, lon: float, precision: int, zones_cfg: dict) -> tuple[float, float, int]:
-    """Wendet Zonen-Präzision an wenn der Punkt in einer Zone liegt.
-    
-    Args:
-        lat: Breitengrad
-        lon: Längengrad
-        precision: Ursprüngliche Präzision aus der Policy
-        zones_cfg: Zonen-Konfiguration
-    
-    Returns:
-        (lat, lon, precision) mit angepasster Präzision falls in Zone
+_ZONE_INSIDE_MODES = ("hide", "coarsen")
+_no_salt_warned = False
+
+
+def _shifted_centre(lat: float, lon: float, radius_m: float) -> tuple[float, float]:
+    """Verschiebt einen Zonen-Mittelpunkt fest, aber nicht vorhersagbar.
+
+    Ohne Verschiebung verrät der Rand, an dem Tracks abgeschnitten werden,
+    über viele Tracks den Kreis und damit den Mittelpunkt. Die Verschiebung
+    (Richtung und Abstand bis radius_m/2, gleichverteilt in der Kreisfläche)
+    kommt aus einem HMAC mit dem Salz aus identity.db: bei jedem Lauf gleich,
+    ohne das Salz nicht nachrechenbar. Der echte Mittelpunkt liegt damit
+    immer mindestens radius_m/2 innerhalb der Zone. Ohne Salz keine
+    Verschiebung (einmalige Warnung).
     """
-    zones_enabled = zones_cfg.get("enabled", True)
-    if not zones_enabled:
-        return lat, lon, precision
-    
-    zone_precision = zones_cfg.get("zone_precision", 2)
-    radius_m = zones_cfg.get("radius_m", 500)
-    
-    # Zone ist nur relevant wenn die ursprüngliche Präzision feiner ist
+    global _no_salt_warned
+    import math
+    salt = _get_pseudonym_salt()
+    if not salt:
+        if not _no_salt_warned:
+            _no_salt_warned = True
+            warnings.warn(
+                t("Kein Salz in identity.db — Privatsphäre-Zonen ohne Verschiebung des Mittelpunkts.",
+                  "No salt in identity.db — privacy zones without shifted centre."))
+        return lat, lon
+    digest = hmac.new(salt.encode("utf-8"), f"zone|{lat:.5f}|{lon:.5f}".encode("utf-8"),
+                      hashlib.sha256).digest()
+    angle = int.from_bytes(digest[0:4], "big") / 2**32 * 2 * math.pi
+    dist = math.sqrt(int.from_bytes(digest[4:8], "big") / 2**32) * radius_m / 2
+    dlat = dist * math.cos(angle) / 111_320.0
+    dlon = dist * math.sin(angle) / (111_320.0 * max(math.cos(math.radians(lat)), 1e-6))
+    return lat + dlat, lon + dlon
+
+
+def _zone_settings(zones_cfg: dict) -> tuple[int, float, str]:
+    """(zone_precision, radius_m, inside) mit Standardwerten 2, 500, "hide"."""
+    inside = zones_cfg.get("inside", "hide")
+    if inside not in _ZONE_INSIDE_MODES:
+        warnings.warn(
+            t(f"Unbekannter Wert für zones.inside ({inside!r}) — verwende \"hide\".",
+              f"Unknown value for zones.inside ({inside!r}) — using \"hide\"."))
+        inside = "hide"
+    return int(zones_cfg.get("zone_precision", 2)), float(zones_cfg.get("radius_m", 500)), inside
+
+
+def zone_centres(zones_cfg: dict | None = None) -> list[tuple[float, float]]:
+    """Verschobene Zonen-Mittelpunkte (nur im Speicher, nie gespeichert)."""
+    if zones_cfg is None:
+        zones_cfg = _get_zones_config()
+    _, radius_m, _ = _zone_settings(zones_cfg)
+    return [_shifted_centre(c_lat, c_lon, radius_m) for c_lat, c_lon in _get_centre_coordinates()]
+
+
+def in_zone(lat: float, lon: float, centres: list[tuple[float, float]], radius_m: float) -> bool:
+    """True, wenn der Punkt in einer der (verschobenen) Zonen liegt."""
+    return any(_is_in_zone(lat, lon, c_lat, c_lon, radius_m) for c_lat, c_lon in centres)
+
+
+def _zone_action(lat: float, lon: float, precision: int, zones_cfg: dict) -> str | None:
+    """Was eine Privatsphäre-Zone mit dem Punkt macht.
+
+    Returns:
+        None (keine Zone betroffen), "hide" (nicht speichern) oder
+        "coarsen" (mit zone_precision speichern). Zonen gelten nur für
+        Quellen, die feiner als zone_precision speichern.
+    """
+    if not zones_cfg.get("enabled", True):
+        return None
+    zone_precision, radius_m, inside = _zone_settings(zones_cfg)
     if precision <= zone_precision:
-        return lat, lon, precision
-    
-    # Prüfe alle Zentren
-    centres = _get_centre_coordinates()
-    for centre_lat, centre_lon in centres:
-        if _is_in_zone(lat, lon, centre_lat, centre_lon, radius_m):
-            # Auf Zonen-Präzision runden
-            lat_rounded = round(lat, zone_precision)
-            lon_rounded = round(lon, zone_precision)
-            return lat_rounded, lon_rounded, zone_precision
-    
-    return lat, lon, precision
+        return None
+    if in_zone(lat, lon, zone_centres(zones_cfg), radius_m):
+        return inside
+    return None
 
 
 def resolve_policy(importer: str, file_type: str | None = None) -> dict:
@@ -325,44 +391,81 @@ def file_sha256(filepath: str | Path) -> str:
         return ""
 
 
-# Grober Rahmen um Deutschland; innerhalb wird das nächstgelegene Bundesland
-# genommen, außerhalb nur "Ausland". Kein Online-Geocoding (design.md).
-_DE_BBOX = (47.2, 55.1, 5.8, 15.1)  # lat_min, lat_max, lon_min, lon_max
-
-
 def region_of(lat: float, lon: float) -> str:
-    """Ermittelt das Bundesland (in Deutschland) oder "Ausland".
+    """ISO-3166-Code der ersten Verwaltungsebene am Punkt, weltweit und offline.
 
-    Offline über modules.geo_bundesland.nearest_bundesland. Grenznahe Punkte
-    im Nachbarland können dem angrenzenden Bundesland zugeordnet werden;
-    für die Stufe "region" ist diese Unschärfe gewollt.
+    Liefert z.B. "DE-BY", "ES-GC" oder "US-HI"; den Ländercode, wenn die
+    Einheit keinen gültigen Unterteilungs-Code hat; "XX" bei ungültiger
+    Eingabe oder offenem Meer (mehr als 5 km von jeder Einheit).
 
-    @limits.de   Die Zuordnung erfolgt über das nächstgelegene Bundesland-Zentrum und ein grobes
-                Rechteck um Deutschland (5.8-15.1° Ost, 47.2-55.1° Nord). In Grenznähe
-                kann ein falsches Bundesland herauskommen; bei Nachbarländern kann ein
-                Bundesland statt "Ausland".
-    @limits.en   Assignment is based on the nearest German federal state centre and a coarse
-                bounding box around Germany (5.8-15.1° E, 47.2-55.1° N). In border
-                areas, a wrong federal state may be returned; in neighbouring countries,
-                a federal state may be returned instead of "Abroad".
+    @limits.de   Natural-Earth-Umrisse, auf ~2 km vereinfacht: Grenzstädte können
+                 der Nachbareinheit zugeordnet werden. De-facto-Grenzen; umstrittene
+                 Gebiete folgen dieser Darstellung. Kleine Einheiten (Stadtstaaten,
+                 Paris) entsprechen fast dem Ort.
+    @limits.en   Natural Earth outlines simplified to ~2 km: border towns can be
+                 assigned to the neighbouring unit. De-facto boundaries; disputed
+                 areas follow that depiction. Small units (city states, Paris)
+                 nearly equal the town.
 
     Args:
         lat: Breitengrad
         lon: Längengrad
 
     Returns:
-        Bundesland-Name (z.B. "Bayern"), "Ausland"/"Abroad" oder
-        "Unbekannt"/"Unknown" bei ungültigen Werten
+        ISO-3166-2-Code, ISO-3166-1-Ländercode oder "XX"
     """
-    try:
-        lat_f, lon_f = float(lat), float(lon)
-    except (TypeError, ValueError):
-        return t("Unbekannt", "Unknown")
-    lat_min, lat_max, lon_min, lon_max = _DE_BBOX
-    if not (lat_min <= lat_f <= lat_max and lon_min <= lon_f <= lon_max):
-        return t("Ausland", "Abroad")
-    from modules.geo_bundesland import nearest_bundesland
-    return nearest_bundesland(lat_f, lon_f)[0]
+    from modules.region_lookup import lookup
+    return lookup(lat, lon)
+
+
+def region_name(code: str) -> str:
+    """Anzeigename einer Region in der aktiven Sprache; unbekannte Codes unverändert.
+
+    Args:
+        code: Code aus region_of (z.B. "DE-BY")
+
+    Returns:
+        Name (z.B. "Bayern" / "Bavaria") oder der Code selbst
+    """
+    from modules.region_lookup import unit_info
+    info = unit_info(code)
+    if info is None:
+        return code
+    return t(info["name_de"], info["name_en"])
+
+
+def _cell_area_km2(lat: float, precision: int) -> float:
+    """Fläche einer Rasterzelle bei precision Nachkommastellen am Breitengrad lat."""
+    from math import cos, radians
+    step_km = 111.32 * 10.0 ** (-precision)
+    return step_km * step_km * max(cos(radians(lat)), 0.0)
+
+
+def stored_region(lat, lon, precision: int | None) -> str:
+    """Region, wie sie im Register gespeichert wird (D4).
+
+    Die Region wird aus dem übergebenen (möglichst unrundeten) Punkt bestimmt.
+    Ist die Einheit kleiner als die Rasterzelle der gespeicherten Präzision,
+    wird nur der Ländercode gespeichert, damit die Region nie mehr verrät als
+    die gespeicherten Koordinaten. Ohne precision (store: "region") gilt die
+    Region unverändert.
+
+    Args:
+        lat: Breitengrad
+        lon: Längengrad
+        precision: gespeicherte Präzision, None bei reiner Regionsspeicherung
+
+    Returns:
+        Region-Code für die Spalte location_registry.region
+    """
+    code = region_of(lat, lon)
+    if precision is None or "-" not in code:
+        return code
+    from modules.region_lookup import unit_info
+    info = unit_info(code)
+    if info is not None and info["area_km2"] < _cell_area_km2(float(lat), int(precision)):
+        return info["country"]
+    return code
 
 
 def _get_pseudonym_salt() -> str:
@@ -444,7 +547,12 @@ def record(
     """Speichert einen Ort im Location-Registry.
     
     WENDET die Policy-Präzision AN VOR DEM SCHREIBEN an.
-    Prüft Zonen und passt die Präzision an falls nötig.
+    Privatsphäre-Zonen: Punkte in einer Zone werden weggelassen
+    (zones.inside "hide", Standard) oder mit zone_precision gespeichert
+    ("coarsen").
+    Die Region (region_of) wird aus dem ungerundeten Punkt bestimmt
+    (stored_region). Bei store: "region" werden nur Region und keine
+    Koordinaten gespeichert.
     Nutzt INSERT OR IGNORE (kein Überschreiben).
     
     Args:
@@ -465,7 +573,8 @@ def record(
 
     Returns:
         True wenn der Eintrag gespeichert wurde, False wenn übersprungen
-        (z.B. weil Policy store: "none" ist oder required fields fehlen)
+        (z.B. weil Policy store: "none" ist, der Punkt in einer Zone liegt
+        oder required fields fehlen)
     
     Raises:
         Keine Exceptions - bei Fehlern: Warnung und False zurück
@@ -475,7 +584,7 @@ def record(
     
     # 2. Prüfen ob Speicherung erlaubt ist
     # Logik: store ist explizit "none" -> keine Speicherung
-    #        store ist explizit "region" -> nur Region speichern (nicht implementiert, return False)
+    #        store ist explizit "region" -> nur Region speichern, keine Koordinaten
     #        store ist nicht gesetzt aber precision ist gesetzt -> speichern mit precision
     #        store ist nicht gesetzt und precision ist nicht gesetzt -> keine Speicherung
     store = policy.get("store")
@@ -483,10 +592,6 @@ def record(
     
     if store == "none":
         # Explizit keine Speicherung
-        return False
-    
-    if store == "region":
-        # Nur Region speichern (derzeit nicht implementiert in Registry)
         return False
     
     if store is None and not has_precision:
@@ -501,15 +606,33 @@ def record(
         )
         return False
     
-    # 4. Präzision aus Policy oder Default
-    precision = policy.get("precision", 0)
-    
-    # 5. Zonen prüfen und Präzision anpassen
-    zones_cfg = _get_zones_config()
-    lat, lon, applied_precision = _apply_zone_precision(lat, lon, precision, zones_cfg)
-    
-    # 6. Auf Präzision runden
-    lat_rounded, lon_rounded = round_coords(lat, lon, applied_precision)
+    try:
+        lat, lon = float(lat), float(lon)
+    except (TypeError, ValueError):
+        warnings.warn(
+            t(f"Ungültige Koordinaten für location_store.record (importer={importer}) — Überspringe.",
+              f"Invalid coordinates for location_store.record (importer={importer}) — Skipping.")
+        )
+        return False
+
+    if store == "region":
+        # 4a. Nur Region: aus dem Originalpunkt, ohne Koordinaten
+        region = stored_region(lat, lon, None)
+        lat_rounded = lon_rounded = applied_precision = None
+    else:
+        # 4. Präzision aus Policy oder Default
+        precision = policy.get("precision", 0)
+
+        # 5. Privatsphäre-Zonen: Punkt weglassen oder vergröbern
+        zones_cfg = _get_zones_config()
+        action = _zone_action(lat, lon, precision, zones_cfg)
+        if action == "hide":
+            return False
+        applied_precision = _zone_settings(zones_cfg)[0] if action == "coarsen" else precision
+
+        # 6. Region aus dem Originalpunkt, dann auf Präzision runden
+        region = stored_region(lat, lon, applied_precision)
+        lat_rounded, lon_rounded = round_coords(lat, lon, applied_precision)
     
     # 7. In Datenbank speichern (Schema bei Bedarf anlegen)
     conn = None
@@ -520,9 +643,9 @@ def record(
         conn.execute("""
             INSERT OR IGNORE INTO location_registry (
                 importer, file_type, source_file, original_sha256, stored_sha256,
-                ts, date, lat, lon, precision, ref_db, ref_table, ref_id, person,
-                migrated_from
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ts, date, lat, lon, precision, region, ref_db, ref_table, ref_id,
+                person, migrated_from
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             importer,
             file_type,
@@ -534,6 +657,7 @@ def record(
             lat_rounded,
             lon_rounded,
             applied_precision,
+            region,
             ref_db,
             ref_table,
             ref_id,
@@ -552,6 +676,208 @@ def record(
     finally:
         if conn is not None:
             conn.close()
+
+
+class _PointFilter:
+    """Wendet Policy und Privatsphäre-Zonen auf viele Punkte einer Quelle an.
+
+    Policy und Zonen-Mittelpunkte werden einmal gelesen, nicht je Punkt.
+    precision ist None, wenn die Policy keine Koordinaten erlaubt (store
+    "none" oder "region", oder kein Eintrag). Mit allow_hide=False werden
+    Punkte in einer Zone nie weggelassen, sondern nur auf zone_precision
+    vergröbert (für Aufenthalte, deren Zeitraum und is_home erhalten
+    bleiben müssen).
+    """
+
+    def __init__(self, importer: str, file_type: str | None = None, allow_hide: bool = True):
+        policy = resolve_policy(importer, file_type)
+        store = policy.get("store")
+        if store in ("none", "region") or (store is None and "precision" not in policy):
+            self.precision = None
+            return
+        self.precision = int(policy.get("precision", 0))
+        zones_cfg = _get_zones_config()
+        self.zone_active = bool(zones_cfg.get("enabled", True))
+        self.zone_precision, self.radius_m, inside = _zone_settings(zones_cfg)
+        self.inside = inside if allow_hide else "coarsen"
+        self.centres = []
+        if self.zone_active and self.precision > self.zone_precision:
+            self.centres = zone_centres(zones_cfg)
+
+    def apply(self, lat, lon) -> tuple[float, float] | None:
+        """Gerundeter Punkt, oder None, wenn er nicht gespeichert wird."""
+        point = _point(lat, lon)
+        if point is None or self.precision is None:
+            return None
+        lat, lon = point
+        if self.centres and in_zone(lat, lon, self.centres, self.radius_m):
+            if self.inside == "hide":
+                return None
+            return round_coords(lat, lon, self.zone_precision)
+        return round_coords(lat, lon, self.precision)
+
+
+def _write_rows(sql: str, rows: list[tuple], conn=None) -> int:
+    """Schreibt Zeilen in location.db (INSERT OR IGNORE), gibt neue Zeilen zurück."""
+    if not rows:
+        return 0
+    from utils.create_location_schema import ensure_location_schema
+    own = conn is None
+    if own:
+        conn = open_location_db()
+    try:
+        ensure_location_schema(conn)
+        before = conn.total_changes
+        conn.executemany(sql, rows)
+        conn.commit()
+        return conn.total_changes - before
+    finally:
+        if own:
+            conn.close()
+
+
+def store_track_points(importer: str, session_id: str, points, file_type: str | None = None,
+                       conn=None) -> int:
+    """Speichert Trackpunkte einer Session in location.db::session_tracks.
+
+    Args:
+        importer: Name des Importers (für die Policy)
+        session_id: Verweis auf health.db::sessions
+        points: Iterable von (ts, lat, lon, elevation_m, speed_ms)
+        file_type: Dateityp für die Policy (z. B. ".gpx"), optional
+        conn: offene location.db-Verbindung (optional, sonst eigene)
+
+    Returns:
+        Anzahl neu gespeicherter Punkte. Punkte in einer Privatsphäre-Zone
+        (zones.inside "hide") werden nicht gespeichert; erlaubt die Policy
+        keine Koordinaten, wird nichts gespeichert.
+    """
+    filt = _PointFilter(importer, file_type)
+    if filt.precision is None:
+        return 0
+    rows = []
+    for ts, lat, lon, elevation_m, speed_ms in points:
+        point = filt.apply(lat, lon)
+        if point is None:
+            continue
+        rows.append((session_id, ts, point[0], point[1], elevation_m, speed_ms))
+    return _write_rows(
+        "INSERT OR IGNORE INTO session_tracks (session_id, ts, lat, lon, elevation_m, speed_ms) "
+        "VALUES (?, ?, ?, ?, ?, ?)", rows, conn)
+
+
+def store_stays(importer: str, stays, file_type: str | None = None, conn=None) -> int:
+    """Speichert Aufenthalte in location.db::location_stays.
+
+    Args:
+        stays: Iterable von (start_ts, end_ts, lat, lon, is_home, timezone,
+            person, source)
+
+    Returns:
+        Anzahl neu gespeicherter Aufenthalte. In einer Privatsphäre-Zone wird
+        ein Aufenthalt nur vergröbert, nie weggelassen.
+    """
+    filt = _PointFilter(importer, file_type, allow_hide=False)
+    if filt.precision is None:
+        return 0
+    rows = []
+    for start_ts, end_ts, lat, lon, is_home, tz, person, source in stays:
+        point = filt.apply(lat, lon)
+        if point is None:
+            continue
+        rows.append((start_ts, end_ts, point[0], point[1], is_home, tz, person, source))
+    return _write_rows(
+        "INSERT OR IGNORE INTO location_stays "
+        "(start_ts, end_ts, lat, lon, is_home, timezone, person, source) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rows, conn)
+
+
+def store_location_history(importer: str, entries, conn=None) -> int:
+    """Speichert Standortverlauf in location.db::location_history.
+
+    Args:
+        entries: Iterable von (datetime, date, hour, state, lat, lon,
+            gps_accuracy, zone, city, person, source); lat/lon dürfen None sein
+
+    Returns:
+        Anzahl neu gespeicherter Einträge. Koordinaten werden nach Policy
+        gerundet und in einer Zone vergröbert; erlaubt die Policy keine
+        Koordinaten, wird nichts gespeichert.
+    """
+    filt = _PointFilter(importer, None, allow_hide=False)
+    if filt.precision is None:
+        return 0
+    rows = []
+    for dt, date, hour, state, lat, lon, accuracy, zone, city, person, source in entries:
+        point = filt.apply(lat, lon) if lat is not None and lon is not None else (None, None)
+        if point is None:
+            continue
+        rows.append((dt, date, hour, state, point[0], point[1], accuracy, zone, city, person, source))
+    return _write_rows(
+        "INSERT OR IGNORE INTO location_history "
+        "(datetime, date, hour, state, lat, lon, gps_accuracy, zone, city, person, source) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows, conn)
+
+
+# ── Lesen aus location.db ────────────────────────────────────────────────────
+
+# je Person: (Beginn aufsteigend, Ende, Zeitzone, laufendes Maximum der Enden)
+_stay_tz_cache: dict[str, tuple[list, list, list, list]] = {}
+_OPEN_END = "\uffff"   # sortiert nach jedem Zeitstempel (Aufenthalt ohne Ende)
+
+
+def clear_read_caches() -> None:
+    """Leert die Lese-Caches (nach Schreiben von Aufenthalten/Zeitzonen)."""
+    _stay_tz_cache.clear()
+
+
+def _load_stay_timezones(person: str) -> tuple[list, list, list, list]:
+    rows = []
+    try:
+        from health_config import Config
+        if Path(Config().location_db_path).exists():
+            conn = open_location_db()
+            try:
+                rows = conn.execute(
+                    "SELECT start_ts, end_ts, timezone FROM location_stays "
+                    "WHERE person = ? AND timezone IS NOT NULL AND start_ts IS NOT NULL "
+                    "ORDER BY start_ts", (person,)).fetchall()
+            finally:
+                conn.close()
+    except (OSError, RuntimeError, *DB_ERRORS):
+        # location.db fehlt, ist nicht lesbar oder ohne Tabelle: keine Zeitzone
+        rows = []
+    starts = [r[0] for r in rows]
+    ends = [r[1] if r[1] is not None else _OPEN_END for r in rows]
+    tzs = [r[2] for r in rows]
+    max_end, running = [], ""
+    for end in ends:
+        running = max(running, end)
+        max_end.append(running)
+    return starts, ends, tzs, max_end
+
+
+def stay_timezone(person: str, ts: str) -> str | None:
+    """Zeitzone des Aufenthalts, der ts abdeckt (neuester Beginn zuerst).
+
+    Liest location.db::location_stays über eine eigene Verbindung, damit
+    Aufrufer mit offener health.db-Transaktion (resolve_timezone) nichts
+    anhängen müssen. Die Aufenthalte einer Person werden einmal je Prozess
+    geladen; die Suche nutzt eine Binärsuche über den Beginn und bricht ab,
+    sobald kein früherer Aufenthalt mehr bis ts reichen kann. Gibt None
+    zurück, wenn location.db fehlt oder kein Aufenthalt mit Zeitzone passt.
+    """
+    import bisect
+    cached = _stay_tz_cache.get(person)
+    if cached is None:
+        cached = _stay_tz_cache[person] = _load_stay_timezones(person)
+    starts, ends, tzs, max_end = cached
+    i = bisect.bisect_right(starts, ts) - 1
+    while i >= 0 and max_end[i] >= ts:
+        if ends[i] >= ts:
+            return tzs[i]
+        i -= 1
+    return None
 
 
 def get_caller_name(explicit_caller: str | None = None) -> str:
@@ -580,24 +906,51 @@ def get_caller_name(explicit_caller: str | None = None) -> str:
     return "unknown"
 
 
-def for_external_api(lat: float, lon: float) -> tuple[float, float]:
-    """Wendet die external_api-Präzision auf Koordinaten an.
+EXTERNAL_API_PRECISION = 1
+EXTERNAL_API_PLACE_PRECISION = 2
+
+
+def external_service_enabled(name: str) -> bool:
+    """Prüft, ob ein externer Dienst in der Konfiguration freigegeben ist.
     
-    Liest die Präzision aus location_privacy.json -> external_api.precision
-    und rundet die Koordinaten entsprechend.
+    Args:
+        name: Name des Dienstes (z. B. "google_pollen")
     
+    Returns:
+        True wenn der Dienst freigegeben ist, False sonst (inkl. fehlende Datei oder Schlüssel)
+    """
+    privacy_cfg = _load_location_privacy()
+    if not privacy_cfg:
+        return False
+    external_api_cfg = privacy_cfg.get("external_api", {})
+    services_cfg = external_api_cfg.get("services", {})
+    # Nur ein echtes true schaltet frei (ein String "false" darf nicht zählen)
+    return services_cfg.get(name) is True
+
+
+def for_external_api(lat: float, lon: float, place: bool = False) -> tuple[float, float]:
+    """Rundet Koordinaten für Anfragen an externe Dienste (nicht LLM).
+
+    Einzige Rundungsfunktion für ausgehende Anfragen. Standard ist
+    external_api.precision (1 Stelle, ~11 km). Nur Abfragen, die einen
+    Ortsnamen auf Gemeindeebene brauchen (Reverse-Geocoding), setzen
+    place=True und nutzen external_api.place_precision (2 Stellen, ~1 km).
+    Ohne location_privacy.json gelten diese Standardwerte.
+
     Args:
         lat: Breitengrad
         lon: Längengrad
-    
+        place: True nur für Ortsnamen-Abfragen
+
     Returns:
-        (lat_rounded, lon_rounded) mit der konfigurierten Präzision
+        (lat_rounded, lon_rounded)
     """
-    privacy_cfg = _load_location_privacy()
-    external_api_cfg = privacy_cfg.get("external_api", {})
-    precision = external_api_cfg.get("precision", 2)
-    
-    return round_coords(lat, lon, precision)
+    external_api_cfg = _load_location_privacy().get("external_api", {})
+    if place:
+        precision = external_api_cfg.get("place_precision", EXTERNAL_API_PLACE_PRECISION)
+    else:
+        precision = external_api_cfg.get("precision", EXTERNAL_API_PRECISION)
+    return round_coords(lat, lon, int(precision))
 
 
 
@@ -745,7 +1098,7 @@ def for_prompt(caller: str, refs: list | None = None, level: str | None = None) 
     Liest Einträge aus location_registry (location.db) für die gegebenen refs
     (location_registry.id Werte) und gibt sie je nach Level an:
     - "none" → leere Liste
-    - "region" → Liste von Dicts mit id, date, region (region_of)
+    - "region" → Liste von Dicts mit id, date, region (gespeicherte Spalte region)
     - Zahl N (0-5) → Liste von Dicts mit id, date, lat, lon; lat/lon werden auf
       min(N, gespeicherte precision) Dezimalstellen gerundet, nie feiner als gespeichert
     - "token" → Liste von Dicts mit id, date, token (location_token); ist das Token
@@ -810,7 +1163,7 @@ def for_prompt(caller: str, refs: list | None = None, level: str | None = None) 
         # Alle gewünschten refs in einer Query abfragen
         placeholders = ",".join("?" * len(valid_refs))
         query = f"""
-            SELECT id, date, lat, lon, precision
+            SELECT id, date, lat, lon, precision, region
             FROM location_registry
             WHERE id IN ({placeholders})
         """
@@ -830,9 +1183,16 @@ def for_prompt(caller: str, refs: list | None = None, level: str | None = None) 
     # Ergebnisse verarbeiten
     result = []
     for row in rows:
-        entry_id, date_val, lat_val, lon_val, precision_val = row
+        entry_id, date_val, lat_val, lon_val, precision_val, region_val = row
         entry = {"id": entry_id, "date": date_val}
-        
+
+        # Region-Level → gespeicherte Region, nie aus Koordinaten neu berechnet
+        if effective_level == "region":
+            if region_val:
+                entry["region"] = region_val
+            result.append(entry)
+            continue
+
         # lat/lon können None sein (z.B. bei region-only Speicherung)
         if lat_val is not None and lon_val is not None:
             # Numeric Level (N) → gerundete Koordinaten
@@ -841,24 +1201,13 @@ def for_prompt(caller: str, refs: list | None = None, level: str | None = None) 
                 entry["lat"] = round(float(lat_val), applied_precision)
                 entry["lon"] = round(float(lon_val), applied_precision)
             
-            # Region-Level → region_of
-            elif effective_level == "region":
-                entry["region"] = region_of(float(lat_val), float(lon_val))
-            
             # Token-Level → location_token
             elif effective_level == "token":
                 token = location_token(float(lat_val), float(lon_val), precision_val or 0)
                 if token is not None:
                     entry["token"] = token
-        else:
-            # Keine Koordinaten gespeichert (z.B. bei store: "region")
-            if effective_level == "region":
-                # Keine Koordinaten → kein Region-Resultat
-                pass
-            elif effective_level == "token":
-                # Ohne Koordinaten kein Token
-                pass
-        
+        # Ohne Koordinaten (store: "region") gibt es weder Raster noch Token
+
         result.append(entry)
     
     return result
@@ -870,8 +1219,11 @@ __all__ = [
     "record",
     "file_sha256",
     "region_of",
+    "region_name",
+    "stored_region",
     "location_token",
     "get_caller_name",
+    "external_service_enabled",
     "for_external_api",
     "filter_prompt_text",
     "for_prompt",

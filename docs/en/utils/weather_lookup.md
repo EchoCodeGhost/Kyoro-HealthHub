@@ -15,7 +15,7 @@ Enables data lookup and referencing, essential for data integration
 
 ## Method
 
-Strategy: Within HOME_RADIUS_M → local weather station; outside → Open-Meteo Archive API with caching in weather_remote
+Strategy: Within HOME_RADIUS_M → local weather station; outside → Open-Meteo Archive API with caching in weather_remote. Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km).
 
 ## Data flow
 

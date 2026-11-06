@@ -46,7 +46,7 @@ Flughafennähe-Erkennung: strukturelles Standortrisiko unabhängig von Ausbrüch
              entfernt (Gepäck-/Fahrzeugtransport der Mücke). Nur Malaria ist für dieses Phänomen gut
              dokumentiert; andere Aedes-/Anopheles-übertragene Erkrankungen (Dengue, Chikungunya, Zika)
              sind über denselben Transportweg theoretisch denkbar, aber nicht in vergleichbarem Maß in der
-             Literatur belegt — deshalb hier bewusst nicht mit demselben Konfidenzgrad getaggt.
+             Literatur belegt — deshalb hier bewusst nicht mit demselben Konfidenzgrad getaggt. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 @limits.en   Airport list is a curated selection of major international hubs (Europe-weighted), not an
              exhaustive world list — a missing airport causes a false negative, not a false alarm. Radius
              thresholds (5/15 km) are a rough, project-internal heuristic without formal epidemiological
@@ -54,8 +54,8 @@ Flughafennähe-Erkennung: strukturelles Standortrisiko unabhängig von Ausbrüch
              airport, with isolated cases further away (baggage/vehicle-transported mosquito). Only
              malaria is well documented for this phenomenon; other Aedes-/Anopheles-borne diseases
              (dengue, chikungunya, zika) are theoretically plausible via the same transport route but not
-             comparably documented in the literature — deliberately not tagged with the same confidence.
-@reads       location_stays, location_stays_geocoded
+             comparably documented in the literature — deliberately not tagged with the same confidence. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area.
+@reads       location.db (location_stays, location_stays_geocoded)
 @writes      keine (reine Berechnungsfunktion, kein DB-Schreibzugriff — der Aufrufer entscheidet, was mit dem Ergebnis geschieht)
 @scoring     Zwei Radius-Stufen (Haversine-Distanz Wohnort zu nächstem Flughafen aus
              MAJOR_INTERNATIONAL_AIRPORTS):
@@ -225,11 +225,13 @@ def current_home_location(conn: sqlite3.Connection) -> dict | None:
     Bevorzugt einen Eintrag ohne end_ts (noch aktueller Wohnsitz), sonst den
     mit dem jüngsten start_ts.
     """
+    from modules.db import attach_location_db
+    attach_location_db(conn)
     row = conn.execute("""
         SELECT ls.lat, ls.lon,
                COALESCE(g.city, ''), COALESCE(g.subregion, ''), COALESCE(g.country, '')
-        FROM location_stays ls
-        LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+        FROM loc.location_stays ls
+        LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
         WHERE ls.is_home = 1 AND ls.lat IS NOT NULL AND ls.lon IS NOT NULL
         ORDER BY (ls.end_ts IS NULL) DESC, ls.start_ts DESC
         LIMIT 1

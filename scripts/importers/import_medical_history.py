@@ -10,13 +10,19 @@ import_medical_history.py — Extracts dated events from free-text medical histo
 @method.de   Liest imports/manual/timeline_symptome.txt und verwendet ein LOKALES LLM,
              um datierte Ereignisse nach imports/manual/life_events.json zu extrahieren.
              WICHTIG: Dieses Skript verarbeitet sensible persoenliche Gesundheitsdaten.
-             Es verweigert die Ausfuehrung mit externen/Cloud-LLM-Anbietern.
-             Nur lokale Anbieter sind zugelassen: openvino, ovms, ollama, lmstudio.
+             Es verweigert die Ausfuehrung mit externen/Cloud-LLM-Anbietern — bei
+             Provider "multi" wird das tatsaechlich geroutete Backend geprueft
+             (modules.llm.resolve_local_backend), nicht nur der Top-Level-String.
+             Nur lokale Anbieter sind zugelassen: openvino, ovms, ollama, lmstudio,
+             llamacpp, exo, mlx.
 @method.en   Reads imports/manual/timeline_symptome.txt and uses a LOCAL LLM to extract
              dated events into imports/manual/life_events.json for user review and import.
              IMPORTANT: This script processes sensitive personal health data.
-             It will refuse to run with any external/cloud LLM provider.
-             Only local providers are permitted: openvino, ovms, ollama, lmstudio.
+             It will refuse to run with any external/cloud LLM provider — for
+             provider "multi" it checks the actually-routed backend
+             (modules.llm.resolve_local_backend), not just the top-level string.
+             Only local providers are permitted: openvino, ovms, ollama, lmstudio,
+             llamacpp, exo, mlx.
 @reads       imports/manual/timeline_symptome.txt
 @writes      imports/manual/life_events.json
 @limits.de   Nur lokale LLM-Anbieter. Keine Cloud-Integration.
@@ -39,35 +45,30 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.prompts.importers import PROMPT_DE, PROMPT_EN
-
-_LOCAL_PROVIDERS = {"openvino", "ovms", "ollama", "lmstudio", "mlx"}
-_EXTERNAL_PROVIDERS = {"anthropic", "openrouter", "mistral", "perplexity", "openai",
-                       "mammouth", "huggingface", "nvidia", "azure"}
+from modules.llm import resolve_local_backend
 
 
-def _require_local_provider(provider: str) -> None:
-    """Hard abort if provider is external — sensitive data must not leave the device."""
-    p = provider.lower().strip()
-    if p not in _LOCAL_PROVIDERS:
-        if p in _EXTERNAL_PROVIDERS:
-            print(t(
-                f"\nFEHLER: Provider '{provider}' ist ein Cloud-Dienst.\n"
-                "Diese Datei enthält sensible Gesundheitsdaten und darf NICHT an externe\n"
-                "Dienste gesendet werden. Bitte einen lokalen Provider konfigurieren:\n"
-                f"  Erlaubt: {', '.join(sorted(_LOCAL_PROVIDERS))}\n"
-                "  In ~/.config/kyoro/health_config.json: \"llm\": {\"provider\": \"ollama\"}",
-                f"\nERROR: Provider '{provider}' is a cloud service.\n"
-                "This file contains sensitive health data and MUST NOT be sent to external\n"
-                "services. Please configure a local provider:\n"
-                f"  Allowed: {', '.join(sorted(_LOCAL_PROVIDERS))}\n"
-                "  In ~/.config/kyoro/health_config.json: \"llm\": {\"provider\": \"ollama\"}",
-            ))
-        else:
-            print(t(
-                f"\nFEHLER: Unbekannter Provider '{provider}'.\n"
-                f"Nur lokale Provider erlaubt: {', '.join(sorted(_LOCAL_PROVIDERS))}",
-                f"\nERROR: Unknown provider '{provider}'.\n"
-                f"Only local providers allowed: {', '.join(sorted(_LOCAL_PROVIDERS))}",
+def _require_local_provider(_unused: str = "") -> None:
+    """Hard abort if the effective backend isn't local — sensitive data must
+    not leave the device. Resolves "multi" routing via resolve_local_backend()
+    (modules.llm) instead of inspecting the top-level provider string, which
+    for "multi" would just say "multi" and tell us nothing about where the
+    actual request would go."""
+    is_local, effective = resolve_local_backend("importer")
+    if not is_local:
+        print(t(
+            f"\nFEHLER: Effektiver Provider '{effective}' ist nicht lokal.\n"
+            "Diese Datei enthält sensible Gesundheitsdaten und darf NICHT an externe\n"
+            "Dienste gesendet werden. Bitte einen lokalen Provider konfigurieren:\n"
+            "  z.B. openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx\n"
+            "  In ~/.config/kyoro/health_config.json: \"llm\": {\"provider\": \"ollama\"}\n"
+            "  (oder bei \"multi\": einen lokalen Eintrag unter multi_backends[\"importer\"])",
+            f"\nERROR: Effective provider '{effective}' is not local.\n"
+            "This file contains sensitive health data and MUST NOT be sent to external\n"
+            "services. Please configure a local provider:\n"
+            "  e.g. openvino, ovms, ollama, lmstudio, llamacpp, exo, mlx\n"
+            "  In ~/.config/kyoro/health_config.json: \"llm\": {\"provider\": \"ollama\"}\n"
+            "  (or for \"multi\": add a local entry under multi_backends[\"importer\"])",
             ))
         sys.exit(1)
 
@@ -154,18 +155,11 @@ def main() -> None:
         ))
         sys.exit(1)
 
-    # Load health config to check LLM provider
-    import sys as _sys
-    _sys.path.insert(0, str(Path(__file__).parent.parent))
-    import health_config as hc
-    cfg = hc.Config()
-    provider = cfg.llm_provider
-
-    _require_local_provider(provider)
-
+    _require_local_provider()  # hard-aborts if the effective backend isn't local
+    is_local, effective = resolve_local_backend("importer")
     print(t(
-        f"LLM-Provider: {provider} (lokal — Daten verlassen das Gerät nicht)",
-        f"LLM provider: {provider} (local — data stays on device)",
+        f"LLM-Provider: {effective} (lokal — Daten verlassen das Gerät nicht)",
+        f"LLM provider: {effective} (local — data stays on device)",
     ))
 
     timeline_text = timeline_path.read_text(encoding="utf-8").strip()
@@ -178,19 +172,22 @@ def main() -> None:
         f"Timeline loaded: {timeline_path.name} ({len(timeline_text)} chars)",
     ))
 
-    from utils.llm_provider import LLMProvider
-    llm = LLMProvider.from_config()
-
     lang = getattr(args, "lang", "de") or "de"
     system_prompt = PROMPT_DE if lang == "de" else PROMPT_EN
     user_msg = timeline_text
 
     print(t("Sende an lokales LLM ...", "Sending to local LLM ..."))
+    from modules.llm import call_llm_importer_only
     try:
-        response = llm.chat(system_prompt, user_msg, max_tokens=4096)
+        response = call_llm_importer_only(
+            user_msg, system=system_prompt, purpose="Medizinische Anamnese-Timeline",
+            max_tokens=4096, require_grounding=False, label_output=False,
+        )
     except Exception as e:
         print(t(f"Fehler beim LLM-Aufruf: {e}", f"LLM call failed: {e}"))
         sys.exit(1)
+    if response is None:
+        sys.exit(1)  # require_local_llm inside call_llm_importer_only already printed why
 
     try:
         raw_events = _extract_json(response)

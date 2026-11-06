@@ -3,7 +3,7 @@
   "_important": "ALL COORDINATES IN THIS FILE MUST BE FICTITIOUS FOR REPO SAFETY.\n  Use only example coordinates like 48.12345, 11.54321. Never use real addresses or locations.",
 
   "default": {
-    "_comment": "Default policy applied when no specific importer/file-type rule matches.\n    store: 'none' = no location data stored at all (safe default)\n    store: 'region' = store only federal state/country, no coordinates\n    precision: 0-5 = decimal places for latitude/longitude (0~111km, 1~11km, 2~1.1km, 3~110m, 4~11m, 5~1m)",
+    "_comment": "Default policy applied when no specific importer/file-type rule matches.\n    store: 'none' = no location data stored at all (safe default)\n    store: 'region' = store only the ISO 3166 region (e.g. DE-BY, ES-GC; country code where no subdivision applies), no coordinates\n    precision: 0-5 = decimal places for latitude/longitude (0~111km, 1~11km, 2~1.1km, 3~110m, 4~11m, 5~1m)",
     "store": "none",
     "precision": 0
   },
@@ -53,6 +53,11 @@
 
     "import_oura_csv": {
       "_comment": "Oura CSV (stays/travel): precision 2 (~1km).",
+      "*": {"precision": 2}
+    },
+
+    "track_location": {
+      "_comment": "Home Assistant location history (iPhone): precision 2 (~1km).",
       "*": {"precision": 2}
     },
 
@@ -108,11 +113,12 @@
   },
 
   "zones": {
-    "_comment": "Privacy zones around sensitive locations. Points within the radius are stored at zone_precision, even if the source policy is finer.",
+    "_comment": "Privacy zones around sensitive locations, like Strava. Only sources finer than zone_precision are affected. inside: 'hide' (default) = points within the radius are not stored; 'coarsen' = stored at zone_precision. Each zone centre is shifted by a fixed, salted offset of up to radius_m/2 so that the edge of hidden points does not reveal the place.",
     "enabled": true,
     "radius_m": 500,
     "zone_precision": 2,
-    "_centres_comment": "Zone centres from privacy_check.patient_places and privacy_check.patient_addresses.\n    Add optional coordinates per place name below. Places without coordinates are skipped with a warning.\n    NO REAL COORDINATES - use example values only.",
+    "inside": "hide",
+    "_centres_comment": "Zone centres: coordinates per place name. A place from privacy_check.patient_places matches by its name; an address from privacy_check.patient_addresses matches by the full address or by the town after the postal code.\n    Configured places without an entry here get no zone; the run reports how many (no names). The home position (location.lat/lon in health_config.json) is always a zone centre. No online geocoding.\n    Zones can be applied to points that are already stored with scripts/migrations/apply_privacy_zones.py (dry run first).\n    NO REAL COORDINATES - use example values only.",
     "centres": {
       "_example_home": {
         "_comment": "Example: home location zone centre. REPLACE with fictitious coordinates.",
@@ -123,12 +129,17 @@
   },
 
   "external_api": {
-    "_comment": "Precision for coordinates sent to external non-LLM services (weather, pollen, air quality APIs).",
-    "precision": 2
+    "_comment": "Precision for coordinates sent to external non-LLM services (weather, pollen, air quality APIs).\n    precision: used for every request (1 = ~11 km). Weather from a grid point ~11 km away can differ in temperature or precipitation; set 2 (~1 km) if that matters more to you than privacy.\n    place_precision: only for reverse geocoding that needs a town name (2 = ~1 km).",
+    "precision": 1,
+    "place_precision": 2,
+    "services": {
+      "_comment": "Dienste mit eigenem API-Schlüssel senden Ihren Ort an den Anbieter. Erst einschalten, wenn Sie das wollen.",
+      "google_pollen": false
+    }
   },
 
   "llm": {
-    "_comment": "Location data in prompts to remote LLM providers.\n    default: level applied to any caller not explicitly listed in 'allow'.\n    allow: map of caller script names to their allowed level.\n    Levels: 'none' (remove all), 'region' (federal state/country only), N (raster precision, e.g. 2), 'token' (location token).",
+    "_comment": "Location data in prompts to remote LLM providers.\n    default: level applied to any caller not explicitly listed in 'allow'.\n    allow: map of caller script names to their allowed level.\n    Levels: 'none' (remove all), 'region' (ISO 3166 region code only, e.g. DE-BY), N (raster precision, e.g. 2), 'token' (location token).",
     "default": "none",
     "allow": {
       "_comment": "Add script names (without .py extension) that are allowed to receive location data.\n      Example: {\"analyse_travel\": \"region\", \"analyse_exposure\": 2, \"analyse_location_correlation\": \"token\"}",

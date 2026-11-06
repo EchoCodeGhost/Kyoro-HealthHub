@@ -58,7 +58,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from health_config import Config as _Cfg, KYORO_CONFIG_DIR
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from modules.location_store import for_external_api
+from modules.location_store import for_external_api, external_service_enabled
 
 _cfg = _Cfg()
 HOME_LAT, HOME_LON = (
@@ -72,14 +72,14 @@ STAGING_BASE = Path(__file__).parent.parent / "data" / "staging"
 
 def _location_from_stays(target_date: str) -> tuple[float, float] | None:
     """Look up (lat, lon) for target_date from the GPS-based location_stays
-    table (health.db), independent of the manually maintained
+    table (location.db), independent of the manually maintained
     travel_history.json. Returns None if no stay covers the date or the
     DB is unavailable.
     """
     try:
-        from modules.db import open_db
+        from modules.db import open_location_db
         from health_config import OWN_PERSON_ID
-        conn = open_db()
+        conn = open_location_db()
         row = conn.execute(
             "SELECT lat, lon FROM location_stays "
             "WHERE person = ? AND date(start_ts) <= ? AND date(end_ts) >= ? "
@@ -211,7 +211,22 @@ def fetch_airquality(staging_day: Path, lat: float, lon: float,
     return results
 
 
-def fetch_pollen_dwd(staging_day: Path, region_id: int) -> dict:
+def _dwd_region(lat: float | None, lon: float | None, is_home: bool) -> int | None:
+    """DWD-Pollenregion für den Tag.
+
+    Zuhause aus der Konfiguration (sonst Schätzung mit Warnung), auf Reisen in
+    Deutschland aus dem Reiseort geschätzt, im Ausland keine (Pollen dann über
+    Open-Meteo). Rein lokal bestimmt; die DWD-Datei ist für alle gleich.
+    """
+    from importers.import_pollen_dwd import region_for_location, resolve_region
+    return resolve_region(_cfg) if is_home else region_for_location(lat, lon)
+
+
+def fetch_pollen_dwd(staging_day: Path, region_id: int | None) -> dict:
+    if region_id is None:
+        print(t("  – DWD Pollen: keine Region (Wohnort nicht in Deutschland oder nicht gesetzt), übersprungen",
+                "  – DWD pollen: no region (home not in Germany or not set), skipped"))
+        return {"pollen_dwd": _skip("no region")}
     from importers.import_pollen_dwd import _fetch_dwd
     content = _fetch_dwd()
     if content:
@@ -225,6 +240,14 @@ def fetch_pollen_dwd(staging_day: Path, region_id: int) -> dict:
 
 
 def fetch_pollen_google(staging_day: Path, lat: float, lon: float, days: int = 5) -> dict:
+    # Prüfe, ob der Dienst freigegeben ist
+    if not external_service_enabled("google_pollen"):
+        print(t(
+            "  – Google Pollen: Dienst nicht freigegeben (external_api.services.google_pollen in location_privacy.json), übersprungen",
+            "  – Google pollen: service not enabled (external_api.services.google_pollen in location_privacy.json), skipped"
+        ))
+        return {"pollen_google": _skip("service not enabled")}
+    
     from importers.import_pollen_google import _get_api_key, _fetch_google
     api_key = _get_api_key()
     if not api_key:
@@ -477,6 +500,7 @@ def main():
     # Determine actual location for the target date (travel-aware)
     from importers.import_aemet import _is_spain
     fetch_lat, fetch_lon, is_home = _location_for_date(str(target_date))
+    region_id = _dwd_region(fetch_lat, fetch_lon, is_home)
     fetch_lat, fetch_lon = for_external_api(fetch_lat, fetch_lon)
     is_spain = _is_spain(fetch_lat, fetch_lon)
     location_label = "Zuhause" if is_home else ("Spanien" if is_spain else "Reise")
@@ -484,9 +508,6 @@ def main():
         f"  📍 Standort: {location_label} ({fetch_lat:.2f},{fetch_lon:.2f})",
         f"  📍 Location: {location_label} ({fetch_lat:.2f},{fetch_lon:.2f})",
     ))
-
-    from importers.import_pollen_dwd import _nearest_region
-    region_id = _nearest_region(fetch_lat, fetch_lon)
 
     manifest = {
         "date":      str(target_date),

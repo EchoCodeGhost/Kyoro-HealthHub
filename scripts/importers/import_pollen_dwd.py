@@ -52,7 +52,7 @@ from health_config import Config as _Cfg, OWN_PERSON_ID as _OWN_PERSON_ID
 from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import
-from modules.location_store import for_external_api
+from modules.location_store import for_external_api, region_of
 
 _cfg = _Cfg()
 DB_PATH  = _cfg.db_path
@@ -64,7 +64,10 @@ HOME_LAT, HOME_LON = (
 
 DWD_URL = "https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json"
 
-# Ungefähre Mittelpunkte der DWD-Teilregionen (lat, lon)
+# Ungefähre Mittelpunkte der DWD-Regionen (lat, lon), nur für die Schätzung.
+# Schlüssel ist die Teilregion; Länder ohne Teilregionen (Mecklenburg-Vorpommern,
+# Brandenburg/Berlin) stehen in der DWD-Datei mit partregion_id -1 und werden
+# über ihre region_id angesprochen.
 REGION_CENTERS: dict[int, tuple[float, float]] = {
     11:  (54.7,  9.0),   # Inseln und Marschen
     12:  (53.8, 10.2),   # Geest, Schleswig-Holstein und Hamburg
@@ -91,7 +94,84 @@ REGION_CENTERS: dict[int, tuple[float, float]] = {
     122: (48.6, 12.6),   # Donauniederungen
     123: (49.2, 11.5),   # Bayern nördl. der Donau, o. Bayr. Wald, o. Mainfranken
     124: (49.8, 10.1),   # Mainfranken
+    20:  (53.8, 12.6),   # Mecklenburg-Vorpommern (ohne Teilregionen)
+    50:  (52.4, 13.4),   # Brandenburg und Berlin (ohne Teilregionen)
 }
+
+
+def _region_key(entry: dict) -> int:
+    """ID eines Eintrags der DWD-Datei: Teilregion, sonst Region (Länder ohne Teilregionen)."""
+    pid = entry.get("partregion_id", -1)
+    return pid if isinstance(pid, int) and pid > 0 else entry.get("region_id", -1)
+
+
+def _region_label(entry: dict) -> str:
+    return entry.get("partregion_name") or entry.get("region_name", "")
+
+
+def _find_region(content: list, region_id: int) -> dict | None:
+    return next((r for r in content if _region_key(r) == region_id), None)
+
+
+def region_for_location(lat: float | None, lon: float | None) -> int | None:
+    """Geschätzte DWD-Region für einen Ort; None außerhalb Deutschlands.
+
+    Rein lokal (region_of + Mittelpunkte), der DWD bekommt keinen Ort.
+    """
+    if lat is None or lon is None:
+        return None
+    if not region_of(lat, lon).startswith("DE"):
+        return None
+    return _nearest_region(lat, lon)
+
+
+def resolve_region(cfg: _Cfg, cli_region: int | None = None) -> int | None:
+    """Ermittelt die DWD-Pollenregion basierend auf CLI, Konfiguration oder Schätzung.
+    
+    Reihenfolge der Auswahl:
+    1. --region (CLI-Parameter)
+    2. environment.dwd_pollen_region (Konfiguration)
+    3. Schätzung über _nearest_region() aus den Wohnort-Koordinaten
+    
+    Args:
+        cfg: Config-Objekt
+        cli_region: Region-ID aus CLI (--region), falls vorhanden
+    
+    Returns:
+        DWD-Teilregion-ID als Integer, oder None wenn nicht bestimmbar
+    """
+    # 1. CLI-Parameter
+    if cli_region is not None:
+        return cli_region
+    
+    # 2. Konfiguration
+    if cfg.dwd_pollen_region is not None:
+        return cfg.dwd_pollen_region
+    
+    # 3. Schätzung aus Wohnort-Koordinaten
+    home_lat = cfg.home_lat
+    home_lon = cfg.home_lon
+    if home_lat is not None and home_lon is not None:
+        estimated_region = region_for_location(home_lat, home_lon)
+        if estimated_region is not None:
+            print(t(
+                f"DWD-Pollenregion nicht konfiguriert. Geschätzte Region: {estimated_region}. "
+                f"Bitte mit --list-regions die richtige Region wählen und "
+                f"environment.dwd_pollen_region in health_config.json setzen.",
+                f"DWD pollen region not configured. Estimated region: {estimated_region}. "
+                f"Please use --list-regions to select the correct region and set "
+                f"environment.dwd_pollen_region in health_config.json."
+            ), file=sys.stderr)
+            return estimated_region
+        else:
+            print(t(
+                "Wohnort liegt nicht in Deutschland. DWD-Pollen-Daten werden übersprungen.",
+                "Home location is not in Germany. DWD pollen data will be skipped."
+            ), file=sys.stderr)
+            return None
+    
+    # Keine Möglichkeit, die Region zu bestimmen
+    return None
 
 
 def _nearest_region(lat: float, lon: float) -> int:
@@ -179,16 +259,16 @@ def import_pollen_dwd_from_raw(conn: sqlite3.Connection,
                Store in pollen_dwd table with INSERT OR IGNORE.
     @param conn SQLite-Datenbankverbindung
     @param content DWD API content (Liste von Regions-Dicts)
-    @param region_id DWD-Teilregion-ID
+    @param region_id DWD-Teilregion-ID bzw. Region-ID bei Ländern ohne Teilregionen
     @returns Anzahl der importierten Datensätze
     """
-    region = next((r for r in content if r.get("partregion_id") == region_id), None)
+    region = _find_region(content, region_id)
     if region is None:
         print(t(f"Region {region_id} nicht gefunden.",
                 f"Region {region_id} not found."), file=sys.stderr)
         return 0
 
-    region_name = region.get("partregion_name", "")
+    region_name = _region_label(region)
     pollen = region.get("Pollen", {})
     today   = date.today()
     day_map = {
@@ -235,60 +315,13 @@ def import_pollen_dwd(conn: sqlite3.Connection, region_id: int) -> int:
     @method.en Call _fetch_dwd, validate region and store pollen data
                for today, tomorrow and day after tomorrow in pollen_dwd table.
     @param conn SQLite-Datenbankverbindung
-    @param region_id DWD-Teilregion-ID
+    @param region_id DWD-Teilregion-ID bzw. Region-ID bei Ländern ohne Teilregionen
     @returns Anzahl der importierten Datensätze oder 0 bei Fehler
     """
     content = _fetch_dwd()
     if not content:
         return 0
-
-    region = next((r for r in content if r.get("partregion_id") == region_id), None)
-    if region is None:
-        print(t(
-            f"Region {region_id} nicht gefunden.",
-            f"Region {region_id} not found."
-        ), file=sys.stderr)
-        return 0
-
-    region_name = region.get("partregion_name", "")
-    pollen = region.get("Pollen", {})
-
-    today     = date.today()
-    day_map   = {
-        "today":        str(today),
-        "tomorrow":     str(today + timedelta(days=1)),
-        "dayafter_to":  str(today + timedelta(days=2)),
-    }
-
-    cur   = conn.cursor()
-    count = 0
-    for day_key, day_str in day_map.items():
-        row = (
-            day_str, region_id, region_name,
-            _parse_val(pollen.get("Hasel",   {}).get(day_key)),
-            _parse_val(pollen.get("Erle",    {}).get(day_key)),
-            _parse_val(pollen.get("Esche",   {}).get(day_key)),
-            _parse_val(pollen.get("Birke",   {}).get(day_key)),
-            _parse_val(pollen.get("Graeser", {}).get(day_key)),
-            _parse_val(pollen.get("Roggen",  {}).get(day_key)),
-            _parse_val(pollen.get("Beifuss", {}).get(day_key)),
-            _parse_val(pollen.get("Ambrosia",{}).get(day_key)),
-            _OWN_PERSON_ID,
-        )
-        cur.execute(
-            "INSERT OR IGNORE INTO pollen_dwd "
-            "(date,region_id,region_name,hazel,alder,ash,birch,grass,rye,mugwort,ragweed,person) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-            row
-        )
-        count += cur.rowcount
-
-    # person=None explizit: regionaler Pollenflug-Index (DWD), keine Personendaten (s. add-importer-person-parameterization-remaining)
-
-
-    log_import(conn, 'pollen_dwd', '', count, person=None)
-    conn.commit()
-    return count
+    return import_pollen_dwd_from_raw(conn, content, region_id)
 
 
 def main():
@@ -322,33 +355,32 @@ def main():
         content = _fetch_dwd()
         print(t("Verfügbare DWD-Regionen:", "Available DWD regions:"))
         for r in content:
-            pid = r.get("partregion_id", -1)
-            if pid > 0:
-                print(f"  {pid:4d}  {r.get('partregion_name','')} "
-                      f"({r.get('region_name','')})")
+            rid = _region_key(r)
+            if rid > 0:
+                print(f"  {rid:4d}  {_region_label(r)} ({r.get('region_name','')})")
         return
 
-    if args.region is None and (HOME_LAT is None or HOME_LON is None):
-        parser.error(t(
-            "--region erforderlich (oder location.lat/lon in health_config.json setzen).",
-            "--region required (or set location.lat/lon in health_config.json)."))
+    # Region auflösen
+    region_id = resolve_region(_cfg, args.region)
+    if region_id is None:
+        print(t(
+            "Keine DWD-Pollenregion verfügbar. Import übersprungen.",
+            "No DWD pollen region available. Skipping import."
+        ))
+        return
 
-    region_id = args.region or _nearest_region(HOME_LAT, HOME_LON)
-    if HOME_LAT is not None and HOME_LON is not None:
-        print(t(
-            f"DWD Pollen-Import für Region {region_id} "
-            f"(nächste zu {HOME_LAT:.2f}°N, {HOME_LON:.2f}°E) ...",
-            f"DWD pollen import for region {region_id} "
-            f"(nearest to {HOME_LAT:.2f}°N, {HOME_LON:.2f}°E) ..."
-        ))
-    else:
-        print(t(
-            f"DWD Pollen-Import für Region {region_id} ...",
-            f"DWD pollen import for region {region_id} ..."
-        ))
+    content = _fetch_dwd()
+    if not content:
+        return
+    region_info = _find_region(content, region_id)
+    region_name = _region_label(region_info) if region_info else str(region_id)
+    print(t(
+        f"DWD Pollen-Import für Region {region_id} ({region_name}) ...",
+        f"DWD pollen import for region {region_id} ({region_name}) ..."
+    ))
 
     conn = open_db()
-    n = import_pollen_dwd(conn, region_id)
+    n = import_pollen_dwd_from_raw(conn, content, region_id)
     print(t(f"  {n} Tage gespeichert.", f"  {n} days stored."))
     conn.close()
 

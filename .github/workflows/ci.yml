@@ -103,7 +103,8 @@ jobs:
         # pydicom: import_fundus loads modules/dicom_utils (pydicom at module
         # level) also for JPEG input; test_import_fundus_fibricheck_no_location
         # runs a real JPEG import.
-        run: pip install numpy scipy requests pillow pikepdf pdf2image pydicom pytesseract==0.3.13 -r requirements-dev.txt -c requirements-lock.txt
+        # shapely: location_store.region_of looks up the bundled boundaries.
+        run: pip install numpy scipy requests pillow pikepdf pdf2image pydicom shapely pytesseract==0.3.13 -r requirements-dev.txt -c requirements-lock.txt
 
       - name: Unit tests
         # This step existed as a local-only pytest suite for months without

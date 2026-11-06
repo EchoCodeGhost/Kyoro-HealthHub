@@ -7,12 +7,12 @@ backfill_travel_environment_person.py — pollen/biometeo/air_quality: person='u
 @tier        infrastructure
 @purpose.de  Setzt historische Zeilen in pollen, biometeo und air_quality, die noch
              den Schema-Default person='unknown' tragen, rückwirkend auf die echte
-             Personen-Pseudonym-ID — auf ausdrücklichen Wunsch der Nutzerin, nach
+             Personen-Pseudonym-ID — nach
              Abwägung gegen die generelle Ausschlussregel für 'unknown' in
              pseudonymize_device_person_identifiers.py (s. @limits).
 @purpose.en  Backfills historical rows in pollen, biometeo and air_quality that
              still carry the schema default person='unknown' to the real person
-             pseudonym ID — on the user's explicit request, after weighing it
+             pseudonym ID — after weighing it
              against the general exclusion rule for 'unknown' in
              pseudonymize_device_person_identifiers.py (see @limits).
 @method.de   import_airquality.py (der alleinige Schreiber dieser drei Tabellen)
@@ -39,9 +39,9 @@ backfill_travel_environment_person.py — pollen/biometeo/air_quality: person='u
              fehlenden Wert als echte Identität ausgeben). Für DIESE drei Tabellen
              ist die Lage anders: es gab in diesem Projekt bisher ausschließlich
              Daten einer einzigen Person, und die betroffenen Zeilen stammen
-             nachweislich aus Aufenthalten/Abrufen für die Nutzerin selbst (nicht
-             aus einer geteilten oder unbekannten Quelle) — deshalb hier auf
-             ausdrücklichen Wunsch rückwirkend korrigiert. Diese Ausnahme gilt NUR
+             nachweislich aus Aufenthalten/Abrufen für die Person selbst (nicht
+             aus einer geteilten oder unbekannten Quelle) — deshalb hier
+             rückwirkend korrigiert. Diese Ausnahme gilt NUR
              für diese drei Tabellen, nicht generell für 'unknown' im Projekt.
              Einmalig gedacht; sicher wiederholt ausführbar (kein Effekt mehr,
              sobald keine 'unknown'-Zeilen mehr existieren).
@@ -53,7 +53,7 @@ backfill_travel_environment_person.py — pollen/biometeo/air_quality: person='u
              situation differs: this project has so far only ever held one
              person's data, and the affected rows demonstrably originate from
              stays/fetches for the user herself (not a shared or genuinely
-             unknown source) — hence backfilled here on her explicit request.
+             unknown source) — hence backfilled here.
              This exception applies ONLY to these three tables, not to 'unknown'
              project-wide. Meant to run once; safe to re-run (no-op once no
              'unknown' rows remain).

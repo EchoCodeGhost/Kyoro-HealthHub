@@ -88,9 +88,9 @@ schlecht ging?"
              ist Mehrheitsvotum über die Tage einer ISO-Woche, keine exakte
              Tageszuordnung pro Datenpunkt — bei gemischten An-/Abreise-Wochen kann das
              im Einzelfall ungenau sein. Bundesland-Zuordnung selbst ist
-             Zentroid-Distanz (modules/geo_bundesland.py), kein echtes
-             Polygon-Grenzmatching — grenznahe Aufenthalte können dem falschen
-             Nachbar-Bundesland zugeordnet werden. location_stays deckt nur den
+             Polygon-Suche auf vereinfachten Natural-Earth-Grenzen
+             (modules/geo_bundesland.py) — Aufenthalte direkt an einer Grenze
+             können dem Nachbar-Bundesland oder -Staat zugeordnet werden. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden. location_stays deckt nur den
              Oura-App-Nutzungszeitraum ab (ab ca. 2026-05); außerhalb davon so genau
              wie die manuell gepflegten travel_history/location_history-Einträge.
 @limits.en   Observational correlation only, no causality. RKI/UBA aggregate data are
@@ -104,9 +104,9 @@ schlecht ging?"
              universal). Weekly region assignment is a majority vote across the days of
              an ISO week, not an exact per-datapoint day assignment — mixed
              travel/return weeks can be inaccurate in individual cases. Federal-state
-             assignment itself is centroid distance (modules/geo_bundesland.py), not
-             real polygon border matching — stays near a border can be assigned to the
-             wrong neighboring state. location_stays only covers the Oura app usage
+             assignment itself is a polygon lookup on simplified Natural Earth
+             boundaries (modules/geo_bundesland.py) — stays right at a border can be
+             assigned to the neighbouring state or country. Assignment via distance to a point, not via boundaries; near borders, a location may be assigned to the neighboring area. location_stays only covers the Oura app usage
              period (from roughly 2026-05); outside that range accuracy is limited to
              the manually maintained travel_history/location_history entries.
 @scoring     Korrelationsstärke: |ρ| <0.2 schwach | 0.2-0.4 moderat | 0.4-0.7 stark | >0.7 sehr stark
@@ -137,9 +137,9 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from modules.geo_bundesland import nearest_bundesland
+from modules.geo_bundesland import bundesland_of
 
 _cfg = _Cfg()
 OUT_DIR = _cfg.analyses_dir / "infectious"
@@ -216,24 +216,12 @@ def _mw_test(a: list, b: list) -> float | None:
 
 def home_bundesland() -> tuple[str | None, str | None]:
     """(Name, ISO-Code) des konfigurierten Heimat-Bundeslands, oder (None, None)
-    ohne konfigurierte Heimatkoordinate — das Skript funktioniert dann weiter,
-    nur ohne regionale Serien (Bundesweit bleibt immer verfügbar)."""
+    ohne Heimatkoordinate oder mit Heimat außerhalb Deutschlands — das Skript
+    funktioniert dann weiter, nur ohne regionale Serien (Bundesweit bleibt
+    immer verfügbar)."""
     if _cfg.home_lat is None or _cfg.home_lon is None:
         return None, None
-    return nearest_bundesland(_cfg.home_lat, _cfg.home_lon)
-
-
-# Grobe Bounding-Box für Deutschland (gepolstert gegen Zentroid-Ungenauigkeit
-# nahe der Grenze) — dient nur dazu, Auslandsaufenthalte auszuschließen, bevor
-# nearest_bundesland() ihnen fälschlich das nächstgelegene deutsche
-# Bundesland zuweist (die Funktion kennt keine Landesgrenzen, nur Distanz).
-_GERMANY_LAT_RANGE = (46.5, 55.5)
-_GERMANY_LON_RANGE = (5.0, 15.5)
-
-
-def _in_germany(lat: float, lon: float) -> bool:
-    return (_GERMANY_LAT_RANGE[0] <= lat <= _GERMANY_LAT_RANGE[1]
-            and _GERMANY_LON_RANGE[0] <= lon <= _GERMANY_LON_RANGE[1])
+    return bundesland_of(_cfg.home_lat, _cfg.home_lon) or (None, None)
 
 
 def _build_weekly_region_map(conn, d_from: str, d_to: str) -> dict[str, tuple[str, str] | None]:
@@ -270,8 +258,9 @@ def _build_weekly_region_map(conn, d_from: str, d_to: str) -> dict[str, tuple[st
     # der erste (früheste) nicht-Zuhause-Aufenthalt eines Tages gewinnt, das
     # reicht für eine Tages-Grobzuordnung.
     day_gps: dict[str, tuple[float, float]] = {}
+    attach_location_db(conn)
     for start_ts, lat, lon in conn.execute("""
-        SELECT start_ts, lat, lon FROM location_stays
+        SELECT start_ts, lat, lon FROM loc.location_stays
         WHERE is_home = 0 AND date(start_ts) >= ? AND date(start_ts) <= ?
         ORDER BY start_ts
     """, (d_from, d_to)).fetchall():
@@ -295,10 +284,9 @@ def _build_weekly_region_map(conn, d_from: str, d_to: str) -> dict[str, tuple[st
         region: tuple[str, str] | None
         if lat is None or lon is None:
             region = home_bundesland()
-        elif _in_germany(lat, lon):
-            region = nearest_bundesland(lat, lon)
         else:
-            region = None  # Ausland — kein deutsches Bundesland zutreffend
+            # None = Ausland, kein deutsches Bundesland zutreffend
+            region = bundesland_of(lat, lon)
         week_votes[_iso_week(day_str)][region] += 1
         day += _timedelta(days=1)
 

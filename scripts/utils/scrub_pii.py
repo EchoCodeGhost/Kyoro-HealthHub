@@ -103,7 +103,7 @@ def find_pii_in_database(conn: sqlite3.Connection) -> list[tuple]:
         'insurance_name': r'\b(AOK|TK|Techniker|Barmer|DAK|KKH|hkk)\b',
         'birthdate': r'\b\d{2}\.\d{2}\.\d{4}\b',
         'full_name': r'\b[A-Z][a-z]+\s[A-Z][a-z]+\b',
-        'first_name': r'\b(Erika|Michael|Erika|Alexander|Thomas|Andreas|Stefan|Christian|Daniel|Markus|Jan|Peter|Anna|Julia|Lisa|Sarah|Laura|Maria|Sophie|Hanna|Emma|Lea|Mia|Lena|Hannah|Johanna)\b',
+        'first_name': r'\b(Michael|Alexander|Thomas|Andreas|Stefan|Christian|Daniel|Markus|Jan|Peter|Anna|Julia|Lisa|Sarah|Laura|Maria|Sophie|Hanna|Emma|Lea|Mia|Lena|Hannah|Johanna)\b',
         'last_name': r'\b(Müller|Schmidt|Schneider|Fischer|Weber|Meyer|Wagner|Becker|Schulz|Hoffmann|Bauer|Richter|Klein|Wolf|Schröder|Neumann|Schwarz|Zimmermann|Braun|Krüger|Hofmann|Hartmann|Lange|Schmitt|Werner|Schmitz|Krause|Meier|Lehmann|Schmid|Schulze|Maier|Köhler|Herrmann|König|Walter|Mayer|Huber|Kaiser|Fuchs|Peters|Lang)\b',
         'arzt_title': r'\b(Dr\. med\.|Dr\.|Prof\. Dr\. med\.|Prof\. Dr\.|Arzt|Ärztin|Facharzt|Fachärztin|Chefarzt|Chefärztin|Oberarzt|Oberärztin)\b',
         'mvz_name': r'\b(MVZ|Medizinisches Versorgungszentrum|Gemeinschaftspraxis|Praxisgemeinschaft|Ärztehaus|Gesundheitszentrum)\b',

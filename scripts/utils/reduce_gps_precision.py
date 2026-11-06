@@ -2,17 +2,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Kyoro-HealthHub contributors
 """
-reduce_gps_precision — Rundet nachträglich zu hochauflösende GPS-Punkte in session_tracks
+reduce_gps_precision — Rundet nachträglich zu hochauflösende GPS-Punkte in location.db::session_tracks
 
 @tier        infrastructure
 @purpose.de  Rundet bestehende `session_tracks`-Koordinaten mit mehr als 5 Nachkommastellen
              auf 5 Nachkommastellen (~1,1 m Raster) herab. Neue Importe runden bereits beim
-             Schreiben (siehe `import_tracks.py`, `round_coords(..., precision=5)`); dieses
+             Schreiben (location_store.store_track_points nach location_privacy.json); dieses
              Skript schließt die Lücke für Altdaten, die vor Einführung des Roundings oder
              über einen Pfad ohne `round_coords()`-Aufruf importiert wurden.
 @purpose.en  Rounds down existing `session_tracks` coordinates with more than 5 decimal
              places to 5 decimal places (~1.1m grid). New imports already round at write
-             time (see `import_tracks.py`, `round_coords(..., precision=5)`); this script
+             time (location_store.store_track_points per location_privacy.json); this script
              closes the gap for legacy data imported before rounding was introduced or via
              a path that skipped `round_coords()`.
 @method.de   Identifiziert betroffene Zeilen mit derselben SQL-Bedingung wie
@@ -25,8 +25,8 @@ reduce_gps_precision — Rundet nachträglich zu hochauflösende GPS-Punkte in s
              rounds lat/lon via `round_coords(precision=5)` and writes them back. Creates a
              rolling backup of the DB file before changes (overwritten on each run),
              analogous to `scrub_pii.py`.
-@reads       session_tracks (lat, lon)
-@writes      session_tracks (lat, lon gerundet), health.db.gps_precision_backup (Rolling-Backup)
+@reads       location.db::session_tracks (lat, lon)
+@writes      location.db::session_tracks (lat, lon gerundet), location.gps_precision_backup (Rolling-Backup)
 @limits.de   Behandelt nur `session_tracks` — die einzige Tabelle, die
              `check_anonymization_compliance()` auf GPS-Präzision prüft. Andere Tabellen mit
              lat/lon-Spalten (z.B. `location_history`) sind nicht Teil dieses Checks und
@@ -51,7 +51,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config
-from modules.db import open_db
+from modules.db import open_location_db
 from utils.anonymize import round_coords
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
@@ -80,14 +80,14 @@ def main():
     apply_lang_from_args(args)
 
     cfg = Config()
-    db_path = cfg.db_path
+    db_path = cfg.location_db_path
 
     if not args.no_backup and not args.dry_run:
         backup_path = db_path.with_suffix(".gps_precision_backup")
         shutil.copy2(db_path, backup_path)
         print(t(f"Backup: {backup_path}", f"Backup: {backup_path}"))
 
-    conn = open_db()
+    conn = open_location_db()
     rows = conn.execute(
         f"SELECT session_id, ts, lat, lon FROM session_tracks WHERE {_HIGH_PRECISION_WHERE}"
     ).fetchall()

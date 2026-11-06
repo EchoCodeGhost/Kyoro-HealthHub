@@ -25,7 +25,7 @@ solo_nights.py — Lookup-Hilfsfunktion für Nächte ohne Partner
 @limits.en   Only as complete as the manually maintained config file.
 @usage
     from modules.solo_nights import is_solo_night
-    if is_solo_night("2026-06-15"):
+    if is_solo_night("2000-01-02"):
         ...
 """
 

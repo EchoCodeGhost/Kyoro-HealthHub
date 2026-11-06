@@ -7,7 +7,7 @@
 
 ## Zweck
 
-Bewertet 6 Wearable-Domänen (Autonomie, PEM, Kardio, Schlaf, Aktivität, Respiration) + bis zu 10 Symptomtagebuch-Domänen (Neurologie, Schmerz, GI, Psychiatrie, Sensorik u.a.) gegen publizierte Referenzwerte für 58 Post-Infektionssyndrome.
+Bewertet 6 Wearable-Domänen (Autonomie, PEM, Kardio, Schlaf, Aktivität, Respiration) + bis zu 10 Symptomtagebuch-Domänen (Neurologie, Schmerz, GI, Psychiatrie, Sensorik u.a.) gegen publizierte Referenzwerte für alle Post-Infektionssyndrome im Katalog (scripts/analysis/syndromes/ -- Anzahl wächst laufend, bewusst nicht hier hartcodiert).
 
 ## Relevanz
 
@@ -53,7 +53,7 @@ Heuristisch: Kombinations-Score, spo2_lc_warn, hrv_crash_pct, Deep-Sleep-Schwell
 
 ## Grenzen
 
-Heuristische Methode: Kein validiertes Medizinprodukt; AFES ist ein Screening-Indikator. Validierte Einzelkomponenten: orthostatischer HR-Anstieg >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/Tag (WHO GAPA 2018). Heuristisch: Multi-Domain-Kombination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, Deep-Sleep-Schwelle <15% (Orientierungswert ohne formale Primaerquelle), Schweregrad-Formel. Schwellenwerte nicht prospektiv evaluiert; Datenqualitaet abhaengig von Geraeteverfuegbarkeit.
+Heuristische Methode: Kein validiertes Medizinprodukt; AFES ist ein Screening-Indikator. Validierte Einzelkomponenten: orthostatischer HR-Anstieg >=30 bpm (Sheldon 2015), DFA alpha1 <0.75 (Gronwald 2020), SpO2 <95% (WHO/ESC), RMSSD >=30 ms (Shaffer 2017), MET >=86/Tag (WHO GAPA 2018). Heuristisch: Multi-Domain-Kombination, spo2_lc_warn=97%, hrv_crash_pct=-10%, rmssd_lc_typical=20 ms, Deep-Sleep-Schwelle <15% (Orientierungswert ohne formale Primaerquelle), Schweregrad-Formel. Schwellenwerte nicht prospektiv evaluiert; Datenqualitaet abhaengig von Geraeteverfuegbarkeit. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 
 ## Referenzen
 

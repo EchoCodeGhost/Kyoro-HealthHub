@@ -29,7 +29,8 @@ Plots:
 @scoring
     Correlation strength: |r| <0.2 weak | 0.2-0.4 moderate | 0.4-0.7 strong | >0.7 very strong
     Location type: home | travel | mixed
-@reads       sessions, session_metrics, pollen, air_quality, biometeo, session_tracks, location_stays, symptoms
+@reads       sessions, session_metrics, pollen, air_quality, biometeo, symptoms;
+             location.db: session_tracks, location_stays
 @writes      analyses/activity/*.{md,png}
 
 Usage:
@@ -54,7 +55,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.prompts.analysis_activity import SYSTEM_PROMPT_ANALYSE_SPORT_ENVIRONMENT_STR as SYSTEM_PROMPT
 
@@ -114,8 +115,9 @@ def aq_index(row: dict) -> float | None:
 
 
 def _gps_centroid(conn: sqlite3.Connection, session_id: str) -> tuple[float, float] | None:
+    attach_location_db(conn)
     row = conn.execute(
-        "SELECT AVG(lat), AVG(lon) FROM session_tracks WHERE session_id=?",
+        "SELECT AVG(lat), AVG(lon) FROM loc.session_tracks WHERE session_id=?",
         (session_id,)
     ).fetchone()
     if row and row[0] is not None:
@@ -127,8 +129,9 @@ def _travel_location(conn: sqlite3.Connection, date_s: str,
                      ts_start: str) -> tuple[float, float] | None:
     """Look up lat/lon from location_stays if session is away from home."""
     try:
+        attach_location_db(conn)
         row = conn.execute("""
-            SELECT lat, lon FROM location_stays
+            SELECT lat, lon FROM loc.location_stays
             WHERE is_home = 0
               AND start_ts <= ? AND end_ts >= ?
             LIMIT 1
@@ -252,7 +255,8 @@ def load_symptoms(conn: sqlite3.Connection, d_from: str, d_to: str) -> dict:
 
 
 def sessions_with_gps(conn: sqlite3.Connection) -> set[str]:
-    rows = conn.execute("SELECT DISTINCT session_id FROM session_tracks").fetchall()
+    attach_location_db(conn)
+    rows = conn.execute("SELECT DISTINCT session_id FROM loc.session_tracks").fetchall()
     return {r[0] for r in rows}
 
 

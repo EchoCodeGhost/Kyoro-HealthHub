@@ -7,8 +7,8 @@ iPhone location tracker via Home Assistant
 @tier        infrastructure
 @purpose.de  Verfolgt iPhone-Standortdaten über Home Assistant für Wetter- und Reiseanalysen
 @purpose.en  Tracks iPhone location data via Home Assistant for weather and travel analysis
-@method.de   Abfrage des aktuellen Standorts von Home Assistant alle paar Stunden; speichert in location_history; Wetter-Importer nutzt diese Daten für Open-Meteo-Standortbestimmung
-@method.en   Queries current location from Home Assistant every few hours; stores in location_history; weather importer uses this data for Open-Meteo location determination
+@method.de   Abfrage des aktuellen Standorts von Home Assistant alle paar Stunden; speichert über location_store in location.db::location_history (Genauigkeit und Zonen nach location_privacy.json, Importer track_location); Wetter-Importer nutzt diese Daten für Open-Meteo-Standortbestimmung. Koordinaten für externe APIs nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km; Ortsnamen 2 Stellen).
+@method.en   Queries current location from Home Assistant every few hours; stores via location_store in location.db::location_history (precision and zones per location_privacy.json, importer track_location); weather importer uses this data for Open-Meteo location determination. Coordinates for external APIs are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km; place names 2 digits).
 @limits.de   Abhängig von Home Assistant-Konfiguration und iPhone-Standortfreigabe
 
 @relevance.de  Ermöglicht die Verfolgung und Analyse von Standortdaten, essentiell für die Mobilitätsanalyse
@@ -28,7 +28,7 @@ Usage:
   python3 track_location.py --today    # show today's summary
 
 @reads       ~/.config/kyoro/travel_history.json, ext. Geolocation-APIs
-@writes      ~/.config/kyoro/travel_history.json
+@writes      ~/.config/kyoro/travel_history.json, location.db::location_history
 @usage
     python track_location.py
     python track_location.py --help
@@ -44,9 +44,14 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
-from health_config import Config as _Cfg, KYORO_CONFIG_DIR
-from modules.db import open_db
+from health_config import Config as _Cfg, KYORO_CONFIG_DIR, OWN_PERSON_ID
+from modules.db import open_location_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
+from modules.location_store import for_external_api, store_location_history
+from utils.create_location_schema import ensure_location_schema
+
+# Importer-Name für die Policy in location_privacy.json
+_IMPORTER = "track_location"
 from utils.anonymize import round_coords
 _cfg = _Cfg()
 
@@ -173,7 +178,7 @@ def geocode_city(city: str) -> tuple[float, float] | None:
 
 def reverse_geocode(lat: float, lon: float) -> str | None:
     """Nominatim (OpenStreetMap) — no API key, max 1 req/s."""
-    rlat, rlon = round_coords(lat, lon)
+    rlat, rlon = for_external_api(lat, lon, place=True)
     try:
         r = requests.get(
             "https://nominatim.openstreetmap.org/reverse",
@@ -192,23 +197,8 @@ def reverse_geocode(lat: float, lon: float) -> str | None:
 
 # ── Database ─────────────────────────────────────────────────────────────────
 def setup_db(conn: sqlite3.Connection):
-    conn.executescript("""
-    CREATE TABLE IF NOT EXISTS location_history (
-        datetime     TEXT PRIMARY KEY,
-        date         TEXT NOT NULL,
-        hour         INTEGER,
-        state        TEXT,        -- 'home' / 'not_home' / zone-name
-        lat          REAL,
-        lon          REAL,
-        gps_accuracy REAL,
-        zone         TEXT,
-        city         TEXT,
-        source       TEXT DEFAULT 'ha_iphone'
-    );
-    CREATE INDEX IF NOT EXISTS idx_loc_date ON location_history(date);
-    CREATE INDEX IF NOT EXISTS idx_loc_state ON location_history(state);
-    """)
-    conn.commit()
+    """Legt das Schema in location.db an (location_history liegt dort)."""
+    ensure_location_schema(conn)
 
 
 def last_recorded(conn: sqlite3.Connection) -> str | None:
@@ -246,13 +236,9 @@ def record_location(conn: sqlite3.Connection, config: dict,
                     "SELECT state, lat, lon, city FROM location_history "
                     "ORDER BY datetime DESC LIMIT 1").fetchone()
                 if last and last[0] == "home":
-                    conn.execute("""
-                        INSERT OR IGNORE INTO location_history
-                        (datetime, date, hour, state, lat, lon, city, source)
-                        VALUES (?,?,?,?,?,?,?,'ha_fallback')""",
-                        (dt_str, date_str, now.hour,
-                         "home", last[1], last[2], last[3]))
-                    conn.commit()
+                    store_location_history(_IMPORTER, [
+                        (dt_str, date_str, now.hour, "home", last[1], last[2],
+                         None, None, last[3], OWN_PERSON_ID, "ha_fallback")], conn=conn)
                     if verbose:
                         print(t(f"[{dt_str}] HA offline — home fortgeschrieben (Fallback)",
                                 f"[{dt_str}] HA offline — home carried forward (fallback)"),
@@ -291,12 +277,9 @@ def record_location(conn: sqlite3.Connection, config: dict,
         else:
             city = reverse_geocode(lat, lon)
 
-    conn.execute("""
-        INSERT OR IGNORE INTO location_history
-        (datetime, date, hour, state, lat, lon, gps_accuracy, zone, city)
-        VALUES (?,?,?,?,?,?,?,?,?)""",
-        (dt_str, date_str, now.hour, state, lat, lon, acc, zone, city))
-    conn.commit()
+    store_location_history(_IMPORTER, [
+        (dt_str, date_str, now.hour, state, lat, lon, acc, zone, city,
+         OWN_PERSON_ID, "ha_iphone")], conn=conn)
 
     if verbose:
         loc_str = city or f"{lat:.2f},{lon:.2f}"
@@ -448,17 +431,13 @@ def backfill_from_ha(conn: sqlite3.Connection, config: dict,
                     dt_str, slot.strftime("%Y-%m-%d"), slot.hour,
                     state, lat_r, lon_r, None,
                     f"zone.{state}" if state == "home" else None,
-                    city, "ha_backfill"
+                    city, OWN_PERSON_ID, "ha_backfill"
                 ))
                 existing_ts.add(dt_str)
             slot += timedelta(hours=1)
 
     if rows:
-        conn.executemany("""
-            INSERT OR IGNORE INTO location_history
-            (datetime, date, hour, state, lat, lon, gps_accuracy, zone, city, source)
-            VALUES (?,?,?,?,?,?,?,?,?,?)""", rows)
-        conn.commit()
+        store_location_history(_IMPORTER, rows, conn=conn)
 
     if verbose:
         print(t(f"  {len(rows)} Einträge rückwirkend eingefügt.",
@@ -707,7 +686,7 @@ def main():
             travel_add(city, args.date_from, args.date_to, args.note)
         return
 
-    conn = open_db()
+    conn = open_location_db()
     setup_db(conn)
 
     if args.history:

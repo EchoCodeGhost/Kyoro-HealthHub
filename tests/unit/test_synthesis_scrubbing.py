@@ -6,6 +6,7 @@ scripts/analysis/manual/analyse_synthesis.py (synthetic names only).
 
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -141,3 +142,17 @@ def test_chair_category_prompt_uses_panel_size(lang):
     lang("de")
     de = syn._build_chair_category_prompt("sleep", [], [], "de", n_members=3)
     assert "drei Panel-Meinungen" in de and "vier Panel-Meinungen" not in de
+
+
+def test_dry_run_prints_counts_but_no_prompt_content(monkeypatch, tmp_path, capsys, lang):
+    lang("en")
+    prompt = "MARKER-PROMPT-CONTENT " * 10
+    monkeypatch.setattr(syn, "SYNTHESIS_DIR", tmp_path)
+    monkeypatch.setattr(syn, "_collect_reports", lambda *a: [{"name": "report"}])
+    monkeypatch.setattr(syn, "_build_prompt", lambda *a: prompt)
+
+    syn.run(date(2000, 1, 1), 10, 10, dry_run=True, lang="en")
+
+    out = capsys.readouterr().out
+    assert "MARKER-PROMPT-CONTENT" not in out
+    assert f"Total prompt: {len(prompt):,} chars | 1 analyses" in out

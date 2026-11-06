@@ -7,7 +7,7 @@ curate_acute_medication_courses.py — Markiert bekannte Akutkuren als is_chroni
 @tier        infrastructure
 @purpose.de  Setzt ``is_chronic=0`` für eine manuell kuratierte Liste bekannter
              einmaliger Akutkuren (z.B. Antibiotika), damit sie in Auswertungen
-             von laufender Dauermedikation unterschieden werden. Die Spalte
+             von dauerhaft eingenommenen Mitteln unterschieden werden. Die Spalte
              ``is_chronic`` selbst wird von ``create_medicine_schema.py``
              angelegt/nachmigriert — dieses Skript kuratiert nur Daten, keine
              Struktur.
@@ -16,14 +16,14 @@ curate_acute_medication_courses.py — Markiert bekannte Akutkuren als is_chroni
              from ongoing long-term medication. The ``is_chronic`` column itself
              is created/migrated by ``create_medicine_schema.py`` — this script
              only curates data, not structure.
-@method.de   Reine ``UPDATE``-Anweisungen gegen ``ACUTE_COURSES`` (Liste aus
-             (drug_name, date)-Paaren); setzt is_chronic=0 nur für exakt
+@method.de   Reine ``UPDATE``-Anweisungen für ``clinical.acute_medication_courses``
+             aus der lokalen Config; setzt is_chronic=0 nur für exakt
              passende (person, drug_name, date)-Zeilen. Kein DDL.
-@method.en   Plain ``UPDATE`` statements against ``ACUTE_COURSES`` (list of
-             (drug_name, date) pairs); sets is_chronic=0 only for exactly
+@method.en   Plain ``UPDATE`` statements for ``clinical.acute_medication_courses``
+             from local config; sets is_chronic=0 only for exactly
              matching (person, drug_name, date) rows. No DDL.
-@reads       medications (drug_name, date, person)
-@writes      medications (UPDATE is_chronic=0 for entries in ACUTE_COURSES)
+@reads       health_config.json (clinical.acute_medication_courses), medications (drug_name, date, person)
+@writes      medications (UPDATE is_chronic=0 for configured entries)
 @limits.de   Manuell kuratierte Liste — neue Akutkuren
              müssen künftig beim Import direkt mit ``is_chronic=0`` versehen
              werden, statt hier ergänzt zu werden. Wiederholtes Ausführen ist
@@ -45,19 +45,24 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from modules.base import log_import, resolve_person
+from health_config import Config
 from modules.db import open_medicine_db
+from modules.i18n import t
 
-# (drug_name, date) Paare bekannter einmaliger Akutkuren — manuell kuratiert.
-ACUTE_COURSES = []
 
 
 def run(person: str | None = None):
+    courses = Config().acute_medication_courses
+    if not courses:
+        sys.exit(t("Keine Einträge in clinical.acute_medication_courses (health_config.json).",
+                   "No entries in clinical.acute_medication_courses (health_config.json)."))
     target_person = resolve_person(person)
     conn = open_medicine_db()
     cursor = conn.cursor()
     total_updated = 0
 
-    for drug_name, dt in ACUTE_COURSES:
+    for course in courses:
+        drug_name, dt = course["drug"], course["date"]
         cursor.execute(
             "UPDATE medications SET is_chronic=0 WHERE person=? AND drug_name=? AND date=?",
             (target_person, drug_name, dt),

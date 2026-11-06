@@ -674,7 +674,7 @@ def build_report(atemst, spo2_apple, spo2_garmin, spo2_polar,
         lines += [
             "\n### Somneo — Umgebungslärm im Schlaffenster\n",
             "  ℹ Misst den Raum am Aufstellort des Geräts;"
-            " lautes Partnerschnarchen kann trotzdem registriert werden.",
+            " lautes Partnerschnarchen kann mitregistriert werden.",
             f"  Nächte: {len(somneo)}  |  Ø Lärm: {_avg(noise_avg_vals):.1f} dB  |  Ø Max: {_avg(noise_max_vals):.1f} dB",
         ]
         loud = sorted(somneo, key=lambda r: r[2] or 0, reverse=True)[:3]

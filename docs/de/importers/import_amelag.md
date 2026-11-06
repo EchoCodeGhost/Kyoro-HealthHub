@@ -24,7 +24,7 @@ Lädt zwei TSV-Dateien von GitHub: die bundesweite aggregierte Kurve (klein, ~10
 
 ## Grenzen
 
-Einzelstandort-Datei ist ~50 MB (bundesweit), wird komplett heruntergeladen und lokal gefiltert — keine serverseitige Bundesland-Filterung verfügbar. Keine medizinische Interpretation der Viruslast-Werte.
+Einzelstandort-Datei ist ~50 MB (bundesweit), wird komplett heruntergeladen und lokal gefiltert — keine serverseitige Bundesland-Filterung verfügbar. Keine medizinische Interpretation der Viruslast-Werte. Zuordnung über Abstand zu einem Punkt, nicht über Grenzen; in Grenznähe kann ein Ort dem Nachbargebiet zugerechnet werden.
 
 ## Referenzen
 

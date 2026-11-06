@@ -15,7 +15,7 @@ Enables creation of database schemas, essential for data organization and struct
 
 ## Method
 
-Tables (identical schemas as in health.db for lossless migration): lab_manual (manual lab results), lab_results (structured lab results), medications, assessments (clinical scores), findings (with ICD codes). Also runs ``_migrate_medications_is_chronic`` on every call — adds is_chronic via ALTER TABLE if an older medicine.db is missing it (idempotent, checked via PRAGMA table_info).
+Tables (identical schemas as in health.db for lossless migration): lab_manual (manual lab results), lab_results (structured lab results), medications, assessments (clinical scores), findings (with ICD codes), diagnoses (ICD-10-coded entries history). Also runs five migrations on every call for older medicine.db instances missing a column (each idempotent, checked via PRAGMA table_info): ``_migrate_medications_is_chronic``, ``_migrate_medications_prescriber_pseudonym``, ``_migrate_medications_date_abgabe``, ``_migrate_diagnoses_date_to``, ``_migrate_diagnoses_provider_pseudonym``.
 
 ## Data flow
 

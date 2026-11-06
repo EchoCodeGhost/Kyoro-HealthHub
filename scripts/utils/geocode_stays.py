@@ -14,20 +14,20 @@ geocode_stays — Reverse Geocoding für GPS-Aufenthalte und Reisevorschläge
               and writes results to location_stays_geocoded. Additionally detects non-home stays
               from GPS tracks (workouts far from home) and suggests new entries for travel_history.
 @method.de   Verwendet Nominatim-API (https://nominatim.openstreetmap.org/reverse) mit Rate-Limit
-              (1,1 Sekunden zwischen Anfragen). GPS-Koordinaten werden auf 2 Dezimalstellen gerundet
-              (ca. 1,1 km Genauigkeit) durch round_coords() aus utils.anonymize für Datenschutz.
+              (1,1 Sekunden zwischen Anfragen). GPS-Koordinaten werden nach `external_api` in
+              `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km; Ortsnamen 2 Stellen).
               Ermittelt Klimazone basierend auf Koordinaten und Ländercode.
               Heimbereich wird als Radius von 0,3 Grad (ca. 30 km) definiert.
               Session-Tracks werden nach Datum gruppiert und gemittelt für Cluster-Erkennung.
 @method.en   Uses Nominatim API (https://nominatim.openstreetmap.org/reverse) with rate limiting
-              (1.1 seconds between requests). GPS coordinates are rounded to 2 decimal places
-              (approx. 1.1km accuracy) via round_coords() from utils.anonymize for privacy.
+              (1.1 seconds between requests). GPS coordinates are coarsened via `external_api` in
+              `location_privacy.json` (default 1 digit, ~11 km; place names 2 digits).
               Determines climate zone based on coordinates and country code.
               Home area defined as radius of 0.3 degrees (approx. 30km).
               Session tracks are grouped and averaged by date for cluster detection.
-@reads       health.db.location_stays, health.db.session_tracks, health.db.sessions,
+@reads       location.db.location_stays, location.db.session_tracks, health.db.sessions,
               ~/.config/kyoro/travel_history.json
-@writes      health.db.location_stays_geocoded, health.db.location_stays.timezone,
+@writes      location.db.location_stays_geocoded, location.db.location_stays.timezone,
               ~/.config/kyoro/travel_history.json (bei Bestätigung durch Benutzer)
 @limits.de   Nominatim hat Rate-Limits (max. 1 Anfrage/Sekunde) - das Skript respektiert dies.
               Nur Aufenthalte mit gültigen GPS-Koordinaten werden verarbeitet.
@@ -62,8 +62,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg
-from modules.db import open_db
-from utils.anonymize import round_coords
+from modules.db import attach_location_db, open_db
+from modules.location_store import clear_read_caches, for_external_api
 from modules.base import tz_from_coords
 
 _cfg = _Cfg()
@@ -102,7 +102,7 @@ def _climate_zone(lat: float, lon: float, country_iso: str = "") -> str:
 
 def _nominatim(lat: float, lon: float) -> dict:
     """Reverse Geocoding via Nominatim. Rate-limited."""
-    lat, lon = round_coords(lat, lon)
+    lat, lon = for_external_api(lat, lon, place=True)
     params = urllib.parse.urlencode({
         "lat": lat, "lon": lon,
         "format": "json", "addressdetails": 1,
@@ -150,14 +150,14 @@ def _extract_region(geo: dict, lat: float, lon: float) -> dict:
 def geocode_stays(conn: sqlite3.Connection, force: bool = False) -> int:
     """Kodiert ungekodete location_stays. Gibt Anzahl kodierter Einträge zurück."""
     if force:
-        conn.execute("DELETE FROM location_stays_geocoded")
+        conn.execute("DELETE FROM loc.location_stays_geocoded")
 
     # Ungekodete Stays laden
     already = {r[0] for r in conn.execute(
-        "SELECT stay_id FROM location_stays_geocoded").fetchall()}
+        "SELECT stay_id FROM loc.location_stays_geocoded").fetchall()}
 
     rows = conn.execute("""
-        SELECT id, lat, lon FROM location_stays
+        SELECT id, lat, lon FROM loc.location_stays
         WHERE lat IS NOT NULL AND lon IS NOT NULL
     """).fetchall()
 
@@ -177,7 +177,7 @@ def geocode_stays(conn: sqlite3.Connection, force: bool = False) -> int:
         tz   = tz_from_coords(lat, lon)
 
         conn.execute("""
-            INSERT OR REPLACE INTO location_stays_geocoded
+            INSERT OR REPLACE INTO loc.location_stays_geocoded
             (stay_id, country, country_iso, state, county, city,
              subregion, climate_zone, geocoded_at)
             VALUES (?,?,?,?,?,?,?,?,?)
@@ -187,7 +187,7 @@ def geocode_stays(conn: sqlite3.Connection, force: bool = False) -> int:
 
         if tz:
             conn.execute(
-                "UPDATE location_stays SET timezone=? WHERE id=?",
+                "UPDATE loc.location_stays SET timezone=? WHERE id=?",
                 (tz, stay_id),
             )
 
@@ -197,6 +197,7 @@ def geocode_stays(conn: sqlite3.Connection, force: bool = False) -> int:
               f"{info['country']} ({info['climate_zone']}){tz_str}")
 
     conn.commit()
+    clear_read_caches()   # Zeitzonen für resolve_timezone neu laden
     return coded
 
 
@@ -216,7 +217,7 @@ def geocode_gps_clusters(conn: sqlite3.Connection,
                MIN(t.lat) as lat_min, MAX(t.lat) as lat_max,
                MIN(t.lon) as lon_min, MAX(t.lon) as lon_max,
                COUNT(*) as n_points
-        FROM session_tracks t
+        FROM loc.session_tracks t
         JOIN sessions s ON s.id = t.session_id
         WHERE t.lat IS NOT NULL AND s.date >= ?
         GROUP BY s.date
@@ -226,7 +227,7 @@ def geocode_gps_clusters(conn: sqlite3.Connection,
 
     # Heimposition aus location_stays
     home_stays = conn.execute("""
-        SELECT AVG(lat), AVG(lon) FROM location_stays WHERE is_home = 1
+        SELECT AVG(lat), AVG(lon) FROM loc.location_stays WHERE is_home = 1
     """).fetchone()
     home_lat = home_stays[0] if home_stays and home_stays[0] else None
     home_lon = home_stays[1] if home_stays and home_stays[1] else None
@@ -335,7 +336,7 @@ def main():
                     help="location_stays überspringen")
     args = ap.parse_args()
 
-    conn = open_db()
+    conn = attach_location_db(open_db())
 
     if not args.no_stays:
         n = geocode_stays(conn, force=args.force)

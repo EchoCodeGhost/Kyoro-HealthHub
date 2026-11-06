@@ -13,6 +13,10 @@ garminconnect  # Garmin Connect API client
 wfdb       # calibration scripts, AFib threshold calibration
 neurokit2  # HRV / ECG signal processing
 
+# Offline region lookup (scripts/modules/region_lookup.py): point-in-polygon
+# on the bundled Natural Earth admin-1 boundaries
+shapely
+
 # HTML parsing (Polar firmware changelog + web imports)
 beautifulsoup4
 
@@ -73,6 +77,13 @@ rawpy         # RAW → Vorschau-JPEG dekodieren (LibRaw-Wrapper)
 # ad-hoc JSON Schema checks a contributor may want to add.
 fhir.resources==8.3.0
 jsonschema
+
+# scripts/utils/sort_scan_batch.py (scanned-document triage/splitter) needs
+# OCR'd input PDFs. OCR itself is NOT a pip dependency here — it's the
+# system binary `ocrmypdf` (pulls in Tesseract + Ghostscript + QPDF), not
+# importable as a Python library for this use case. Install via:
+#   sudo apt-get install ocrmypdf
+# onboard.py checks for it and prints this hint (non-fatal) if missing.
 
 # Datasette — auf 0.65.x gepinnt (kein 1.0.x im verfügbaren Index)
 # datasette-dashboards 0.8.0 kompatibel mit 0.65.x getestet

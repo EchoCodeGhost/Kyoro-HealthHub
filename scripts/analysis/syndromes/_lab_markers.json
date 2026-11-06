@@ -22,6 +22,14 @@
     {"parameter": "Borrelien Westernblot","type": "IgG", "label": "Borrelia Westernblot (IgG)"}
   ],
 
+  "neuroborreliose": [
+    {"parameter": "Borrelien IgG",        "type": "IgG", "label": "Borrelia IgG (ELISA) -- Serum"},
+    {"parameter": "Borrelien IgM",        "type": "IgM", "label": "Borrelia IgM (ELISA) -- Serum"},
+    {"parameter": "Borrelia Western Blot","type": "IgG", "label": "Borrelia Western Blot (IgG) -- Serum"},
+    {"parameter": "Borrelia Westernblot", "type": "IgG", "label": "Borrelia Westernblot (IgG) -- Serum"},
+    {"parameter": "Borrelien Westernblot","type": "IgG", "label": "Borrelia Westernblot (IgG) -- Serum"}
+  ],
+
   "cmv": [
     {"parameter": "CMV IgG",       "type": "IgG", "label": "CMV IgG"},
     {"parameter": "CMV IgM",       "type": "IgM", "label": "CMV IgM"}
@@ -98,7 +106,6 @@
   ],
 
   "chlamydia_pneumoniae": [
-    {"parameter": "Chlamydia trachomatis IgGA", "type": "IgG", "label": "Chlamydia IgGA (EIA)"},
     {"parameter": "Chlamydophila pneumoniae",   "type": "IgG", "label": "Chlamydophila pneumoniae IgG"},
     {"parameter": "Chlamydia pneumoniae",       "type": "IgG", "label": "Chlamydia pneumoniae IgG"}
   ],

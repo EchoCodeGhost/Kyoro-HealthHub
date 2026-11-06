@@ -26,7 +26,7 @@ def test_insurance_numbers_are_redacted(text):
     "CRP 1.2 mg/l", "2026-10-20", "20.10.2026", "Ruhepuls 58 bpm", "10000 Schritte",
     "0,85 mg", "05-100 mg", "12.345.678 Messpunkte", "HRV 41 ms, 0.5 s", "Bestellnummer 12345",
     "ICD A41.9", "08:30 Uhr", "Dosis 0 5 10 mg", "NCT01234567",
-    "01.02.2026", "05.10.2025", "01-02-2026", "01/02/2026", "Befund vom 01.02.2026",
+    "01.02.2026", "05.10.2025", "01-02-2026", "01/02/2026", "Befund vom 01.02.2026",  # no-date-check: Testeingabe
     "Zeitraum 06-01/06/30", "Clusterung 01-15/02-20", "_1234567 Schritte_",
 ])
 def test_measurements_and_codes_are_kept(text):

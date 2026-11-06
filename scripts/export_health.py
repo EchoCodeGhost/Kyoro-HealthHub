@@ -46,7 +46,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
 from modules.db import open_db, open_medicine_db, DB_OPERATIONAL_ERRORS
 from modules.i18n import t, set_lang
-from modules.location_store import region_of, round_coords
+from modules.location_store import region_name, region_of, round_coords
 _cfg = _Cfg()
 
 DB_PATH      = _cfg.db_path
@@ -191,11 +191,15 @@ def _redact_location_columns(rows: list[dict], profile_name: str) -> tuple[list[
         for row in rows:
             # Region nur aus einem echten Paar (lat + lon derselben Herkunft);
             # einzelne Spalten ohne Partner werden nur entfernt
+            # Code plus Name in der aktiven Sprache (z.B. DE-BY / Bayern)
             for lat_col, lon_col, region_col in pairs:
-                try:
-                    row[region_col] = region_of(float(row[lat_col]), float(row[lon_col]))
-                except (KeyError, ValueError, TypeError):
-                    row[region_col] = t("Unbekannt", "Unknown")
+                # lat/lon und latitude/longitude teilen sich die Spalte region;
+                # ein Paar, das in dieser Zeile fehlt, überschreibt sie nicht
+                if lat_col not in row and lon_col not in row:
+                    continue
+                code = region_of(row.get(lat_col), row.get(lon_col))
+                row[region_col] = code
+                row[f"{region_col}_name"] = region_name(code)
 
             # Alte Ortsspalten entfernen
             for col in location_columns:

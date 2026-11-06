@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Backfills historical rows in pollen, biometeo and air_quality that still carry the schema default person='unknown' to the real person pseudonym ID — on the user's explicit request, after weighing it against the general exclusion rule for 'unknown' in pseudonymize_device_person_identifiers.py (see @limits).
+Backfills historical rows in pollen, biometeo and air_quality that still carry the schema default person='unknown' to the real person pseudonym ID — after weighing it against the general exclusion rule for 'unknown' in pseudonymize_device_person_identifiers.py (see @limits).
 
 ## Relevance
 
@@ -24,7 +24,7 @@ import_airquality.py (the sole writer of these three tables) already defaults pe
 
 ## Limitations
 
-Deliberately deviates from the general rule in pseudonymize_device_person_identifiers.py, which does NOT pseudonymize 'unknown' (rationale there: 'unknown' means "no person recorded", not "a specific person" — converting it would misrepresent a missing value as a real identity). For THESE three tables the situation differs: this project has so far only ever held one person's data, and the affected rows demonstrably originate from stays/fetches for the user herself (not a shared or genuinely unknown source) — hence backfilled here on her explicit request. This exception applies ONLY to these three tables, not to 'unknown' project-wide. Meant to run once; safe to re-run (no-op once no 'unknown' rows remain).
+Deliberately deviates from the general rule in pseudonymize_device_person_identifiers.py, which does NOT pseudonymize 'unknown' (rationale there: 'unknown' means "no person recorded", not "a specific person" — converting it would misrepresent a missing value as a real identity). For THESE three tables the situation differs: this project has so far only ever held one person's data, and the affected rows demonstrably originate from stays/fetches for the user herself (not a shared or genuinely unknown source) — hence backfilled here. This exception applies ONLY to these three tables, not to 'unknown' project-wide. Meant to run once; safe to re-run (no-op once no 'unknown' rows remain).
 
 ## Usage
 

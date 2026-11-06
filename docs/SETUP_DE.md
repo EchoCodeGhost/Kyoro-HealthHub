@@ -228,6 +228,61 @@ Optionale externe APIs werden unter dem `"apis"`-Block konfiguriert:
 |-----------|-----------|
 | `apis.aemet_api_key` | AEMET Open Data API-Schlüssel (Spanien-Wetter — optional) |
 
+### Standort-Datenschutz-Einstellungen
+
+Standortdaten, die an externe Dienste gesendet werden, werden zur Wahrung der
+Privatsphäre vergröbert. Konfiguration in `~/.config/kyoro/location_privacy.json`
+(wird von `templates/location_privacy.example.json` erstellt):
+
+```json
+{
+  "external_api": {
+    "precision": 1,
+    "place_precision": 2,
+    "services": {
+      "google_pollen": false
+    }
+  }
+}
+```
+
+| Einstellung | Beschreibung | Standard |
+|-------------|--------------|----------|
+| `external_api.precision` | Dezimalstellen für an externe Dienste gesendete Koordinaten (~11 km bei 1) | 1 |
+| `external_api.place_precision` | Dezimalstellen für Rückwärtsgeokodierung von Ortsnamen (~1 km bei 2) | 2 |
+| `external_api.services.google_pollen` | Google Pollen API aktivieren (erfordert API-Schlüssel, Opt-in) | false |
+
+**Google Pollen**: Muss explizit aktiviert (`true`) werden, um Standortdaten an
+Google zu senden. Ohne diese Einstellung wird der Google-Pollen-Dienst übersprungen.
+
+**DWD-Pollen-Region**: Konfigurieren Sie die DWD-Pollenregion in
+`health_config.json`:
+
+```json
+{
+  "environment": {
+    "dwd_pollen_region": 123
+  }
+}
+```
+
+Verfügbare Regionen auflisten:
+```bash
+python3 scripts/importers/import_pollen_dwd.py --list-regions
+```
+
+Mecklenburg-Vorpommern (20) und Brandenburg/Berlin (50) haben beim DWD keine
+Teilregionen; dort ist die ID die des Landes.
+
+Falls nicht gesetzt, wird die Region aus den Heimatkoordinaten mit einer Warnung
+geschätzt. Befindet sich der Heimatstandort außerhalb Deutschlands, wird
+DWD-Pollen übersprungen.
+
+Auf Reisen (`travel_log.json` bzw. erkannte Aufenthalte) nimmt `fetch_daily.py`
+die Region des Reiseorts, solange er in Deutschland liegt; im Ausland entfällt
+DWD-Pollen, die Pollenwerte kommen dann über Open-Meteo. Die Region wird lokal
+bestimmt, der DWD erfährt keinen Ort.
+
 ## Datenbankschlüssel und Sicherheit
 
 ### Verschlüsselung

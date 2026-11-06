@@ -33,7 +33,7 @@ def _font():
 def _address_image() -> Image.Image:
     img = Image.new("RGB", (1200, 460), "white")
     d = ImageDraw.Draw(img)
-    d.text((40, 40), "Befund vom 01.02.2026", font=_font(), fill="black")
+    d.text((40, 40), "Befund vom 01.02.2026", font=_font(), fill="black")  # no-date-check: Testeingabe
     d.text((40, 120), "Musterstrasse 12", font=_font(), fill="black")
     d.text((40, 180), "12345 Musterstadt", font=_font(), fill="black")
     d.text((40, 260), "Patientin: Erika Mustermann", font=_font(), fill="black")

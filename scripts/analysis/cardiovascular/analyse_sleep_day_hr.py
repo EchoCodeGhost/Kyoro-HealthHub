@@ -200,8 +200,8 @@ WEIGHT_METRICS = ("body_mass", "body_weight", "weight_kg")
 
 # Apple-Health-Schlaf-Fallback: fuer Phasen, in denen primaer ein anderes
 # Geraet als Polar getragen wird, liefert Polar keine sessions -- ohne
-# Fallback wuerde das Schlaffenster fuer diese Monate komplett fehlen. Seit dem
-# 23.09.2025 (geprueft) exportiert Apple Health 'sleep_analysis' nicht mehr
+# Fallback wuerde das Schlaffenster fuer diese Monate komplett fehlen. Neuere
+# Apple-Health-Exporte liefern 'sleep_analysis' nicht mehr
 # nur EINEN Marker/Nacht, sondern viele Stage-Samples/Nacht (s.
 # import_apple.py::_SLEEP_VALUE_MAP) -- daraus laesst sich ein Naeherungs-
 # Schlaffenster ableiten: alle Samples werden zeitlich sortiert und an
@@ -215,7 +215,7 @@ WEIGHT_METRICS = ("body_mass", "body_weight", "weight_kg")
 # Vermischung mit der praeziseren Polar-Quelle).
 APPLE_SLEEP_GAP_HOURS = 9
 APPLE_SLEEP_MIN_SAMPLES = 3   # verwirft die alten Einzel-Marker-Naechte (ein
-                              # Sample/Nacht, vor dem 23.09.2025 exportiert)
+                              # Sample/Nacht, aus aelteren Exporten)
 APPLE_SLEEP_MIN_SPAN_MIN = 90  # verwirft kurze Tagesschlaf-/Nickerchen-Cluster
 
 

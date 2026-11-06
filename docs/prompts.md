@@ -118,6 +118,7 @@ Jeder Prompt **MUSS** im Skript-Docstring dokumentiert werden:
 | [analysis/manual/analyse_skin.py](../scripts/analysis/manual/analyse_skin.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
 | [analysis/manual/analyse_synthesis.py](../scripts/analysis/manual/analyse_synthesis.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
 | [analysis/manual/analyse_urine.py](../scripts/analysis/manual/analyse_urine.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
+| [analysis/manual/check_supplement_interactions.py](../scripts/analysis/manual/check_supplement_interactions.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
 | [analysis/metabolic/analyse_blood_glucose.py](../scripts/analysis/metabolic/analyse_blood_glucose.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
 | [analysis/metabolic/analyse_body_composition.py](../scripts/analysis/metabolic/analyse_body_composition.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
 | [analysis/metabolic/analyse_body_temperature.py](../scripts/analysis/metabolic/analyse_body_temperature.py) | LLM:Analysis | LLM | 1 | Bilingual (DE/EN) | ✅ Dokumentiert |
@@ -2937,6 +2938,34 @@ You are an experienced nephrologist/internist. Analyze urine home monitoring dat
 
 ---
 
+### 🔹 analysis/manual/check_supplement_interactions.py
+
+**Pfad:** [`scripts/analysis/manual/check_supplement_interactions.py`](../scripts/analysis/manual/check_supplement_interactions.py)  
+**Klassifizierung:** `LLM:Analysis`  
+**Status:** ✅ Dokumentiert  
+**Verantwortlich:** LLM-Infrastruktur  
+
+#### Prompt 1: SYSTEM_PROMPT (LLM:Analysis)
+
+**Klassifizierung:** LLM:Analysis  
+**Zweck:** Allgemeine LLM-Anfrage  
+**Deutsch:**
+```text
+Du bist ein erfahrener klinischer Apotheker. Du bekommst eine Liste aktueller Medikamente (Name, Dosis) und ein oder mehrere Nahrungsergänzungsmittel, die die Nutzerin erwägt. Nenne NUR gut etablierte, allgemein bekannte Interaktions- oder Kontraindikationsbedenken zwischen den genannten Medikamenten und dem/den Supplement(en) — keine spekulativen oder seltenen Wechselwirkungen als sicher darstellen. Wenn dir zu einer Kombination nichts Gesichertes bekannt ist, sag das explizit, statt eine Vermutung als Tatsache zu formulieren. Gib KEINE abschließende 'sicher'/'unsicher'-Bewertung — das ist keine Entscheidung, die du triffst. Schließe IMMER mit dem Hinweis, dass dies kein Ersatz für Rücksprache mit Apotheker oder Arzt ist.
+```
+
+**Englisch:**
+```text
+You are an experienced clinical pharmacist. You receive a list of current medications (name, dose) and one or more supplements the user is considering. Name ONLY well-established, generally known interaction or contraindication concerns between the listed medications and the supplement(s) — do not present speculative or rare interactions as certain. If nothing solid is known about a combination, say so explicitly instead of phrasing a guess as fact. Give NO final 'safe'/'unsafe' verdict — that is not a decision you make. ALWAYS close with a note that this is not a substitute for consulting a pharmacist or doctor.
+```
+
+**Quellcode:** Konstante `SYSTEM_PROMPT` in [`scripts/analysis/manual/check_supplement_interactions.py`](../scripts/analysis/manual/check_supplement_interactions.py)  
+**Variablen:** Keine (statisch)  
+**Besonderheiten:**
+- Keine besonderen Merkmale
+
+---
+
 ### 🔹 analysis/metabolic/analyse_blood_glucose.py
 
 **Pfad:** [`scripts/analysis/metabolic/analyse_blood_glucose.py`](../scripts/analysis/metabolic/analyse_blood_glucose.py)  
@@ -4210,7 +4239,7 @@ NONREM2 = Leichtschlaf, WAKE = Wachphasen.
 
 Analysiere auf Deutsch:
 1. **Schlafarchitektur**: Wie ist die Verteilung von Tief-, REM- und Leichtschlaf?
-   Normwerte: Tiefschlaf 15–25%, REM 20–25% der Schlafdauer.
+   Normwerte: Tiefschlaf 13–23%, REM 18–25% der Schlafdauer (siehe modules/sleep_norms.py).
 2. **Trend**: Verändert sich die Schlafqualität über die Zeit?
 3. **Nächtliche HRV**: Zu welchen Zeiten ist die HRV am höchsten (Erholungsphase)?
 4. **Korrelation mit Folgetag**: Welche Schlafparameter sagen den nächsten Tag voraus?
@@ -4227,7 +4256,7 @@ NONREM2 = light sleep, WAKE = wake phases.
 
 Analyze in English:
 1. **Sleep architecture**: What is the distribution of deep, REM, and light sleep?
-   Normal values: Deep sleep 15–25%, REM 20–25% of sleep duration.
+   Normal values: Deep sleep 13–23%, REM 18–25% of sleep duration (see modules/sleep_norms.py).
 2. **Trend**: Is sleep quality changing over time?
 3. **Nocturnal HRV**: At what times is HRV highest (recovery phase)?
 4. **Correlation with next day**: Which sleep parameters predict the next day?
@@ -4767,7 +4796,6 @@ weather_remote: ts, lat, lon, temp_c, precip_mm, windspeed_kmh, pressure_hpa, so
 air_quality: date, pm25_mean, pm10_mean, no2_mean, o3_mean, aqi_eu_mean, source
 pollen: date, birch, alder, grass, mugwort, ragweed, source
 home_environment: date, entity_id, sensor_type, mean_value, min_value, max_value, unit, source
-location_history: datetime, date, hour, state, lat, lon, city, person, source
 devices: device_id, brand, model, sensor_type, person  -- Geräte-Stammdaten
 persons: person_id, display_name, timezone, active
 
@@ -4882,7 +4910,6 @@ weather_remote: ts, lat, lon, temp_c, precip_mm, windspeed_kmh, pressure_hpa, so
 air_quality: date, pm25_mean, pm10_mean, no2_mean, o3_mean, aqi_eu_mean, source
 pollen: date, birch, alder, grass, mugwort, ragweed, source
 home_environment: date, entity_id, sensor_type, mean_value, min_value, max_value, unit, source
-location_history: datetime, date, hour, state, lat, lon, city, person, source
 devices: device_id, brand, model, sensor_type, person  -- Geräte-Stammdaten
 persons: person_id, display_name, timezone, active
 

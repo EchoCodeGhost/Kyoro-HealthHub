@@ -124,7 +124,7 @@ Arrhythmia detection from all available sources.
              Detektor geschickt (Geraeteklassen-Routing wie SENSOR_TYPE_ROUTING,
              nicht nur Konfidenz-Abstufung) — ein erster Testlauf gegen echte
              Daten zeigte, dass optische/PPG-Quellen eine Falsch-Positiv-
-             Explosion erzeugen (>99% aller Funde stammten von 3 optischen
+             Explosion erzeugen (fast alle Funde stammten von optischen
              Geraeten, EKG-Brustgurt lieferte eine plausible Groessenordnung).
              Synthetischer Test bestaetigt die Ursache: die Klassifikation
              wird ab ca. 50ms Beat-zu-Beat-Rauschen (SD) messbar falsch-
@@ -187,7 +187,7 @@ Arrhythmia detection from all available sources.
              all (device-class routing like SENSOR_TYPE_ROUTING, not just a
              confidence downgrade) — an initial test run against real data
              showed optical/PPG sources produce a false-positive explosion
-             (>99% of all findings came from 3 optical devices, chest-strap
+             (almost all findings came from optical devices, chest-strap
              ECG produced a plausible order of magnitude). A synthetic test
              confirms the cause: classification turns measurably false-
              positive above roughly 50ms of beat-to-beat noise (SD) — PPG raw
@@ -318,9 +318,8 @@ elif _dash_mode == "alternative":
 # Grund: ein fester Absolut-Schwellwert (frueher HR_EXERCISE_MAX=110bpm)
 # versagt bei Personen mit chronisch erhoehter, aber STABILER Ruhe-HF (z.B.
 # POTS) — Belastungs- und Ruhe-HF-Verteilung koennen sich dann fast komplett
-# ueberlappen (empirisch geprueft: Median 140 bpm waehrend geloggter
-# Trainingseinheiten vs. 138 bpm ausserhalb, auf realen Daten dieser
-# Nutzerin), wodurch entweder fast alle Schlaege als "Belastung" verworfen
+# ueberlappen (Median waehrend geloggter Trainingseinheiten fast gleich
+# dem Median ausserhalb), wodurch entweder fast alle Schlaege als "Belastung" verworfen
 # werden (zu hoher Informationsverlust) oder der Schwellwert gar nicht mehr
 # trennt. Stattdessen: ein gleitender Basiswert (Median der letzten
 # ADAPTIVE_BASELINE_WINDOW_S Sekunden) pro Geraet, ein Schlag zaehlt nur dann
@@ -502,7 +501,7 @@ CUESTA_WINDOW = 10   # "10 normal beats", experimentell festgelegt im Original
 # _collect_cuesta_episodes fuer die empirische Begruendung): nur 'ecg'/
 # 'chest_strap' werden ueberhaupt durch den Detektor geschickt, optische/
 # PPG-Quellen erzeugten in einem ersten Testlauf auf echten Daten eine
-# Falsch-Positiv-Explosion (>99% aller Funde bei nur 3 Geraeten) und wurden
+# Falsch-Positiv-Explosion (fast alle Funde) und wurden
 # deshalb komplett ausgeschlossen statt nur niedriger konfidenzbewertet.
 # 'moderate' statt 'high', da die hier verwendete Naechster-Klassenschwerpunkt-
 # Klassifikation selbst nur eine Naeherung an die unveroeffentlichte
@@ -874,7 +873,7 @@ def _collect_cuesta_episodes(conn, person: str, tz_name: str, training_by_day: d
     geschickt, NICHT nur niedriger konfidenzbewertet. Grund: empirisch
     getestet (echte Datenbasis) erzeugt die Naechster-Klassenschwerpunkt-
     Naeherung auf optischem/PPG-RR-Rauschen eine Falsch-Positiv-Explosion
-    (>99% aller Funde bei einem ersten Testlauf stammten von 3 optischen
+    (fast alle Funde bei einem ersten Testlauf stammten von optischen
     Geraeten, waehrend EKG-Brustgurt-Quellen eine plausible Groessenordnung
     lieferten) — konsistent mit dem synthetischen Befund, dass die
     Klassifikation ab ca. 50ms Beat-zu-Beat-Rauschen (SD) messbar falsch-

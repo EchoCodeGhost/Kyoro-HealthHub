@@ -238,16 +238,6 @@ CREATE TABLE IF NOT EXISTS session_metrics (
 );
 CREATE INDEX IF NOT EXISTS idx_sm_metric ON session_metrics(metric);
 
-CREATE TABLE IF NOT EXISTS session_tracks (
-    session_id  TEXT REFERENCES sessions(id),
-    ts          TEXT NOT NULL,
-    lat         REAL,
-    lon         REAL,
-    elevation_m REAL,
-    speed_ms    REAL,
-    PRIMARY KEY (session_id, ts)
-);
-
 -- -----------------------------------------------------------------------
 -- Stryd (Laufleistungsmesser, sekundengenaue Laufdynamik)
 -- -----------------------------------------------------------------------
@@ -834,15 +824,6 @@ CREATE TABLE IF NOT EXISTS biometeo (
     PRIMARY KEY (date, lat, lon)
 );
 
-CREATE TABLE IF NOT EXISTS photo_locations (
-    date                 TEXT NOT NULL,
-    lat                  REAL NOT NULL,
-    lon                  REAL NOT NULL,
-    source               TEXT NOT NULL,
-    person               TEXT NOT NULL DEFAULT 'unknown',
-    PRIMARY KEY (date, lat, lon, source)
-);
-
 CREATE TABLE IF NOT EXISTS indoor_air_quality (
     date        TEXT NOT NULL,
     entity_id   TEXT NOT NULL,
@@ -873,33 +854,6 @@ CREATE TABLE IF NOT EXISTS pollen (
     source       TEXT DEFAULT 'open-meteo',
     person       TEXT NOT NULL DEFAULT 'unknown',
     PRIMARY KEY (date, lat, lon)
-);
-
-CREATE TABLE IF NOT EXISTS location_history (
-    datetime     TEXT NOT NULL,
-    date         TEXT,
-    hour         INTEGER,
-    state        TEXT,
-    lat          REAL,
-    lon          REAL,
-    gps_accuracy REAL,
-    zone         TEXT,
-    city         TEXT,
-    person       TEXT NOT NULL DEFAULT 'unknown',
-    source       TEXT,
-    PRIMARY KEY (datetime, person)
-);
-
-CREATE TABLE IF NOT EXISTS location_stays (
-    id       INTEGER PRIMARY KEY,
-    start_ts TEXT,
-    end_ts   TEXT,
-    lat      REAL,
-    lon      REAL,
-    is_home  INTEGER,
-    timezone TEXT,
-    person   TEXT NOT NULL DEFAULT 'unknown',
-    source   TEXT
 );
 
 -- Outbreak-Surveillance: Ausbruchsmeldungen aus WHO, ECDC, ProMED, HealthMap
@@ -1008,19 +962,6 @@ CREATE TABLE IF NOT EXISTS outbreak_exposure (
     exposure_score  REAL,       -- 0.0–1.0
     source          TEXT,       -- travel_history | location_stays | gps | home_residence
     computed_at     TEXT NOT NULL
-);
-
--- GPS-Aufenthalte mit Reverse-Geocoding-Ergebnis
-CREATE TABLE IF NOT EXISTS location_stays_geocoded (
-    stay_id         INTEGER PRIMARY KEY REFERENCES location_stays(id),
-    country         TEXT,
-    country_iso     TEXT,
-    state           TEXT,
-    county          TEXT,
-    city            TEXT,
-    subregion       TEXT,       -- Zusammenfassung für Expositionsmatching
-    climate_zone    TEXT,
-    geocoded_at     TEXT NOT NULL
 );
 
 -- Kognitive Kurztests (täglich ~2 min)
@@ -1765,15 +1706,29 @@ def main():
                 v2.execute(f"INSERT OR IGNORE INTO {src} VALUES ({ph})", row)
         log(f"{src}: {len(rows)} rows kopiert")
 
-    # location_history + location_stays (+ person)
-    copy_with_person("location_history", "location_history")
+    # location_history + location_stays (+ person) → location.db, unverändert
+    # übernommen wie bei der späteren Migration aus health.db
+    from modules.db import open_location_db
+    from utils.create_location_schema import ensure_location_schema
+    loc = open_location_db()
+    ensure_location_schema(loc)
+    hist = v1.execute("SELECT * FROM location_history").fetchall()
+    if hist:
+        ph = ",".join("?" * (len(hist[0]) + 1))
+        loc.executemany(f"INSERT OR IGNORE INTO location_history VALUES ({ph})",
+                        [(*row, OWN_PERSON_ID) for row in hist])
+    log(f"location_history: {len(hist)} rows nach location.db kopiert (+person=OWN_PERSON_ID)")
 
     stays = v1.execute("SELECT * FROM location_stays").fetchall()
-    for row in stays:
-        # id, start_ts, end_ts, lat, lon, is_home, source → + timezone=NULL, person=OWN_PERSON_ID
-        v2.execute("INSERT OR IGNORE INTO location_stays VALUES (?,?,?,?,?,?,?,?,?)",
-                   (*row, None, OWN_PERSON_ID))
-    log(f"location_stays: {len(stays)} rows kopiert (+timezone=NULL, person={OWN_PERSON_ID})")
+    # id, start_ts, end_ts, lat, lon, is_home, source → + timezone=NULL, person=OWN_PERSON_ID
+    loc.executemany(
+        "INSERT OR IGNORE INTO location_stays "
+        "(id, start_ts, end_ts, lat, lon, is_home, source, timezone, person) "
+        "VALUES (?,?,?,?,?,?,?,?,?)",
+        [(*row, None, OWN_PERSON_ID) for row in stays])
+    loc.commit()
+    loc.close()
+    log(f"location_stays: {len(stays)} rows nach location.db kopiert (+timezone=NULL, person={OWN_PERSON_ID})")
 
     v2.commit()
 

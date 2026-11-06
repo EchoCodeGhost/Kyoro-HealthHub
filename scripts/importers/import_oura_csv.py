@@ -33,8 +33,8 @@ Oura Ring CSV-Export → health.db
 @writes      health.db (oura_cycle_insights, oura_period_starts,
              oura_cycle_predictions, oura_tags, oura_temperature_raw,
              oura_daytime_stress, oura_sleep_model, oura_vo2max, oura_workouts,
-             oura_contraception, oura_survey, location_stays, sessions,
-             session_metrics, ...)
+             oura_contraception, oura_survey, sessions, session_metrics, ...),
+             location.db (location_stays)
 @limits.de   Ergänzt die API-Daten, ersetzt sie nicht. Einige Tabellen
              werden nur erstellt, wenn Daten vorhanden sind. Keine medizinische
              Interpretation. training_load für gespiegelte Oura-Workouts ist
@@ -81,9 +81,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg
 from modules.base import claim_training_load_slot, log_import, resolve_person
-from modules.db import open_db
+from modules.db import attach_location_db, open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
-from utils.anonymize import round_coords
+from modules.location_store import store_stays
 
 _cfg = _Cfg()
 DB_PATH   = _cfg.db_path
@@ -100,7 +100,7 @@ def setup_db(conn: sqlite3.Connection):
         "oura_tags", "oura_temperature_raw", "oura_daytime_stress",
         "oura_sleep_model", "oura_vo2max", "oura_workouts", "oura_contraception",
         "oura_survey", "oura_blood_glucose", "oura_blood_pressure",
-        "oura_medications", "oura_lab_results", "location_stays",
+        "oura_medications", "oura_lab_results",
     ]
     for tbl in _TABLES:
         row = conn.execute(
@@ -375,18 +375,7 @@ def setup_db(conn: sqlite3.Connection):
         source              TEXT DEFAULT 'oura_csv'
     );
 
-    -- Standort-Aufenthalte (aus rawlocation, Stay-Detection)
-    CREATE TABLE IF NOT EXISTS location_stays (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        start_ts    TEXT NOT NULL,
-        end_ts      TEXT NOT NULL,
-        lat         REAL NOT NULL,
-        lon         REAL NOT NULL,
-        is_home     INTEGER DEFAULT 0,
-        source      TEXT DEFAULT 'oura_gps'
-    );
-    CREATE INDEX IF NOT EXISTS idx_loc_stays_start ON location_stays(start_ts);
-    CREATE INDEX IF NOT EXISTS idx_loc_stays_end   ON location_stays(end_ts);
+    -- Standort-Aufenthalte liegen in location.db (location_store.store_stays)
 
     PRAGMA journal_mode=WAL;
     """)
@@ -921,22 +910,26 @@ def import_medications(conn, rows):
     return n
 
 
-def import_location_stays(conn, rows):
+def import_location_stays(conn, rows, person: str | None = None):
     """
     Subsamplet rawlocation auf 1-Min-Takt, erkennt Aufenthalte per
-    Zheng-Algorithmus, speichert in location_stays.
+    Zheng-Algorithmus, speichert sie über location_store in
+    location.db::location_stays (Genauigkeit und Zonen nach
+    location_privacy.json, Importer import_oura_csv).
     Bereits importierte Zeiträume werden übersprungen.
     """
     if not rows:
         return 0
+    person = resolve_person(person)
 
     cfg = _Cfg()
     home_lat = cfg.home_lat or 0.0
     home_lon = cfg.home_lon or 0.0
 
     # Letzten importierten Timestamp holen
+    attach_location_db(conn)
     last = conn.execute(
-        "SELECT MAX(end_ts) FROM location_stays WHERE source='oura_gps'"
+        "SELECT MAX(end_ts) FROM loc.location_stays WHERE source='oura_gps'"
     ).fetchone()[0]
 
     # Subsample: 1 Point pro Minute (erster Point je Minute)
@@ -960,21 +953,13 @@ def import_location_stays(conn, rows):
     if not pts:
         return 0
 
-    stays = detect_stays(pts)
-
-    n = 0
-    for start_ts, end_ts, lat, lon in stays:
-        is_home = 1 if haversine_m(lat, lon, home_lat, home_lon) <= HOME_RADIUS_M else 0
-        rlat, rlon = round_coords(lat, lon)
-        conn.execute("""
-            INSERT OR IGNORE INTO location_stays
-            (start_ts, end_ts, lat, lon, is_home)
-            VALUES (?,?,?,?,?)
-        """, (start_ts, end_ts, rlat, rlon, is_home))
-        n += 1
-
-    conn.commit()
-    return n
+    stays = [
+        (start_ts, end_ts, lat, lon,
+         1 if haversine_m(lat, lon, home_lat, home_lon) <= HOME_RADIUS_M else 0,
+         None, person, "oura_gps")
+        for start_ts, end_ts, lat, lon in detect_stays(pts)
+    ]
+    return store_stays("import_oura_csv", stays)
 
 
 def import_lab_results(conn, rows):
@@ -1442,7 +1427,7 @@ _PERSON_AWARE = {
     import_daily_activity_csv, import_daily_readiness_csv, import_daily_sleep_csv,
     import_daily_spo2_csv, import_daily_stress_csv, import_cardiovascular_age_csv,
     import_heartrate_csv, import_daily_resilience, import_daily_metabolic_score,
-    import_daily_smoothed_cva,
+    import_daily_smoothed_cva, import_location_stays,
 }
 
 
@@ -1514,7 +1499,7 @@ def main():
         ("oura_daytime_stress",  "SELECT COUNT(*), MIN(timestamp), MAX(timestamp) FROM oura_daytime_stress"),
         ("oura_sleep_model",     "SELECT COUNT(*), MIN(day), MAX(day) FROM oura_sleep_model"),
         ("oura_vo2max",          "SELECT COUNT(*), MIN(day), MAX(day) FROM oura_vo2max"),
-        ("location_stays",       "SELECT COUNT(*), MIN(start_ts), MAX(end_ts) FROM location_stays"),
+        ("location_stays",       "SELECT COUNT(*), MIN(start_ts), MAX(end_ts) FROM loc.location_stays"),
     ]
     for label, sql in checks:
         r = conn.execute(sql).fetchone()

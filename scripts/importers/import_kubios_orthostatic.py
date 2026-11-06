@@ -88,7 +88,7 @@ def _find_value(text: str, *patterns) -> float | None:
 
 def _find_date(text: str) -> str | None:
     """Extrahiert Datum/Uhrzeit aus KubiosHRV-Bericht."""
-    # Format: 28.01.2024  10:30:05
+    # Format: 01.02.2000  10:30:05
     m = re.search(r'Date[:\s]+(\d{1,2})\.(\d{2})\.(\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)', text)
     if m:
         d, mo, y, t = m.groups()

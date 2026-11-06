@@ -20,8 +20,8 @@ Umweltdaten für Reiseaufenthalte → health.db (air_quality, pollen, biometeo)
            optionally AEMET (Spain) and stored in the DB.
            Data is stored in regular tables (air_quality, pollen, biometeo).
 @reads ~/Kyoro-HealthHub/.config/kyoro/travel_history.json,
-       health.db:location_stays, health.db:location_stays_geocoded,
-       health.db:sessions, health.db:session_tracks
+       location.db:location_stays, location.db:location_stays_geocoded,
+       health.db:sessions, location.db:session_tracks
 @writes health.db:air_quality, health.db:pollen, health.db:biometeo, health.db:import_log
 @limits.de Erfordert Internetverbindung für API-Abfragen.
            Koordinatenauflösung für Aufenthalte ohne GPS-Daten via Nominatim.
@@ -58,9 +58,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, KYORO_CONFIG_DIR
-from modules.db import open_db, DB_OPERATIONAL_ERRORS
+from modules.db import attach_location_db, open_db, DB_OPERATIONAL_ERRORS
 from modules.base import ImportResult, log_import, resolve_person
-from utils.anonymize import round_coords
+from modules.location_store import for_external_api
 from modules.i18n import t, set_lang, add_lang_arg, apply_lang_from_args
 
 _cfg = _Cfg()
@@ -181,8 +181,7 @@ def migrate_env_compound_pk(conn: sqlite3.Connection) -> bool:
     if not _env_pk_needs_migration(conn):
         return False
 
-    home_lat = round(_cfg.home_lat or 0, 2)
-    home_lon = round(_cfg.home_lon or 0, 2)
+    home_lat, home_lon = for_external_api(_cfg.home_lat or 0, _cfg.home_lon or 0)
 
     print(t("  [migration] env-Tabellen auf (date, lat, lon) PK migrieren …",
             "  [migration] migrating env tables to (date, lat, lon) PK …"))
@@ -450,12 +449,13 @@ def _load_travel_log(dfrom: str | None = None) -> list[dict]:
 
 def _load_db_stays(conn: sqlite3.Connection, dfrom: str) -> list[dict]:
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
             SELECT ls.start_ts, ls.end_ts, ls.lat, ls.lon,
                    COALESCE(g.country,''), COALESCE(g.country_iso,''),
                    COALESCE(g.city, g.subregion, '')
-            FROM   location_stays ls
-            LEFT JOIN location_stays_geocoded g ON g.stay_id = ls.id
+            FROM   loc.location_stays ls
+            LEFT JOIN loc.location_stays_geocoded g ON g.stay_id = ls.id
             WHERE  ls.is_home = 0 AND ls.start_ts >= ?
             ORDER  BY ls.start_ts
         """, (dfrom,)).fetchall()
@@ -486,13 +486,14 @@ def _load_gps_daytrips(conn: sqlite3.Connection, dfrom: str,
                        max_km: float = DAYTRIP_MAX_KM) -> list[dict]:
     """Training-Sessions mit GPS-Track, deren Zentroid min_km…max_km vom Heim liegt."""
     try:
+        attach_location_db(conn)
         rows = conn.execute("""
             SELECT s.date,
                    AVG(st.lat)  AS clat,
                    AVG(st.lon)  AS clon,
                    s.sport
             FROM sessions s
-            JOIN session_tracks st ON st.session_id = s.id
+            JOIN loc.session_tracks st ON st.session_id = s.id
             WHERE s.type = 'training' AND s.date >= ?
             GROUP BY s.id
             HAVING clat IS NOT NULL
@@ -505,7 +506,7 @@ def _load_gps_daytrips(conn: sqlite3.Connection, dfrom: str,
         km = _haversine_km(clat, clon, home_lat, home_lon)
         if not (min_km <= km <= max_km):
             continue
-        rlat, rlon = round_coords(clat, clon)
+        rlat, rlon = for_external_api(clat, clon)
         result.append({
             "date_from":   d0,
             "date_to":     d0,
@@ -536,10 +537,12 @@ def _all_stays(conn: sqlite3.Connection,
     @purpose.en Collect all relevant stays for environmental data import
     @method.de Kombiniert Aufenthalte aus travel_history.json, location_stays (DB)
                und GPS-Trainings-Tracks. Filtert Aufenthalte < 2 km vom Heim.
-               Löst Koordinaten mit _resolve_coords auf.
+               Löst Koordinaten mit _resolve_coords auf. Koordinaten für externe APIs
+               nach `external_api` in `location_privacy.json` vergröbert (Standard 1 Stelle, ~11 km).
     @method.en Combine stays from travel_history.json, location_stays (DB)
                and GPS training tracks. Filter stays < 2 km from home.
-               Resolve coordinates with _resolve_coords.
+               Resolve coordinates with _resolve_coords. Coordinates for external APIs
+               are coarsened via `external_api` in `location_privacy.json` (default 1 digit, ~11 km).
     @param conn SQLite-Datenbankverbindung
     @param dfrom Frühestes Datum (ISO-Format)
     @param sources Liste der Quellen: 'travel', 'db', 'gps', 'all'
@@ -595,10 +598,11 @@ def _has_gap(conn: sqlite3.Connection, table: str,
     """
     try:
         if lat is not None and lon is not None:
+            lat_coarse, lon_coarse = for_external_api(lat, lon)
             existing = conn.execute(
                 f"SELECT COUNT(*) FROM {table} "
                 f"WHERE date >= ? AND date <= ? AND lat = ? AND lon = ?",
-                (d_from, d_to, round(lat, 2), round(lon, 2))
+                (d_from, d_to, lat_coarse, lon_coarse)
             ).fetchone()[0]
         else:
             existing = conn.execute(
@@ -618,8 +622,7 @@ def _fetch_openmeteo(conn: sqlite3.Connection, stay: dict,
     """Open-Meteo: Luftqualität + Pollen + Biometeo für einen Aufenthalt."""
     from importers.import_airquality import import_airquality, import_biometeo
 
-    lat = round(stay["lat"], 4)
-    lon = round(stay["lon"], 4)
+    lat, lon = for_external_api(stay["lat"], stay["lon"])
     d0  = stay["date_from"]
     d1  = stay["date_to"]
 

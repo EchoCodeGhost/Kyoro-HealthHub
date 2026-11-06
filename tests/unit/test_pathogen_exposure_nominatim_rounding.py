@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
 def test_nominatim_receives_rounded_coordinates(monkeypatch):
     import analysis.infectious.analyse_pathogen_exposure as ape
+    from modules import location_store
 
     requested = []
 
@@ -37,6 +38,9 @@ def test_nominatim_receives_rounded_coordinates(monkeypatch):
 
     monkeypatch.setattr(ape.urllib.request, "urlopen", _fake_urlopen)
     monkeypatch.setattr(ape.time, "sleep", lambda s: None)
+    # Mock location_privacy to use precision=1 (default for external API)
+    monkeypatch.setattr(location_store, "_load_location_privacy", 
+                       lambda: {"external_api": {"precision": 1, "place_precision": 2}})
 
     cache = {}
     result = ape._nominatim(48.12345, 11.54321, cache)

@@ -42,7 +42,7 @@ class TestSniffCsv:
         assert _sniff_csv(Path("sleepdata-2026-07-11.csv")) == "sleep_cycle"
 
     def test_beurer_health_manager(self):
-        assert _sniff_csv(Path("HealthManager Pro Export - 18.05.2023 - 05.06.2024.csv")) == "health_manager"
+        assert _sniff_csv(Path("HealthManager Pro Export - 01.02.2000 - 03.04.2001.csv")) == "health_manager"
 
     def test_renpho(self):
         assert _sniff_csv(Path("RENPHO Health-_20250711_191410.csv")) == "renpho"

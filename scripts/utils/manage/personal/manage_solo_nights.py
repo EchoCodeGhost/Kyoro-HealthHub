@@ -162,7 +162,7 @@ def main():
 Beispiele / Examples:
   python3 scripts/utils/manage/personal/manage_solo_nights.py list
   python3 scripts/utils/manage/personal/manage_solo_nights.py add
-  python3 scripts/utils/manage/personal/manage_solo_nights.py add 2026-06-15 2026-06-16
+  python3 scripts/utils/manage/personal/manage_solo_nights.py add 2000-01-02 2000-01-03
   python3 scripts/utils/manage/personal/manage_solo_nights.py delete 3
   python3 scripts/utils/manage/personal/manage_solo_nights.py edit 2
 """,
