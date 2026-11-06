@@ -24,7 +24,7 @@ Allowlist: build_args() erzeugt Argumente nur aus deklarierten Feldern, und ein 
 
 ## Grenzen
 
-Enthält nur Typen und Ausschlüsse. Die Einträge pro Skript folgen getrennt.
+Die Einträge für manuelle Importer und Werkzeuge fehlen noch. --person bleibt offen, bis die Frage zum Personenfeld geklärt ist.
 
 ## Aufruf
 

@@ -24,7 +24,7 @@ Allowlist: build_args() creates arguments only from declared fields, and an entr
 
 ## Limitations
 
-Holds types and exclusions only. The entries per script follow separately.
+Entries for manual importers and utilities are still missing. --person stays open until the question about the person field is settled.
 
 ## Usage
 

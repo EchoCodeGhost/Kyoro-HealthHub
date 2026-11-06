@@ -27,37 +27,39 @@
 - [x] 2.6 Tests with real subprocesses: output arrives before exit, cancel ends the child of an orchestrator, `input()` in piped mode fails visibly, shell characters stay literal
 - [ ] 2.7 Add a read-only opener to `modules/db.py` that installs no triggers, and implement `status.py` on it with `PRAGMA query_only=ON`, reading all three log tables; test locked, missing and undecryptable databases and missing log tables
 - [ ] 2.8 Tests for `status.py`: timestamps in both formats compare correctly as UTC, `post_import_*` rows are ignored, on-demand rows do not make compute or analysis look current
-- [ ] 2.9 Implement the job log widget with a line limit and ANSI handling, the field-driven flag form, and the confirmation dialog
+- [ ] 2.9 Implement the job log widget with a line limit and ANSI handling, the field-driven flag form, and the start dialog naming script, arguments and whether it writes
 - [ ] 2.10 Show elapsed time in the job view during every run, and offer the per-script output files after an `analyse_all.py` run, read-only
 
 ## 3. Manifest and drift checks
 
 - [x] 3.1 Implement `ScriptEntry`, the field types and `EXCLUDED` in `manifests.py`
 - [ ] 3.2 Read each script's argparse and add entries for all manual importers, including those also run automatically (lab results, HRV logger, ECG logger, Kubios, manual genetics, Aniva)
-- [ ] 3.3 Add entries for the 5 on-demand compute scripts and the 11 on-demand analysis scripts
+- [x] 3.3 Add entries for the 5 on-demand compute scripts and the 11 on-demand analysis scripts
 - [ ] 3.4 Add the utility entries from design decision 11, confirming the correct mode from each script's source; give `EXCLUDED` a reason per entry
 - [ ] 3.5 Add drift tests: coverage, flags exist through `_supported_flags()`, blocked flags absent, `input(` requires interactive mode or a declared gating flag, `COMPUTE_REQUIRES` consistent, on-demand manifest entries match `ON_DEMAND_COMPUTE_SCRIPTS` and `ON_DEMAND_ANALYSE_SCRIPTS`
 - [ ] 3.6 Declare `no_write_flags` for each manual importer from its source, including dry-run and list modes
+
+- [x] 3.7 Remove the `confirm` field from `ScriptEntry`, because every job start asks (design decision 16)
 
 ## 4. LLM consent
 
 - [ ] 4.1 Determine the active provider and `is_local` through `utils/llm_provider.py` without any network call; verify this against the provider classes, and treat errors as unknown
 - [ ] 4.2 Check how per-tool routing resolves, so the display and dialog cover every route an action can use
-- [ ] 4.3 Implement the provider indicator and the per-run consent dialog; set `uses_llm` in the manifest from each script's source
-- [ ] 4.4 Tests: remote asks and is not remembered, unknown asks, local does not ask, run without AI adds `--no-llm`
+- [ ] 4.3 Implement the provider indicator and the per-run consent as part of the start dialog; set `uses_llm` in the manifest from each script's source
+- [ ] 4.4 Tests: remote asks and is not remembered, unknown asks, local shows no consent part, run without AI adds `--no-llm`
 
 ## 5. Screens
 
 - [ ] 5.1 Import screen: auto tab (all, single through `--only-exact`, form) and manual tab (picker restricted to the declared path kind, sanitising as a second job step after success, failure and cancel, retry when it did not complete)
 - [ ] 5.2 Compute screen: all, single with upstream and downstream warning and "with dependents", on-demand tab through `compute_all.py --on-demand` with last-run status
 - [ ] 5.3 Analyse screen: all, single and multi-select through `--only-exact`, skip selection, form without `--llm`, on-demand tab through `analyse_all.py --on-demand` with last-run status
-- [ ] 5.4 Utility screen with groups, confirmation for maintenance actions, and the Datasette toggle (localhost, read-only)
+- [ ] 5.4 Utility screen with groups and the Datasette toggle (localhost, read-only)
 - [ ] 5.5 Query screen: single question, `--sql` option, interactive mode through suspend
 - [ ] 5.6 Export screen: profiles read at runtime, including `aliases`; time range, person, format, output directory
 - [ ] 5.7 Dashboard: last-run status, stale hint, skipped scripts from `REQUIRES_INFECTION_DATE`
-- [ ] 5.8 Resolve the open question on empty-inbox behaviour of `process_inbox --import`, then implement the daily workflow with mandatory preview and pause on failure
-- [ ] 5.9 Resolve the open question on the person field by checking `identity_resolver`
-- [ ] 5.10 Pilot tests per screen: expected argument list per action, disabled states, keyboard-only navigation, quit confirmation with a running job
+- [ ] 5.8 Resolve the open question on empty-inbox behaviour of `process_inbox --import`, then implement the daily workflow with one question at its start, including remote AI consent, mandatory preview and pause on failure
+- [ ] 5.9 Implement the person selection from the databases through the read-only opener, with display names from `identity_resolver`, hidden with one person, and nothing stored; test one and several persons
+- [ ] 5.10 Pilot tests per screen: expected argument list per action, start dialog before every job and once per sequence, no process after cancelling it, disabled states, keyboard-only navigation, quit confirmation with a running job
 - [ ] 5.11 Results browser: scripts from `ANALYSE_SCRIPTS`, runs newest first, Markdown reports, output files including old `.log` files, plots through `xdg-open` or `open` with the path as fallback, the no-report state, and the output locations of on-demand scripts
 
 ## 6. Verification against real data
