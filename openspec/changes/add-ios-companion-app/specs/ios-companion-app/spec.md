@@ -1,11 +1,15 @@
 ## ADDED Requirements
 
-### Requirement: Analysis stays in the hub
-The app SHALL capture data, guide the user and show results. It SHALL NOT compute clinical metrics or run analyses itself.
+### Requirement: Works without a computer
+The app SHALL run Kyoro's import and compute stages in embedded Python on the device, in-process, and SHALL show results from structured analysis output with Swift Charts. Every function in version 1 SHALL work without a paired hub. Analyses that need scipy or statsmodels SHALL run only on a paired hub.
 
 #### Scenario: Derived metric needed
 - **WHEN** a screen needs a derived metric such as an HRV trend or a PEM pattern
-- **THEN** the app shows the value computed by the hub, or says that it is not available yet
+- **THEN** the app shows the value computed on the device, or says how many more days of data it needs
+
+#### Scenario: Analysis only available on the hub
+- **WHEN** the user opens an analysis that needs scipy or statsmodels and no hub is paired
+- **THEN** the app says that this analysis runs on a computer with Kyoro and offers pairing, without showing an empty chart
 
 ### Requirement: Suggestions explain themselves
 The Today screen SHALL show at most three suggestions. Every suggestion SHALL state why it appears and offer exactly one action.
@@ -35,9 +39,9 @@ Exports from the app SHALL use the SymptomTrack JSON format read by `import_symp
 ### Requirement: No feature pretends to work
 A function that depends on a missing part (such as the hub bridge) SHALL say so and offer the manual alternative, instead of showing a control that does nothing.
 
-#### Scenario: Doctor export without a paired hub
-- **WHEN** the user picks a specialty in the Doctor tab and no hub is paired
-- **THEN** the app shows the matching `export_health.py` command to run on the computer
+#### Scenario: Function needs the hub
+- **WHEN** the user opens a function that only a paired hub provides, such as automatic Garmin download
+- **THEN** the app says so in one sentence and offers the manual path on the device, such as sharing the Garmin export file
 
 ### Requirement: Wizards resume where the user left
 Every multi-step wizard SHALL persist its current step and entered values, so that closing it and opening it again continues at the same step.

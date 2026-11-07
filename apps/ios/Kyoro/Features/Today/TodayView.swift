@@ -68,7 +68,7 @@ struct TodayView: View {
     private func perform(_ action: Suggestion.Action) {
         switch action {
         case .logSymptom: selection = .capture
-        case .connectHealth, .pairHub, .runAutopilot: selection = .more
+        case .connectHealth, .runAutopilot: selection = .more
         case .startProtocol(let id): activeProtocol = .protocolFor(id)
         }
     }

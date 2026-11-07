@@ -19,7 +19,7 @@ struct OnboardingFlow: View {
         WizardStep(
             id: "welcome",
             title: "Willkommen bei Kyoro",
-            explanation: "Kyoro bringt deine Beschwerden, Messwerte und Gerätedaten auf eine Zeitachse. Deine Daten bleiben auf deinem iPhone und deinem eigenen Rechner.",
+            explanation: "Kyoro bringt deine Beschwerden, Messwerte und Gerätedaten auf eine Zeitachse. Alles läuft auf deinem iPhone, ein Rechner ist nicht nötig.",
             primaryTitle: "Einrichten"
         ),
         WizardStep(
@@ -32,12 +32,6 @@ struct OnboardingFlow: View {
             title: "Welche Daten darf Kyoro lesen?",
             explanation: "Apple fragt am Ende der Einrichtung noch einmal einzeln nach. Was du weglässt, kannst du später freigeben.",
             isSkippable: true
-        ),
-        WizardStep(
-            id: "hub",
-            title: "Auswertung auf deinem Rechner",
-            explanation: "Die Analysen laufen in Kyoro auf deinem eigenen Rechner. Wenn du ihn koppelst, startet die App Import, Berechnung und Analyse für dich.",
-            primaryTitle: "Später koppeln"
         ),
         WizardStep(
             id: "reminder",
@@ -60,7 +54,6 @@ struct OnboardingFlow: View {
                 case "welcome": welcome
                 case "focus": focusPicker
                 case "health": healthPicker
-                case "hub": hubInfo
                 default: reminderPicker
                 }
             }
@@ -106,13 +99,6 @@ struct OnboardingFlow: View {
                     toggle(group.id, in: &healthGroups)
                 }
             }
-        }
-    }
-
-    private var hubInfo: some View {
-        KyoroCard {
-            Label("Koppeln geht über einen QR-Code, den Kyoro auf deinem Rechner anzeigt.", systemImage: "qrcode")
-            Label("Ohne Kopplung kannst du Einträge als Datei in den Inbox-Ordner legen.", systemImage: "folder")
         }
     }
 

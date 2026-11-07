@@ -1,12 +1,12 @@
 ## Context
 
-The hub is local-first Python with a fixed stage order (`import_all.py` → `compute_all.py` → `analyse_all.py`) and an existing operating layer, the pipeline TUI (`scripts/tui/`). The TUI already solves job locking, flag allowlisting and remote-LLM consent. The phone app should reuse those decisions instead of creating a second pipeline path.
+The hub is local-first Python with a fixed stage order (`import_all.py` → `compute_all.py` → `analyse_all.py`) and an existing operating layer, the pipeline TUI (`scripts/tui/`). The TUI already solves job locking, flag allowlisting and remote-LLM consent. The phone app reuses those decisions and the same Python code instead of creating a second pipeline.
 
 ## Goals / Non-Goals
 
-**Goals:** easy capture in two taps; guided flows for everything manual; one autopilot job for everything automatic; data stays on the phone and the user's own computer.
+**Goals:** the app works on an iPhone or iPad alone, without a computer; easy capture in two taps; guided flows for everything manual; one autopilot job for everything automatic; data stays on the device and, if paired, on the user's own computer.
 
-**Non-goals:** running analyses on the phone; a cloud backend; Android in this change; diagnosis or treatment advice; rating values or warning based on values.
+**Non-goals:** requiring a computer; a cloud backend; Android in this change; diagnosis or treatment advice; rating values or warning based on values.
 
 ## Decisions
 
@@ -18,7 +18,16 @@ The hub is local-first Python with a fixed stage order (`import_all.py` → `com
 - **Suggestions are rule-based and explain themselves.** At most three cards; each states why it appears. No LLM decides what the user should do.
 - **Design tokens from the logo** in one file (`KyoroTheme.swift`); colour only as accent, status never by colour alone.
 
-### Spike: pipeline in embedded Python (2026-11-07, direction pending)
+### Direction: iPhone alone, hub optional (decided 2026-11-07)
+
+Michel decided on 2026-11-07 that the app runs on its own. Import and
+compute run in embedded Python on the device, plots are drawn with Swift
+Charts from structured analysis output, and the hub is an optional upgrade
+for the analyses that need scipy or statsmodels, for automatic Garmin
+download, and as a backup target. Version 1 targets one person and one
+leading device.
+
+### Spike: pipeline in embedded Python (2026-11-07)
 
 Static import check: 72 of 80 importers and 22 of 28 compute scripts need no
 third-party package at module level. In an empty venv, 66 importers and 21
@@ -40,7 +49,7 @@ measurements are open.
 - Every recognised value goes through a confirmation step. The model never
   derives medical values; computation stays in the pipeline. Devices without
   Apple Intelligence fall back to OCR plus fixed rules.
-- Nothing leaves the device, so the remote-LLM consent flow does not apply.
+- On-device intelligence sends nothing off the device. Remote LLM providers are not part of version 1; if added later, they use the per-run consent flow.
 
 ### Relation to Kyoro SymptomTrack (KiSTe)
 

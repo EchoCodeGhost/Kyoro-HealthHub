@@ -3,8 +3,8 @@
 > **Deutsche Version:** [README_DE.md](README_DE.md)
 
 Native iPhone app that makes Kyoro easy, guided and integrated: quick capture,
-Apple Health, widgets and Siri on the phone, while the analysis keeps running in
-the Python hub on your own computer. Plan and research:
+Apple Health, widgets and Siri, with the Kyoro pipeline running in embedded
+Python on the iPhone or iPad itself. A computer running the hub is optional. Plan and research:
 `openspec/changes/add-ios-companion-app/`.
 
 > Not part of a release. Like `mobile/` and `pwa/`, this app needs a full privacy
@@ -13,15 +13,15 @@ the Python hub on your own computer. Plan and research:
 ## What works in this skeleton
 
 - Five tabs: Today, Capture, History, Doctor, More
-- Five-step onboarding (goals, Apple Health permissions with reasons, daily reminder)
+- Four-step onboarding (goals, Apple Health permissions with reasons, daily reminder)
 - Rule-based suggestions on Today, at most three, each with its reason
 - Symptom capture in two taps; interactive widget and Siri shortcut "Symptom erfassen"
 - Guided standing test (Schellong / NASA Lean Test) with checklist and timers
 - Export of entries as `symptomtrack_export_<date>.json`, which `scripts/process_inbox.py`
   recognises and imports
-- Doctor tab: pick a specialty, get the matching `export_health.py` command
+- Doctor tab: pick a specialty (on-device export follows with embedded Python)
 
-Not yet: hub bridge and pairing, autopilot, HealthKit data reading beyond the
+Not yet: pipeline in embedded Python (proof of concept in `apps/ios-python-poc`), optional hub bridge, autopilot, HealthKit data reading beyond the
 permission request, storing protocol measurements, resuming paused flows.
 
 ## Build

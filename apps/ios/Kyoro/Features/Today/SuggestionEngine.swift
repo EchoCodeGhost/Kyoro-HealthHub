@@ -2,8 +2,8 @@
 // Copyright (C) 2026 Kyoro-HealthHub contributors
 //
 // Rule-based "next best action". Deterministic and offline on purpose: every
-// suggestion carries the reason it appears, so the user can trust it. Later rules
-// will read hub findings (stale pipeline stages, new analyses) via the bridge.
+// suggestion carries the reason it appears, so the user can trust it. The app
+// works without a computer; pairing is offered only where it adds something.
 
 import Foundation
 
@@ -11,7 +11,6 @@ struct Suggestion: Identifiable, Equatable, Sendable {
     enum Action: Equatable, Sendable {
         case logSymptom
         case connectHealth
-        case pairHub
         case runAutopilot
         case startProtocol(TestProtocolID)
     }
@@ -66,17 +65,7 @@ enum SuggestionEngine {
             ))
         }
 
-        if !context.hubPaired {
-            result.append(Suggestion(
-                id: "pair-hub",
-                title: "Mit deinem Rechner verbinden",
-                reason: "Import, Berechnung und Analyse laufen dann automatisch, ohne Befehle im Terminal.",
-                actionTitle: "Rechner koppeln",
-                systemImage: "desktopcomputer",
-                action: .pairHub,
-                priority: 70
-            ))
-        } else if context.undeliveredEntries > 0 {
+        if context.hubPaired && context.undeliveredEntries > 0 {
             result.append(Suggestion(
                 id: "run-autopilot",
                 title: "Neue Einträge auswerten",

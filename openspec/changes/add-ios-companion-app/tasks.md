@@ -23,7 +23,7 @@
 - [ ] 3.2 QR pairing, device token in Keychain, revoke from the hub
 - [ ] 3.3 Inbox upload and autopilot job with plain-language status
 - [ ] 3.4 Results: findings and plots for the History tab
-- [ ] 3.5 Doctor tab runs `export_health.py` through the bridge and shares the result
+- [ ] 3.5 Analyses that need scipy or statsmodels run through the bridge
 
 ## 4. Integration
 
@@ -39,7 +39,11 @@
 - [x] 4b.1 Static import check and in-process smoke test on desktop
 - [x] 4b.2 Simulator run of apps/ios-python-poc (size, start, timings)
 - [ ] 4b.3 Device run with signing, and size of a SwiftUI shell that embeds only the Python framework
-- [ ] 4b.4 Decide direction based on the measurements
+- [x] 4b.4 Decide direction: iPhone alone with embedded Python, hub optional (2026-11-07)
+- [ ] 4b.5 In-process runner for import_all and compute_all on the device
+- [ ] 4b.6 HealthKit mapping to Kyoro tables
+- [ ] 4b.7 Structured output format for analyses; the ten most used analyses first
+- [ ] 4b.8 Doctor export (`export_health.py`) on the device, shared through the share sheet
 
 ## 4c. Help at critical steps (see "Kyoro-App: Wo Nutzer Hilfe brauchen")
 

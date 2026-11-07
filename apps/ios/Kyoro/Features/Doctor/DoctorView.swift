@@ -61,7 +61,7 @@ struct DoctorView: View {
     }
 }
 
-/// Until the hub bridge exists the app cannot run the export itself, so it hands
+/// Until the export runs in the embedded Python on the device, the skeleton hands
 /// over the exact command instead of a button that would do nothing.
 private struct ExportPlanSheet: View {
     let profile: ExportProfile
@@ -83,7 +83,7 @@ private struct ExportPlanSheet: View {
                 } header: {
                     Text("Auf deinem Rechner ausführen")
                 } footer: {
-                    Text("Sobald dein Rechner gekoppelt ist, startet die App den Export selbst.")
+                    Text("Der Export direkt auf dem iPhone ist in Arbeit. Bis dahin geht er mit diesem Befehl auf einem Rechner mit Kyoro.")
                 }
             }
             .navigationTitle(profile.specialty)

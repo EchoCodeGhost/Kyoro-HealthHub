@@ -46,7 +46,6 @@ struct SuggestionEngineTests {
 
         let unpaired = SuggestionEngine.suggestions(for: context(paired: false, lastLog: now, undelivered: 2))
         #expect(!unpaired.contains { $0.action == .runAutopilot })
-        #expect(unpaired.contains { $0.action == .pairHub })
     }
 
     @Test func everySuggestionExplainsWhy() {

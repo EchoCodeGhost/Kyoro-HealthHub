@@ -1,5 +1,7 @@
 ## ADDED Requirements
 
+The hub bridge is optional. The app SHALL work without it; the bridge adds the analyses that do not run on the device, automatic downloads that need a computer, and a backup target.
+
 ### Requirement: Bridge runs only allowlisted pipeline jobs
 The bridge SHALL start work only through the TUI job runner and manifests, with argument lists and no shell. It SHALL run at most one job at a time.
 

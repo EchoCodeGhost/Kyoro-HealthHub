@@ -21,7 +21,7 @@ struct HistoryView: View {
                     ContentUnavailableView(
                         "Noch kein Verlauf",
                         systemImage: "chart.xyaxis.line",
-                        description: Text("Erfasse ein Symptom. Auswertungen von deinem Rechner erscheinen hier, sobald er gekoppelt ist.")
+                        description: Text("Erfasse ein Symptom. Deine Einträge erscheinen hier nach Tagen geordnet.")
                     )
                 } else {
                     List(days, id: \.day) { day in
