@@ -43,6 +43,17 @@ A function that depends on a missing part (such as the hub bridge) SHALL say so 
 - **WHEN** the user opens a function that only a paired hub provides, such as automatic Garmin download
 - **THEN** the app says so in one sentence and offers the manual path on the device, such as sharing the Garmin export file
 
+### Requirement: Doctor export as PDF and FHIR file
+The doctor export SHALL produce a PDF and, on request, a FHIR R4 bundle from the existing `export_health.py` profiles, run on the device and shared only through the share sheet. The export SHALL contain recorded values and the user's notes, without ratings. The app SHALL explain how to upload the PDF into the user's ePA through their health insurer's ePA app. It SHALL NOT send data to a server, a practice system or the ePA by itself, and SHALL NOT claim interoperability with an electronic health record system.
+
+#### Scenario: Share with the practice
+- **WHEN** the user taps Share on the export preview
+- **THEN** the share sheet opens with the PDF, and the FHIR bundle is offered as a second file
+
+#### Scenario: Put it into the ePA
+- **WHEN** the user picks "In meine ePA" on the export preview
+- **THEN** the app saves the PDF to Files and shows three steps for uploading it in the insurer's ePA app
+
 ### Requirement: Wizards resume where the user left
 Every multi-step wizard SHALL persist its current step and entered values, so that closing it and opening it again continues at the same step.
 

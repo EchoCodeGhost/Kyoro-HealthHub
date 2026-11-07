@@ -43,7 +43,8 @@
 - [ ] 4b.5 In-process runner for import_all and compute_all on the device
 - [ ] 4b.6 HealthKit mapping to Kyoro tables
 - [ ] 4b.7 Structured output format for analyses; the ten most used analyses first
-- [ ] 4b.8 Doctor export (`export_health.py`) on the device, shared through the share sheet
+- [ ] 4b.8 Doctor export (`export_health.py`) on the device as PDF and FHIR R4 bundle, shared through the share sheet, with ePA upload steps
+- [ ] 4b.9 Later: evaluate a direct interface to practice software or the ePA (needs a server or DiGA status; see design)
 
 ## 4c. Help at critical steps (see "Kyoro-App: Wo Nutzer Hilfe brauchen")
 

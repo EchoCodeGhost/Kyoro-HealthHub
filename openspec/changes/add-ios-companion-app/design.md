@@ -88,6 +88,21 @@ place the user picks, or to the paired hub; Kyoro does not write to iCloud
 by itself. Apple is asked before the first submission whether an end-to-end
 encrypted iCloud backup is acceptable.
 
+### Doctor export as an interface (research 2026-11-07)
+
+A direct API to practice software or the ePA is not part of version 1.
+Writing into the ePA is open to the insured person through the insurer's
+ePA app, to providers, insurers, the e-prescription server and, by opt-in,
+to DiGA (§ 6a DiGAV); a DiGA must be a CE-marked medical device, which
+conflicts with the documentation-only scope. Practice software has no
+general import interface for patient data; the KBV archive and change
+interface (FHIR, § 371 SGB V) moves data between practice systems. Version 1
+therefore exports a PDF and a FHIR R4 bundle through the share sheet and
+explains the upload into the ePA app. A Kyoro server or API would make the
+project a controller for health data under GDPR Art. 9, and claiming
+interoperability with an EHR system would require the EHDS wellness label
+(Regulation (EU) 2025/327, Art. 47).
+
 ## Risks / Trade-offs
 
 - An app makes it easier to start a remote-LLM run casually → consent per run, provider always visible, default off.
