@@ -24,7 +24,7 @@ final class HealthKitService {
         HealthDataGroup(
             id: "heart",
             title: "Herz und HRV",
-            reason: "Für HRV-Trends, Ruhepuls und Hinweise auf Rhythmusauffälligkeiten.",
+            reason: "Für HRV-Verlauf, Ruhepuls und deine EKG-Aufzeichnungen der Apple Watch.",
             systemImage: "heart",
             types: [
                 HKQuantityType(.heartRate),

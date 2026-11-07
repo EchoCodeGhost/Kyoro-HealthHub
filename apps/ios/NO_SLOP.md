@@ -21,6 +21,7 @@ an item fails.
 - [ ] No invented numbers, sample values that look real, or fake testimonials, also not in previews or mockups.
 - [ ] Empty states say what to do next. Error messages say what happened and what the user can do.
 - [ ] Findings are framed as "worth asking your doctor about", never as a diagnosis. AI text is labelled.
+- [ ] Kyoro documents and does not rate: no erkennen, warnen, screenen, auffällig, Diagnose, and no test named as a test for a condition (EU MDR, see the "Intended purpose is documentation" requirement).
 
 ## Code
 

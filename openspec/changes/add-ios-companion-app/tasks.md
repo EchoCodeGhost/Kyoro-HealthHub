@@ -50,9 +50,10 @@
 - [ ] 4c.5 Low-energy capture: bad-day action, "wie gestern", backfill yesterday
 - [ ] 4c.6 Severity anchors on the scale
 - [ ] 4c.7 Doctor wizard: specialty question, default period, preview before sharing
-- [ ] 4c.8 Automatic encrypted backup to iCloud Drive, restore detection on first launch
-- [ ] 4c.10 Threshold table for notable and urgent values, reviewed by a physician
-- [ ] 4c.11 Regulatory assessment of the safety net (EU MDR rule 11) before release
+- [ ] 4c.8 Encrypted backup to a location the user picks (Files picker, hub), reminder after seven days, restore on first launch; ask App Review whether an end-to-end encrypted iCloud backup is acceptable
+- [ ] 4c.10 Show the lab's own markings and the fixed emergency sentence; no own threshold table
+- [ ] 4c.11 Written regulatory assessment of the intended purpose and the grey areas (standing-test difference, lab markings) before public release
+- [ ] 4c.14 Filter rating outputs (arrhythmia tiers, AFib and ectopy flags, orthostatic ratings) from everything the app shows or exports
 - [ ] 4c.12 Accessibility pass at the largest text size, VoiceOver and Switch Control; test with affected users
 - [ ] 4c.13 Data location page in setup
 - [ ] 4c.9 "Ask someone for help" report without health data

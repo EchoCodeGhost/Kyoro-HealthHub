@@ -6,7 +6,7 @@ The hub is local-first Python with a fixed stage order (`import_all.py` → `com
 
 **Goals:** easy capture in two taps; guided flows for everything manual; one autopilot job for everything automatic; data stays on the phone and the user's own computer.
 
-**Non-goals:** running analyses on the phone; a cloud backend; Android in this change; diagnosis or treatment advice.
+**Non-goals:** running analyses on the phone; a cloud backend; Android in this change; diagnosis or treatment advice; rating values or warning based on values.
 
 ## Decisions
 
@@ -60,6 +60,24 @@ this repository. The hub reads it through `import_symptomtrack_export.py`
   symptom catalogue and wording.
 - `compute_histamine_triggers.py` reads only `source = 'kyoro_st'` rows
   with timestamps. iPhone entries must be included there as well.
+
+### Regulatory scope (research 2026-11-07)
+
+The research doc "Kyoro iPhone-App: Recht und Technik geprüft" found that
+value-bound warnings, a standing-test rating and arrhythmia tiers are very
+likely medical device software under MDCG 2019-11 (class IIa to IIb), while
+capture, display and an uninterpreted doctor export are not. Version 1
+therefore documents and does not rate: the lab's own markings, a fixed
+emergency sentence, and a standing test that shows values and the difference.
+Classifications from hub or on-device analyses are filtered out of the app
+and its exports. User-logged episodes (migraine, AFib as a diary entry) stay,
+because the user records them.
+
+App Review Guideline 5.1.3(ii) says apps "may not store personal health
+information in iCloud". The backup is therefore encrypted and written to a
+place the user picks, or to the paired hub; Kyoro does not write to iCloud
+by itself. Apple is asked before the first submission whether an end-to-end
+encrypted iCloud backup is acceptable.
 
 ## Risks / Trade-offs
 
