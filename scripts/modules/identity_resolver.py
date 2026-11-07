@@ -60,7 +60,7 @@ identity_resolver.py — Zentrales Identifier-Pseudonym-Resolver-Modul
              Stores mappings in ~/.config/kyoro/identity.db and provides
              forward (real→pseudo) and reverse (pseudo→real) resolution plus
              human-readable display names for reports.
-@reads       ~/.config/kyoro/identity.db (device_id_map, person_map, provider_map, sourcefile_map, device_serial_map)
+@reads       <KYORO_ACTIVE_PATIENT_DIR or ~>/.config/kyoro/identity.db (device_id_map, person_map, provider_map, sourcefile_map, device_serial_map)
              ~/.config/kyoro/registry.json (für sensor_type Lookup in resolve_display_name)
 @writes      ~/.config/kyoro/identity.db (neue Einträge in device_id_map, person_map, provider_map, sourcefile_map)
 @limits.de   Nur lokale Auflösung; keine Netzwerkzugriffe. Pseudonyme sind
@@ -90,8 +90,13 @@ import json
 import os
 
 # Constants
-IDENTITY_DB_PATH = Path("~/.config/kyoro/identity.db").expanduser()
-REGISTRY_PATH = Path("~/.config/kyoro/registry.json").expanduser()
+# Same rule as health_config.KYORO_CONFIG_DIR (not imported here to keep this
+# module free of the config import chain): a patient instance started with
+# KYORO_ACTIVE_PATIENT_DIR must use its own identity.db, never the operator's.
+_ACTIVE_PATIENT_DIR = os.environ.get("KYORO_ACTIVE_PATIENT_DIR")
+_CONFIG_DIR = (Path(_ACTIVE_PATIENT_DIR) if _ACTIVE_PATIENT_DIR else Path.home()) / ".config" / "kyoro"
+IDENTITY_DB_PATH = _CONFIG_DIR / "identity.db"
+REGISTRY_PATH = _CONFIG_DIR / "registry.json"
 
 # Pseudonym prefixes
 PREFIX_DEVICE = "DEV-"

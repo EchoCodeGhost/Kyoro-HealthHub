@@ -37,8 +37,9 @@
 ## 4b. Embedded pipeline spike
 
 - [x] 4b.1 Static import check and in-process smoke test on desktop
-- [ ] 4b.2 Simulator and device run of apps/ios-python-poc (size, start, timings)
-- [ ] 4b.3 Decide direction based on the measurements
+- [x] 4b.2 Simulator run of apps/ios-python-poc (size, start, timings)
+- [ ] 4b.3 Device run with signing, and size of a SwiftUI shell that embeds only the Python framework
+- [ ] 4b.4 Decide direction based on the measurements
 
 ## 5. Release gate
 

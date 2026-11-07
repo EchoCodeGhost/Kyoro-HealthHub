@@ -19,7 +19,7 @@ Deterministische SHA-256-basierte Pseudonym-Generierung mit Präfixen: - DEV-XXX
 
 ## Datenfluss
 
-- **Liest:** `~/.config/kyoro/identity.db`, `(device_id_map`, `person_map`, `provider_map`, `sourcefile_map`, `device_serial_map)`, `~/.config/kyoro/registry.json`, `(für`, `sensor_type`, `Lookup`, `in`, `resolve_display_name)`
+- **Liest:** `<KYORO_ACTIVE_PATIENT_DIR`, `or`, `~>/.config/kyoro/identity.db`, `(device_id_map`, `person_map`, `provider_map`, `sourcefile_map`, `device_serial_map)`, `~/.config/kyoro/registry.json`, `(für`, `sensor_type`, `Lookup`, `in`, `resolve_display_name)`
 - **Schreibt:** `~/.config/kyoro/identity.db (neue Einträge in device_id_map, person_map, provider_map, sourcefile_map)`
 
 ## Grenzen

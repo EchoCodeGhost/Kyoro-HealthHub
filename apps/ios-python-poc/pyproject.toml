@@ -2,12 +2,12 @@
 project_name = "Kyoro PoC"
 bundle = "org.kyoro"
 version = "0.0.1"
-license.file = "../../LICENSE"
+license = "GPL-3.0-or-later"
 
 [tool.briefcase.app.kyoro_poc]
 formal_name = "Kyoro PoC"
 description = "Runs one Kyoro importer and one compute step in embedded Python."
-sources = ["src/kyoro_poc", "src/kyoro_scripts"]
+sources = ["src/kyoro_poc", "src/kyoro_scripts", "src/config"]
 requires = []
 
 [tool.briefcase.app.kyoro_poc.iOS]

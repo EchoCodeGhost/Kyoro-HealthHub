@@ -15,6 +15,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Iterator
 
 
 def _sample_export(path: Path, days: int = 30) -> None:
@@ -35,8 +36,11 @@ def _sample_export(path: Path, days: int = 30) -> None:
     path.write_text(json.dumps({"symptom_entries": entries}), encoding="utf-8")
 
 
-def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> list[tuple[str, float, str]]:
-    """Return a list of (step, seconds, detail). Raises on the first failure."""
+def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> Iterator[tuple[str, float, str]]:
+    """Yield (step, seconds, detail) as each step finishes.
+
+    Raises on the first failure, after the earlier steps were already yielded.
+    """
     scripts_dir = Path(scripts_dir).resolve()
     work = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="kyoro_poc_"))
     work.mkdir(parents=True, exist_ok=True)
@@ -46,18 +50,16 @@ def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> list[tup
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
-    steps: list[tuple[str, float, str]] = []
-
     def timed(name, fn):
         t0 = time.perf_counter()
         detail = fn()
-        steps.append((name, time.perf_counter() - t0, str(detail)))
+        return name, time.perf_counter() - t0, str(detail)
 
     def load_modules():
         import modules.db  # noqa: F401  (first import of the pipeline package)
         return "ok"
 
-    timed("Module laden", load_modules)
+    yield timed("Module laden", load_modules)
 
     def init_db():
         from health_config import Config
@@ -72,7 +74,7 @@ def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> list[tup
             sys.argv = argv
         return db_path
 
-    timed("Datenbank anlegen", init_db)
+    yield timed("Datenbank anlegen", init_db)
 
     export = work / "symptomtrack_export_2026-10-30.json"
     _sample_export(export)
@@ -88,7 +90,7 @@ def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> list[tup
             conn.close()
         return res
 
-    timed("Import Symptome", do_import)
+    yield timed("Import Symptome", do_import)
 
     def do_compute():
         from modules.db import open_db
@@ -101,8 +103,7 @@ def run(scripts_dir: str | Path, work_dir: str | Path | None = None) -> list[tup
             conn.close()
         return res
 
-    timed("Berechnen Symptome", do_compute)
-    return steps
+    yield timed("Berechnen Symptome", do_compute)
 
 
 if __name__ == "__main__":

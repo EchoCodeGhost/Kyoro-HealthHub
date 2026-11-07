@@ -19,7 +19,7 @@ Deterministic SHA-256-based pseudonym generation with prefixes: - DEV-XXXXXXXX f
 
 ## Data flow
 
-- **Reads:** `~/.config/kyoro/identity.db`, `(device_id_map`, `person_map`, `provider_map`, `sourcefile_map`, `device_serial_map)`, `~/.config/kyoro/registry.json`, `(für`, `sensor_type`, `Lookup`, `in`, `resolve_display_name)`
+- **Reads:** `<KYORO_ACTIVE_PATIENT_DIR`, `or`, `~>/.config/kyoro/identity.db`, `(device_id_map`, `person_map`, `provider_map`, `sourcefile_map`, `device_serial_map)`, `~/.config/kyoro/registry.json`, `(für`, `sensor_type`, `Lookup`, `in`, `resolve_display_name)`
 - **Writes:** `~/.config/kyoro/identity.db (neue Einträge in device_id_map, person_map, provider_map, sourcefile_map)`
 
 ## Limitations

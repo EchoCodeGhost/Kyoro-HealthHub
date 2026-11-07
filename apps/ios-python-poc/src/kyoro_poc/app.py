@@ -1,8 +1,10 @@
 """Minimal iOS shell: one button that runs the smoke test and shows timings.
 
 Results are also printed with the prefix KYORO_POC so they show up in the
-`briefcase run` log.
+`briefcase run` log. KYORO_POC_AUTORUN=1 runs the test right after startup,
+for simulators where nothing can tap the button (simctl cannot tap).
 """
+import os
 import time
 import traceback
 from pathlib import Path
@@ -25,6 +27,8 @@ class KyoroPoc(toga.App):
         self.main_window.show()
         ready = (time.perf_counter() - _T_IMPORT) * 1000
         self._report(f"UI bereit nach {ready:.0f} ms ab App-Modul")
+        if os.environ.get("KYORO_POC_AUTORUN") == "1":
+            self.run_test(None)
 
     def _report(self, line):
         print(f"KYORO_POC {line}", flush=True)

@@ -91,9 +91,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from modules.identity_resolver import resolve_provider  # noqa: E402
+from modules.identity_resolver import _CONFIG_DIR, resolve_provider  # noqa: E402
 
-PROVIDER_REGISTRY_PATH = Path("~/.config/kyoro/provider_registry.json").expanduser()
+PROVIDER_REGISTRY_PATH = _CONFIG_DIR / "provider_registry.json"
 
 # Deutsche PLZ gefolgt von einem großgeschriebenen Ortsnamen.
 GERMAN_POSTAL_CODE_RE = re.compile(

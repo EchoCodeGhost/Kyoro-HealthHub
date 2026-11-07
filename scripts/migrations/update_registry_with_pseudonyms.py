@@ -43,12 +43,12 @@ scripts_dir = Path(__file__).parent.parent
 if str(scripts_dir) not in sys.path:
     sys.path.insert(0, str(scripts_dir))
 
-from modules.identity_resolver import resolve_device, resolve_person
+from modules.identity_resolver import REGISTRY_PATH, resolve_device, resolve_person
 
 def update_registry_with_pseudonyms(dry_run: bool = True) -> int:
     """Update registry.json with pseudonyms."""
     
-    registry_path = Path("~/.config/kyoro/registry.json").expanduser()
+    registry_path = REGISTRY_PATH
     
     if not registry_path.exists():
         print(f"✗ Registry file not found: {registry_path}")
