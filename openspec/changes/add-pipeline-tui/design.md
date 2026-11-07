@@ -121,8 +121,11 @@ The dashboard reads `import_log`, `compute_log` and `analysis_log` through a new
 
 Three rules keep the stale hint correct:
 - Timestamps are parsed to UTC before comparing, never compared as strings.
-- `post_import_*` rows do not count as imports. Otherwise sanitising would make compute look outdated.
-- Only `COMPUTE_SCRIPTS` and `ANALYSE_SCRIPTS` entries count towards a stage being current. Otherwise an on-demand run would hide an outdated full run.
+- `post_import_*` and `compute_*` rows do not count as imports. Sanitising and some compute scripts write to `import_log`, which would otherwise make compute look outdated.
+- Only imports with new rows make compute outdated. Otherwise a daily run that found nothing new would do the same.
+- Only `COMPUTE_SCRIPTS` and `ANALYSE_SCRIPTS` entries count towards a stage being current. Otherwise an on-demand run would hide an outdated full run. A stage is as current as its script with the oldest success, so a single-script run does not hide the others either.
+
+`modules.identity_resolver` still ensures the schema of `identity.db` when it loads, and the orchestrators load it through `OWN_PERSON_ID`. That is what every pipeline script does, so the TUI does not work around it.
 
 ### 8. Single compute runs warn and do not block
 
@@ -231,7 +234,7 @@ This is a property of starting a job, so it does not depend on a manifest entry,
 
 ### 17. Person selection comes from the databases
 
-The person field lists the persons found in the databases, read through the read-only opener (decision 7), with display names from `identity_resolver.resolve_display_name`. The default is `OWN_PERSON_ID`. With only one person, the field is hidden and no `--person` is passed. Names appear only on screen, and the TUI stores neither the list nor the selection.
+The person field lists the persons found in the databases, read through the read-only opener (decision 7), with names from `identity_resolver.reverse_resolve`. A pseudonym without a name is shown as it is, and the own person is shown as "Myself". The default is `OWN_PERSON_ID`. Tables without health data, such as `devices` and the log tables, do not count. Values that are no pseudonym are ignored, and so is the pseudonym that stands for `unknown`, because it marks unassigned data and not a person. Reading all tables can take long with a cold disk cache, so it runs in a background worker. With only one person, the field is hidden and no `--person` is passed. Names appear only on screen, and the TUI stores neither the list nor the selection.
 
 `identity_resolver` has no function that lists persons, so the list comes from the data. This also keeps persons out of the list for whom no data exists.
 
