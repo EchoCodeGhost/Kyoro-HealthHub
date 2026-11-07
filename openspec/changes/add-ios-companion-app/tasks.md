@@ -41,6 +41,18 @@
 - [ ] 4b.3 Device run with signing, and size of a SwiftUI shell that embeds only the Python framework
 - [ ] 4b.4 Decide direction based on the measurements
 
+## 4c. Help at critical steps (see "Kyoro-App: Wo Nutzer Hilfe brauchen")
+
+- [ ] 4c.1 Persist wizard state (step and values) and resume
+- [ ] 4c.2 Health source detection screen and "no Health data" suggestion
+- [ ] 4c.3 Data-quantity states instead of empty charts
+- [ ] 4c.4 Error pattern: one sentence, one fix, collapsed details
+- [ ] 4c.5 Low-energy capture: bad-day action, "wie gestern", backfill yesterday
+- [ ] 4c.6 Severity anchors on the scale
+- [ ] 4c.7 Doctor wizard: specialty question, default period, preview before sharing
+- [ ] 4c.8 Monthly backup suggestion and move-to-new-device wizard
+- [ ] 4c.9 "Ask someone for help" report without health data
+
 ## 5. Release gate
 
 - [ ] 5.1 Privacy sweep of the app and the bridge
