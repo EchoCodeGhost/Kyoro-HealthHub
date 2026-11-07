@@ -50,8 +50,20 @@
 - [ ] 4c.5 Low-energy capture: bad-day action, "wie gestern", backfill yesterday
 - [ ] 4c.6 Severity anchors on the scale
 - [ ] 4c.7 Doctor wizard: specialty question, default period, preview before sharing
-- [ ] 4c.8 Monthly backup suggestion and move-to-new-device wizard
+- [ ] 4c.8 Automatic encrypted backup to iCloud Drive, restore detection on first launch
+- [ ] 4c.10 Threshold table for notable and urgent values, reviewed by a physician
+- [ ] 4c.11 Regulatory assessment of the safety net (EU MDR rule 11) before release
+- [ ] 4c.12 Accessibility pass at the largest text size, VoiceOver and Switch Control; test with affected users
+- [ ] 4c.13 Data location page in setup
 - [ ] 4c.9 "Ask someone for help" report without health data
+
+## 4d. Alignment with Kyoro SymptomTrack (KiSTe)
+
+- [x] 4d.1 Importer keeps iPhone entries under source kyoro_ios, highest value per day
+- [ ] 4d.2 Get access to the KiSTe repository and align symptom catalogue and wording
+- [ ] 4d.3 Body region per entry in the app and the export
+- [ ] 4d.4 Migraine and AFib episodes in the app, and an importer path for them
+- [ ] 4d.5 Include kyoro_ios rows in compute_histamine_triggers.py
 
 ## 5. Release gate
 

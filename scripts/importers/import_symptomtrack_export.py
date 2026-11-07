@@ -17,6 +17,8 @@ Kyoro SymptomTrack JSON-Export → health.db (symptoms)
              id, timestamp (ISO 8601), symptom, kategorie, wert_num, wert_text,
              note, source. Schreibt in symptoms mit source='symptomtrack_export'
              (INSERT OR IGNORE auf PRIMARY KEY (date, symptom, person, source)).
+             Einträge mit source='kyoro_ios' (Kyoro iPhone-App) werden mit
+             source='kyoro_ios' gespeichert; mehrere am selben Tag: höchster Wert gewinnt.
              Migräne- und AFib-Einträge (migraine_entries, afib_entries) sind
              Kyoro SymptomTrack-interne Sondertabellen ohne Entsprechung in health.db und
              werden übersprungen.
@@ -24,6 +26,8 @@ Kyoro SymptomTrack JSON-Export → health.db (symptoms)
              id, timestamp (ISO 8601), symptom, kategorie, wert_num, wert_text,
              note, source. Writes to symptoms with source='symptomtrack_export'
              (INSERT OR IGNORE on PRIMARY KEY (date, symptom, person, source)).
+             Entries with source='kyoro_ios' (Kyoro iPhone app) are stored with
+             source='kyoro_ios'; several on the same day: highest value wins.
              Migraine and AFib entries (migraine_entries, afib_entries) are
              Kyoro SymptomTrack-internal specialist tables with no equivalent in health.db and
              are skipped.
@@ -54,6 +58,7 @@ from modules.db import open_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 
 SOURCE = "symptomtrack_export"
+IOS_SOURCE = "kyoro_ios"
 
 
 def _extend_symptoms(conn) -> None:
@@ -106,12 +111,24 @@ def run(conn, data_path: str | Path, lang: str = "de", person: str | None = None
         if not date or not symptom:
             result.rows_skipped += 1
             continue
+        # Entries from the Kyoro iPhone app keep their own source, so they never
+        # collide with SymptomTrack-PWA rows of the same day, and several
+        # entries per day resolve to the highest value (as import_kyoro_symptoms).
+        from_ios = e.get("source") == IOS_SOURCE
+        conflict = (
+            """ON CONFLICT(date, symptom, person, source) DO UPDATE SET
+                    value_num = excluded.value_num, value_text = excluded.value_text,
+                    ts = excluded.ts, notes = excluded.notes
+                WHERE COALESCE(excluded.value_num, -1) > COALESCE(symptoms.value_num, -1)"""
+            if from_ios else ""
+        )
         try:
             conn.execute(
-                """
-                INSERT OR IGNORE INTO symptoms
+                f"""
+                INSERT {"" if from_ios else "OR IGNORE "}INTO symptoms
                     (date, symptom, value_num, value_text, category, person, source, ts, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                {conflict}
                 """,
                 (
                     date,
@@ -120,7 +137,7 @@ def run(conn, data_path: str | Path, lang: str = "de", person: str | None = None
                     e.get("wert_text"),
                     e.get("kategorie"),
                     person_id,
-                    SOURCE,
+                    IOS_SOURCE if from_ios else SOURCE,
                     ts or None,
                     e.get("note"),
                 ),

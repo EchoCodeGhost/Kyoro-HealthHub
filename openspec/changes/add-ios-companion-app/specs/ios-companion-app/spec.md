@@ -85,9 +85,42 @@ Values recognised from scans, camera or free text SHALL be stored only after the
 - **WHEN** a lab report is scanned and three values are uncertain
 - **THEN** the review screen lists those three first with the source crop, and nothing is saved before the user confirms
 
-### Requirement: Backup reminder
-The app SHALL suggest creating an encrypted backup file once a month while no backup exists from the last 30 days.
+### Requirement: Automatic encrypted backup and restore
+The app SHALL back up its own database automatically from the first day, encrypted with a key held in the iCloud Keychain, to iCloud Drive, and SHALL show the time of the last backup. On first launch with an empty database it SHALL look for an existing backup and offer to restore it.
 
-#### Scenario: No recent backup
-- **WHEN** 30 days passed since the last backup file was created
-- **THEN** the Today screen shows a backup suggestion with its reason
+#### Scenario: New iPhone
+- **WHEN** the app starts with an empty database and a Kyoro backup exists in iCloud Drive
+- **THEN** it shows the backup date, source device and day count, and offers Restore or Start fresh
+
+#### Scenario: Backup fails
+- **WHEN** a backup cannot be written, for example because iCloud storage is full
+- **THEN** the Today screen shows a suggestion with the reason and an option to save the backup to Files
+
+#### Scenario: iCloud Keychain off
+- **WHEN** the backup key cannot be stored in the iCloud Keychain
+- **THEN** the app shows a recovery code once and offers to save it in the Passwords app
+
+### Requirement: Safety net for notable values
+Values from scans, protocols and analyses SHALL be checked against a versioned threshold table reviewed by a physician. Notable values SHALL be shown with one calm sentence and one action; urgent values SHALL additionally state to seek medical advice today and name the emergency number. No language model SHALL decide a warning level.
+
+#### Scenario: Notable orthostatic result
+- **WHEN** a standing test shows a heart rate increase of 30 per minute or more
+- **THEN** the result screen says the increase is notable, adds it to the doctor report, and offers to prepare a doctor visit
+
+#### Scenario: Urgent value
+- **WHEN** a value crosses an urgent threshold
+- **THEN** the hint cannot be dismissed permanently and names the emergency number
+
+### Requirement: Accessible under cognitive fatigue
+Every screen SHALL support Dynamic Type up to the largest accessibility size without truncation, VoiceOver labels for all controls, chart summaries for VoiceOver, touch targets of at least 44 points, no time limits, Reduce Motion, and meaning that never relies on colour alone. Every text field SHALL accept dictation.
+
+#### Scenario: Largest text size
+- **WHEN** the user selects the largest accessibility text size
+- **THEN** every screen reflows without cut-off text and all actions stay reachable
+
+### Requirement: Explain where data lives during setup
+Setup SHALL show, before the Apple Health request, where data is stored (on the device, in the user's encrypted backup, nowhere else) and which actions send data off the device, and SHALL state that Kyoro is neither a medical device nor an emergency service.
+
+#### Scenario: Setup
+- **WHEN** the user reaches the Apple Health step in setup
+- **THEN** the data location page has been shown before it

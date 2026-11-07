@@ -15,7 +15,7 @@ Enables import of symptom data, essential for clinical analysis
 
 ## Method
 
-Reads symptomtrack_export_*.json files (field symptom_entries[]). Fields: id, timestamp (ISO 8601), symptom, kategorie, wert_num, wert_text, note, source. Writes to symptoms with source='symptomtrack_export' (INSERT OR IGNORE on PRIMARY KEY (date, symptom, person, source)). Migraine and AFib entries (migraine_entries, afib_entries) are Kyoro SymptomTrack-internal specialist tables with no equivalent in health.db and are skipped.
+Reads symptomtrack_export_*.json files (field symptom_entries[]). Fields: id, timestamp (ISO 8601), symptom, kategorie, wert_num, wert_text, note, source. Writes to symptoms with source='symptomtrack_export' (INSERT OR IGNORE on PRIMARY KEY (date, symptom, person, source)). Entries with source='kyoro_ios' (Kyoro iPhone app) are stored with source='kyoro_ios'; several on the same day: highest value wins. Migraine and AFib entries (migraine_entries, afib_entries) are Kyoro SymptomTrack-internal specialist tables with no equivalent in health.db and are skipped.
 
 ## Data flow
 

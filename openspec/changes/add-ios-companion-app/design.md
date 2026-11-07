@@ -42,6 +42,25 @@ measurements are open.
   Apple Intelligence fall back to OCR plus fixed rules.
 - Nothing leaves the device, so the remote-LLM consent flow does not apply.
 
+### Relation to Kyoro SymptomTrack (KiSTe)
+
+Kyoro SymptomTrack, short KiSTe, is the existing symptom-tracking PWA with
+its own backend (shared-access server, `/api/export`). Its code is not in
+this repository. The hub reads it through `import_symptomtrack_export.py`
+(JSON) and `import_kyoro_symptoms.py` (CSV, source `kyoro_st`).
+
+- The iPhone app writes the same JSON format, so no new importer is needed.
+  Its entries carry `source: kyoro_ios`; the importer stores them under
+  that source so they never collide with PWA rows of the same day, and
+  several entries per day resolve to the highest value.
+- The PWA stays the path for Android, web and the shared family server.
+  The iPhone app is the native, offline path for iPhone and iPad users.
+- To take over from KiSTe: body region per entry, migraine and AFib
+  episodes (start, end, triggers; the importer skips these today), the
+  symptom catalogue and wording.
+- `compute_histamine_triggers.py` reads only `source = 'kyoro_st'` rows
+  with timestamps. iPhone entries must be included there as well.
+
 ## Risks / Trade-offs
 
 - An app makes it easier to start a remote-LLM run casually → consent per run, provider always visible, default off.
