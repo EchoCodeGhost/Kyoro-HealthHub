@@ -1,0 +1,14 @@
+[tool.briefcase]
+project_name = "Kyoro PoC"
+bundle = "org.kyoro"
+version = "0.0.1"
+license.file = "../../LICENSE"
+
+[tool.briefcase.app.kyoro_poc]
+formal_name = "Kyoro PoC"
+description = "Runs one Kyoro importer and one compute step in embedded Python."
+sources = ["src/kyoro_poc", "src/kyoro_scripts"]
+requires = []
+
+[tool.briefcase.app.kyoro_poc.iOS]
+requires = ["toga-iOS~=0.5.0"]

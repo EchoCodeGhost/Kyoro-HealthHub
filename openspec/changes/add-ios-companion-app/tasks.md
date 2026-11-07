@@ -30,6 +30,15 @@
 - [ ] 4.1 Live Activity for timed protocols
 - [ ] 4.2 Notification when the autopilot finished
 - [ ] 4.3 App icon from the octopus head, layered for Icon Composer
+- [ ] 4.4 Lab report scan with Vision document recognition and a confirm step
+- [ ] 4.5 Live Text reading for measuring devices without an export
+- [ ] 4.6 Foundation Models mapping of OCR and free text, with rule-based fallback
+
+## 4b. Embedded pipeline spike
+
+- [x] 4b.1 Static import check and in-process smoke test on desktop
+- [ ] 4b.2 Simulator and device run of apps/ios-python-poc (size, start, timings)
+- [ ] 4b.3 Decide direction based on the measurements
 
 ## 5. Release gate
 

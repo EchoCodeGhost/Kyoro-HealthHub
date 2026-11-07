@@ -1,0 +1,5 @@
+src/kyoro_scripts/
+build/
+dist/
+logs/
+.venv/

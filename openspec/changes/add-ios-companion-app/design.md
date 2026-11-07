@@ -18,6 +18,30 @@ The hub is local-first Python with a fixed stage order (`import_all.py` → `com
 - **Suggestions are rule-based and explain themselves.** At most three cards; each states why it appears. No LLM decides what the user should do.
 - **Design tokens from the logo** in one file (`KyoroTheme.swift`); colour only as accent, status never by colour alone.
 
+### Spike: pipeline in embedded Python (2026-11-07, direction pending)
+
+Static import check: 72 of 80 importers and 22 of 28 compute scripts need no
+third-party package at module level. In an empty venv, 66 importers and 21
+compute modules import cleanly, and `importers/import_symptomtrack_export.py`
+plus `compute/compute_symptoms.py` run in-process against a fresh database
+(apps/ios-python-poc). Blockers for iOS: subprocess orchestration in
+import_all/compute_all/analyse_all, and sqlcipher3 (replaced on iOS by Data
+Protection). Proposed split: Python on device for import and compute, Swift
+Charts for plots, scipy/statsmodels analyses on the optional hub. Device
+measurements are open.
+
+### On-device intelligence
+
+- Vision document recognition (iOS 26, every device) reads lab reports
+  including table structure; VisionKit Live Text reads displays of measuring
+  devices without an export.
+- Foundation Models (Apple Intelligence devices only) maps OCR text and
+  free text or speech to structured fields with guided generation.
+- Every recognised value goes through a confirmation step. The model never
+  derives medical values; computation stays in the pipeline. Devices without
+  Apple Intelligence fall back to OCR plus fixed rules.
+- Nothing leaves the device, so the remote-LLM consent flow does not apply.
+
 ## Risks / Trade-offs
 
 - An app makes it easier to start a remote-LLM run casually → consent per run, provider always visible, default off.
