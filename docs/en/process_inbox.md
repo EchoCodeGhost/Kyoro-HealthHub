@@ -15,7 +15,7 @@ Provides health data functions, essential for medical data processing
 
 ## Method
 
-Supports ZIP archives (Apple Health, Polar GDPR, Garmin GDPR, Oura CSV) and single files (symptom history, WomanLog, Bearable, HRV4Training, Ecowitt, HealthManager Pro, RENPHO, Wellue O2Ring, ECGLogger, Omron, FDDB (diary_*.csv, userhistory_*.csv, combined complete_*.csv export), Hilo blood-pressure reports, PDF lab results, Migraine app, Shotsy, Kubios screenshots, Kubios TXT, GPX). ECGLogger and Omron are detected via header sniffing (filenames are app-generic, no fixed pattern). Files are moved to _inbox/processed/ after processing.
+Supports ZIP archives (Apple Health, Polar GDPR, Garmin GDPR, Oura CSV) and single files (symptom history, WomanLog, Bearable, HRV4Training, Ecowitt, HealthManager Pro, RENPHO, Wellue O2Ring, ECGLogger, Omron, FDDB (diary_*.csv, userhistory_*.csv, combined complete_*.csv export), Hilo blood-pressure reports, PDF lab results, Migraine app, Shotsy, SymptomTrack JSON export (also from the iPhone app), Kubios screenshots, Kubios TXT, GPX). ECGLogger and Omron are detected via header sniffing (filenames are app-generic, no fixed pattern). Files are moved to _inbox/processed/ after processing.
 
 ## Data flow
 

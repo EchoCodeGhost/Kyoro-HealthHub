@@ -14,6 +14,7 @@ process_inbox.py — Inbox-Prozessor für Import-Dateien
              Ecowitt, HealthManager Pro, RENPHO, Wellue O2Ring, ECGLogger, Omron,
              FDDB (diary_*.csv, userhistory_*.csv, kombinierter complete_*.csv-Export),
              Hilo-Blutdruckbericht, PDF-Laborergebnisse, Migraine-App, Shotsy,
+             SymptomTrack-JSON-Export (auch aus der iPhone-App),
              Kubios-Screenshots, Kubios-TXT, GPX). ECGLogger und Omron werden per
              Header-Sniffing erkannt (Dateinamen sind app-generisch, kein festes
              Muster). Dateien werden nach Verarbeitung nach _inbox/processed/
@@ -23,6 +24,7 @@ process_inbox.py — Inbox-Prozessor für Import-Dateien
              Ecowitt, HealthManager Pro, RENPHO, Wellue O2Ring, ECGLogger, Omron,
              FDDB (diary_*.csv, userhistory_*.csv, combined complete_*.csv export),
              Hilo blood-pressure reports, PDF lab results, Migraine app, Shotsy,
+             SymptomTrack JSON export (also from the iPhone app),
              Kubios screenshots, Kubios TXT, GPX). ECGLogger and Omron are detected
              via header sniffing (filenames are app-generic, no fixed pattern).
              Files are moved to _inbox/processed/ after processing.
@@ -148,10 +150,14 @@ def _sniff_json(path: Path) -> str | None:
         return "shotsy"
     if path.name.lower().startswith("shotsy"):
         return "shotsy"
+    if path.name.lower().startswith("symptomtrack_export"):
+        return "symptomtrack_export"
     try:
         sample = path.read_bytes()[:500].decode("utf-8-sig", errors="replace").lower()
         if '"drug"' in sample or '"injections"' in sample or '"injection_date"' in sample:
             return "shotsy"
+        if '"symptom_entries"' in sample:
+            return "symptomtrack_export"
     except Exception:
         pass
     return None
@@ -283,6 +289,13 @@ def _handle_kyoro_st(src: Path, dry: bool) -> list[str]:
     msgs = _copy_to(src, dest_dir, dry)
     dest = dest_dir / src.name
     msgs += _run("importers/import_kyoro_symptoms.py", ["--file", str(dest)], dry)
+    return msgs
+
+
+def _handle_symptomtrack_export(src: Path, dry: bool) -> list[str]:
+    dest_dir = _cfg.data_root / "symptomtrack-export"
+    msgs = _copy_to(src, dest_dir, dry)
+    msgs += _run("importers/import_symptomtrack_export.py", [str(dest_dir / src.name)], dry)
     return msgs
 
 
@@ -494,6 +507,8 @@ def process_file(path: Path, dry: bool) -> bool:
         source = _sniff_json(path)
         if source == "shotsy":
             label, handler = "Shotsy", _handle_shotsy
+        elif source == "symptomtrack_export":
+            label, handler = "SymptomTrack-/iPhone-Export", _handle_symptomtrack_export
         else:
             print(t(f"  Unbekannte JSON-Quelle: {name} — übersprungen",
                     f"  Unknown JSON source: {name} — skipped"))

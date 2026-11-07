@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Kyoro-HealthHub contributors
+#
+# Kyoro iPhone app. Generate the Xcode project with:
+#     brew install xcodegen && xcodegen generate
+# The generated Kyoro.xcodeproj is not checked in (see .gitignore).
+name: Kyoro
+options:
+  bundleIdPrefix: org.kyoro
+  deploymentTarget:
+    iOS: "26.0"
+  developmentLanguage: de
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEVELOPMENT_TEAM: ""          # set your own team locally
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+targets:
+  Kyoro:
+    type: application
+    platform: iOS
+    sources:
+      - path: Kyoro
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.kyoro.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: Kyoro/Kyoro.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: Kyoro/Info.plist
+      properties:
+        CFBundleDisplayName: Kyoro
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSHealthShareUsageDescription: >-
+          Kyoro liest ausgewählte Gesundheitsdaten, um deine Werte im Zusammenhang
+          zu zeigen. Die Daten bleiben auf deinem iPhone und deinem eigenen Rechner.
+        NSHealthUpdateUsageDescription: >-
+          Kyoro kann erfasste Symptome in Apple Health speichern, wenn du das möchtest.
+        NSCameraUsageDescription: >-
+          Für Fotos nach dem Hautfoto-Protokoll und für den QR-Code beim Koppeln mit deinem Rechner.
+        NSLocalNetworkUsageDescription: >-
+          Kyoro verbindet sich im Heimnetz mit deinem eigenen Kyoro-Rechner.
+        NSSupportsLiveActivities: true
+        BGTaskSchedulerPermittedIdentifiers: [org.kyoro.app.autopilot]
+        UIBackgroundModes: [processing, fetch]
+    entitlements:
+      path: Kyoro/Kyoro.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.background-delivery: true
+        com.apple.security.application-groups: [group.org.kyoro.app]
+    dependencies:
+      - target: KyoroWidgets
+  KyoroWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KyoroWidgets
+      - path: Kyoro/DesignSystem/KyoroTheme.swift
+      - path: Kyoro/Integration/SharedStore.swift
+      - path: Kyoro/Integration/LogSymptomIntent.swift
+      - path: Kyoro/Data/SymptomCatalog.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.kyoro.app.widgets
+        CODE_SIGN_ENTITLEMENTS: KyoroWidgets/KyoroWidgets.entitlements
+    info:
+      path: KyoroWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Kyoro
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: KyoroWidgets/KyoroWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.org.kyoro.app]
+  KyoroTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: KyoroTests
+    dependencies:
+      - target: Kyoro
+schemes:
+  Kyoro:
+    build:
+      targets:
+        Kyoro: all
+        KyoroTests: [test]
+    test:
+      targets: [KyoroTests]

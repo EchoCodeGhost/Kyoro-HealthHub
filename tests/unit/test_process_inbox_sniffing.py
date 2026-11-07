@@ -84,6 +84,16 @@ class TestSniffJson:
         f.write_text('{"injections": []}')
         assert _sniff_json(f) == "shotsy"
 
+    def test_symptomtrack_export_by_name(self, tmp_path):
+        f = tmp_path / "symptomtrack_export_2026-11-07.json"
+        f.write_text('{"symptom_entries": []}')
+        assert _sniff_json(f) == "symptomtrack_export"
+
+    def test_symptomtrack_export_by_content(self, tmp_path):
+        f = tmp_path / "renamed.json"
+        f.write_text('{"exported_at": "2026-11-07T08:00:00Z", "symptom_entries": []}')
+        assert _sniff_json(f) == "symptomtrack_export"
+
     def test_unknown_json_returns_none(self, tmp_path):
         f = tmp_path / "export.json"
         f.write_text('{"foo": "bar"}')
