@@ -45,21 +45,35 @@ measurements are open.
 ### Relation to Kyoro SymptomTrack (KiSTe)
 
 Kyoro SymptomTrack, short KiSTe, is the existing symptom-tracking PWA with
-its own backend (shared-access server, `/api/export`). Its code is not in
-this repository. The hub reads it through `import_symptomtrack_export.py`
+its own backend. Its code lives in the history of the private repository
+(pwa/, tools/KST-PWA/), untracked since July pending consolidation and a
+privacy review. The hub reads it through `import_symptomtrack_export.py`
 (JSON) and `import_kyoro_symptoms.py` (CSV, source `kyoro_st`).
 
-- The iPhone app writes the same JSON format, so no new importer is needed.
-  Its entries carry `source: kyoro_ios`; the importer stores them under
-  that source so they never collide with PWA rows of the same day, and
-  several entries per day resolve to the highest value.
+- The iPhone app writes the same JSON format. Its entries carry
+  `source: kyoro_ios`; the importer stores them under that source so they
+  never collide with PWA rows of the same day, and several entries per day
+  resolve to the highest value.
+- Symptom catalogue: the PWA defines 37 modules with 256 symptoms
+  (`pwa/backend/symptom_schema.py`), five preselected. The app adopts the
+  module model instead of a fixed quick-pick list; setup selects modules.
+  Symptom labels stay identical to the PWA, because they are the `symptom`
+  value in health.db.
+- Entry types: binary, scale 0 to 10, inverted scale (high is good) and
+  text. Scale anchors depend on the type.
+- Capture flow: category, search, value, body region on a body map,
+  backdated time, photo, note, and a batch ("Stapel") that saves several
+  symptoms at once.
+- Migraine and AFib episodes (start, end, aura or heart rate, medication,
+  intake time). The importer skips them today.
+- Crisis banner with 112 and the German crisis lines while the suicidality
+  module is active.
 - The PWA stays the path for Android, web and the shared family server.
-  The iPhone app is the native, offline path for iPhone and iPad users.
-- To take over from KiSTe: body region per entry, migraine and AFib
-  episodes (start, end, triggers; the importer skips these today), the
-  symptom catalogue and wording.
 - `compute_histamine_triggers.py` reads only `source = 'kyoro_st'` rows
   with timestamps. iPhone entries must be included there as well.
+- `mobile/KyoroVitalGuard` (Android, Polar BLE presyncope warning, untested
+  on hardware) is out of scope for version 1; an iOS port via the Polar
+  BLE SDK is a later candidate.
 
 ## Risks / Trade-offs
 

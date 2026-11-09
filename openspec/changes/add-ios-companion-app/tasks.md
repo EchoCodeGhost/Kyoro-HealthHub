@@ -60,10 +60,13 @@
 ## 4d. Alignment with Kyoro SymptomTrack (KiSTe)
 
 - [x] 4d.1 Importer keeps iPhone entries under source kyoro_ios, highest value per day
-- [ ] 4d.2 Get access to the KiSTe repository and align symptom catalogue and wording
-- [ ] 4d.3 Body region per entry in the app and the export
-- [ ] 4d.4 Migraine and AFib episodes in the app, and an importer path for them
-- [ ] 4d.5 Include kyoro_ios rows in compute_histamine_triggers.py
+- [x] 4d.2 Read the KiSTe code (private repo history) and record what the app adopts
+- [ ] 4d.3 Module-based symptom catalogue with the PWA labels; module choice in setup
+- [ ] 4d.4 Entry types binary, scale, inverted scale, text with type-specific anchors
+- [ ] 4d.5 Body map, backdated time, photo and batch save in Capture
+- [ ] 4d.6 Migraine and AFib episodes in the app, and an importer path for them
+- [ ] 4d.7 Crisis banner while the suicidality module is active
+- [ ] 4d.8 Include kyoro_ios rows in compute_histamine_triggers.py
 
 ## 5. Release gate
 
