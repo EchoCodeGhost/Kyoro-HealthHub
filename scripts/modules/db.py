@@ -47,6 +47,7 @@ db.py — Datenbankverbindung
         conn.execute(...)
     except DB_ERRORS as e:
         ...
+    conn = open_readonly(Config().db_path)  # nur lesen, installiert keine Trigger
 """
 
 import os
@@ -308,6 +309,39 @@ def _open_encrypted(db_path: str) -> sqlite3.Connection:
     conn.execute("PRAGMA busy_timeout=5000")
     _install_pseudonymization_safeguard(conn)
     _install_audit_log_triggers(conn)
+    return conn
+
+
+def open_readonly(path: "str | Path") -> sqlite3.Connection:
+    """Öffnet eine Kyoro-DB nur zum Lesen, ohne Trigger, WAL-Umstellung oder neue Datei.
+
+    Für Stellen, die nie schreiben dürfen. open_db() legt bei jedem Öffnen Trigger an,
+    und ein normales connect() erzeugt eine fehlende Datei. Fehlende, gesperrte oder
+    nicht entschlüsselbare Datenbanken lösen einen Fehler aus DB_ERRORS aus.
+    """
+    from health_config import load  # lokaler Import verhindert Zirkel
+    uri = f"{Path(path).expanduser().resolve().as_uri()}?mode=ro"
+    key = _load_db_key(load())
+    if key:
+        try:
+            import sqlcipher3
+        except ImportError as exc:
+            raise RuntimeError(
+                "db_key ist gesetzt, aber sqlcipher3 ist nicht installiert.\n"
+                "Bitte: pip install sqlcipher3"
+            ) from exc
+        conn = sqlcipher3.connect(uri, uri=True)
+        escaped = key.replace("'", "''")
+        conn.execute(f"PRAGMA key='{escaped}'")
+    else:
+        conn = sqlite3.connect(uri, uri=True)
+    try:
+        conn.execute("PRAGMA busy_timeout=1000")
+        conn.execute("SELECT count(*) FROM sqlite_master").fetchone()
+        conn.execute("PRAGMA query_only=ON")
+    except Exception:
+        conn.close()
+        raise
     return conn
 
 

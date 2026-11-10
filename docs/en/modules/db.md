@@ -35,4 +35,5 @@ try:
     conn.execute(...)
 except DB_ERRORS as e:
     ...
+conn = open_readonly(Config().db_path)  # nur lesen, installiert keine Trigger
 ```
