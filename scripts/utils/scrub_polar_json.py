@@ -46,19 +46,19 @@ import argparse
 import json
 import os
 import pathlib
-import sqlite3
 import sys
 import tempfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from health_config import KYORO_CONFIG_DIR
+from modules.db import open_identity_db
 
 _IDENTITY_DB = KYORO_CONFIG_DIR / "identity.db"
 _POLAR_DIR = pathlib.Path(__file__).resolve().parents[2] / "imports" / "polar"
 
 def _load_id_map(identity_db: pathlib.Path = _IDENTITY_DB) -> dict[str, str]:
     """Load serial→pseudo and account_real→account_pseudo from identity.db."""
-    con = sqlite3.connect(identity_db)
+    con = open_identity_db(identity_db)
     serials = con.execute("SELECT serial_real, pseudo_id FROM device_serial_map").fetchall()
     accounts = con.execute(
         "SELECT account_real, account_pseudo FROM account_pseudo_map WHERE service='polar'"

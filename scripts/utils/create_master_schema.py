@@ -37,11 +37,11 @@ create_master_schema.py — Praxisweite Verwaltungsdatenbank erstellen/aktualisi
     python3 scripts/utils/create_master_schema.py  # from repo root
 """
 import pathlib
-import sqlite3
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 from health_config import KYORO_MASTER_DIR
+from modules.db import open_master_db
 
 _MASTER_DB = KYORO_MASTER_DIR / "master.db"
 
@@ -82,7 +82,7 @@ CREATE INDEX IF NOT EXISTS idx_research_consent_lookup
 
 def create_or_upgrade(db_path: pathlib.Path = _MASTER_DB) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(db_path)
+    con = open_master_db(db_path)
     for stmt in _DDL.strip().split(";"):
         stmt = stmt.strip()
         if stmt:

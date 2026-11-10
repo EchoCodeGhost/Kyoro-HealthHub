@@ -204,7 +204,6 @@ Arrhythmia detection from all available sources.
 
 import argparse
 import math
-import sqlite3
 import statistics
 from collections import deque
 from datetime import datetime, timedelta, timezone
@@ -214,7 +213,7 @@ from pathlib import Path
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID, KYORO_CONFIG_DIR
-from modules.db import open_db
+from modules.db import open_db, open_identity_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import resolve_timezone
 from modules.ppi_provenance import mode_from_sources
@@ -382,7 +381,7 @@ def _load_serial_map() -> dict[str, str]:
     if not db_path.exists():
         return {}
     try:
-        with sqlite3.connect(db_path) as c:
+        with open_identity_db(db_path) as c:
             return {s: d for s, d in c.execute(
                 "SELECT serial_real, device_id FROM device_serial_map"
             ).fetchall()}

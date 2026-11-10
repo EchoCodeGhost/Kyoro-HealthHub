@@ -54,7 +54,6 @@ import argparse
 import csv
 import json
 import os
-import sqlite3
 import subprocess
 import sys
 from datetime import date
@@ -62,6 +61,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import KYORO_MASTER_DIR
+from modules.db import open_master_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from utils.deidentify_cohort import (
     date_shift_offset_days,
@@ -93,7 +93,7 @@ def _is_date_column(col_name: str) -> bool:
 
 def _load_patient_instances():
     """Lädt alle aktiven Patient:innen-Instanzen aus master.db."""
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     rows = con.execute(
         "SELECT patient_pseudo, instance_dir FROM patient_number_map "
         "WHERE active = 1 ORDER BY patient_pseudo"
@@ -104,7 +104,7 @@ def _load_patient_instances():
 
 def _check_consent(patient_pseudo: str, scope: str) -> bool:
     """Prüft, ob Patient:in für den Scope eingewilligt hat (nicht widerrufen)."""
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     row = con.execute(
         "SELECT 1 FROM research_consent WHERE patient_pseudo=? AND consent_scope=? AND revoked_at IS NULL",
         (patient_pseudo, scope),

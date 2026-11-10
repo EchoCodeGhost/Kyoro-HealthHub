@@ -9,19 +9,37 @@ db.py — Datenbankverbindung
 @purpose.en  The single place in the project that opens a SQLite/SQLCipher connection.
              All scripts import open_db from here.
 @method.de   Verwaltet den Datenbank-Schlüssel-Lookup in Prioritätsreihenfolge:
-             1) Umgebungsvariable KYORO_DB_KEY, 2) System-Keyring, 3) ~/.config/kyoro/db.key,
-             4) health_config.json["db_key"]. Unterstützt sowohl SQLite als auch SQLCipher.
-             Jede geöffnete Verbindung bekommt automatisch DB-interne
+             1) Umgebungsvariable KYORO_DB_KEY, 2) System-Keyring (höchstens einmal
+             pro Prozess, mit Zeitlimit in einem Worker-Thread, damit ein gesperrter
+             Keyring nicht blockiert),
+             3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"].
+             Unterstützt sowohl SQLite als auch SQLCipher.
+             open_db()/open_medicine_db()/open_location_db()/open_medicine_imaging_db()
+             öffnen die Gesundheits-DBs und installieren automatisch DB-interne
              Chain-of-Custody-Trigger (audit_log-Tabelle, UPDATE/DELETE auf
              jeder Tabelle) — greift unabhängig vom aufrufenden Code, auch
              bei Zugriff über sqlite3-CLI oder Datasette.
+             open_identity_db()/open_master_db() öffnen identity.db und master.db
+             mit demselben Schlüssel-Lookup (während der Übergangszeit öffnet eine
+             noch unverschlüsselte Datei mit Warnung im Klartext; verschlüsselt
+             ohne Schlüssel: klarer Fehler) — ohne Audit-Trigger, weil diese
+             Datenbanken die Klartext-Zuordnungen selbst halten.
 @method.en   Manages database key lookup in priority order:
-             1) Environment variable KYORO_DB_KEY, 2) System keyring, 3) ~/.config/kyoro/db.key,
-             4) health_config.json["db_key"]. Supports both SQLite and SQLCipher.
-             Every opened connection automatically gets DB-internal
+             1) Environment variable KYORO_DB_KEY, 2) System keyring (asked at most
+             once per process, with a timeout in a worker thread, so a locked keyring
+             cannot block),
+             3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"].
+             Supports both SQLite and SQLCipher.
+             open_db()/open_medicine_db()/open_location_db()/open_medicine_imaging_db()
+             open the health databases and automatically install DB-internal
              chain-of-custody triggers (audit_log table, UPDATE/DELETE on
              every table) — fires regardless of the calling code, even
              access via the sqlite3 CLI or Datasette.
+             open_identity_db()/open_master_db() open identity.db and master.db
+             with the same key lookup (during the transition an unencrypted
+             file still opens with a warning in plaintext; encrypted without
+             a key: clear error) — without audit triggers, because these
+             databases hold the cleartext mappings themselves.
 @reads       DB-Datei (health.db oder health_encrypted.db)
 @writes      DB-Datei (über SQLite/SQLCipher); audit_log-Tabelle + Trigger (automatisch)
 @limits.de   Einziger DB-Zugangspunkt. Aenderungen brechen alle Skripte. SQLCipher erfordert pysqlcipher3.
@@ -53,6 +71,7 @@ db.py — Datenbankverbindung
 import os
 import sqlite3
 import sys
+import threading
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -76,13 +95,73 @@ except ImportError:
 _KEY_FILE = KYORO_CONFIG_DIR / "db.key"
 _KEYRING_SERVICE = "kyoro-healthhub"
 _KEYRING_USERNAME = "db_key"
+_KEYRING_TIMEOUT_SECONDS = 5.0
+_keyring_timeout_logged = False
+
+# Keyring result cache: the system keyring is asked at most once per process
+# (one worker thread, one wait on the timeout). KYORO_DB_KEY is still checked
+# first on every _load_db_key() call, before any keyring access.
+_KEYRING_UNSET = object()
+_keyring_result = _KEYRING_UNSET  # str | None, once the keyring has been asked
+_keyring_lock = threading.Lock()
+
+
+def _keyring_get_password(service: str, username: str) -> "str | None":
+    import keyring
+    return keyring.get_password(service, username)
+
+
+def _load_keyring_key(timeout_seconds: float = _KEYRING_TIMEOUT_SECONDS) -> "str | None":
+    """Keyring-Lookup in einem Worker-Thread mit kurzem Zeitlimit — höchstens einmal pro Prozess.
+
+    Ein gesperrter System-Keyring (Unlock-Prompt) blockiert
+    keyring.get_password() beliebig lange — ohne Zeitlimit würde jeder
+    Skriptaufruf genau hier hängen bleiben. Nach dem Timeout wird einmalig
+    pro Prozess eine Logzeile geschrieben (ohne den Schlüssel) und None
+    zurückgegeben, damit der Lookup mit db.key / health_config.json
+    fortfährt. Der Thread ist daemon, damit ein hängengebliebener Keyring
+    den Prozess nicht am Exit blockiert.
+
+    Das Ergebnis (Schlüssel oder None — auch nach einem Timeout) wird im
+    Modul gemerkt: spätere Aufrufe starten keinen weiteren Thread und
+    warten nicht erneut. KYORO_DB_KEY wird in _load_db_key() weiterhin vor
+    jedem Keyring-Zugriff bei jedem Aufruf geprüft.
+    """
+    global _keyring_timeout_logged, _keyring_result
+    with _keyring_lock:
+        if _keyring_result is not _KEYRING_UNSET:
+            return _keyring_result
+        box: list = []
+
+        def _worker() -> None:
+            try:
+                box.append(_keyring_get_password(_KEYRING_SERVICE, _KEYRING_USERNAME))
+            except Exception:
+                box.append(None)
+
+        worker = threading.Thread(target=_worker, daemon=True)
+        worker.start()
+        worker.join(timeout_seconds)
+        if worker.is_alive():
+            if not _keyring_timeout_logged:
+                _keyring_timeout_logged = True
+                print(
+                    f"[Hinweis] System-Keyring hat innerhalb von {timeout_seconds:g}s nicht "
+                    f"geantwortet (evtl. gesperrt) — fahre ohne Keyring fort "
+                    f"(KYORO_DB_KEY / {_KEY_FILE} / health_config.json).",
+                    file=sys.stderr,
+                )
+            _keyring_result = None
+            return None
+        _keyring_result = box[0] if box else None
+        return _keyring_result
 
 
 def _load_db_key(cfg_data: dict) -> "str | None":
     """Schlüssel-Lookup in Prioritätsreihenfolge:
 
     1. Umgebungsvariable KYORO_DB_KEY
-    2. System-Keyring (keyring-Paket, optional)
+    2. System-Keyring (keyring-Paket, optional, mit Zeitlimit — s. _load_keyring_key)
     3. ~/.config/kyoro/db.key (0600)
     4. health_config.json["db_key"]  ← Fallback, gibt Migrationshinweis
     """
@@ -90,13 +169,9 @@ def _load_db_key(cfg_data: dict) -> "str | None":
     if env_key:
         return env_key.strip()
 
-    try:
-        import keyring as _kr
-        kr_key = _kr.get_password(_KEYRING_SERVICE, _KEYRING_USERNAME)
-        if kr_key:
-            return kr_key.strip()
-    except Exception:
-        pass
+    kr_key = _load_keyring_key()
+    if kr_key:
+        return kr_key.strip()
 
     if _KEY_FILE.exists():
         mode = _KEY_FILE.stat().st_mode & 0o777
@@ -343,6 +418,101 @@ def open_readonly(path: "str | Path") -> sqlite3.Connection:
         conn.close()
         raise
     return conn
+
+
+_PLAIN_SQLITE_HEADER = b"SQLite format 3\x00"
+
+
+def _file_is_plain_sqlite(db_path: "str | Path") -> bool:
+    """True, wenn die Datei existiert und den Klartext-Kopf einer unverschlüsselten SQLite-Datei trägt."""
+    try:
+        with open(db_path, "rb") as fh:
+            return fh.read(len(_PLAIN_SQLITE_HEADER)) == _PLAIN_SQLITE_HEADER
+    except OSError:
+        return False
+
+
+def _open_encrypted_store(db_path: str, store_name: str) -> sqlite3.Connection:
+    """Öffnet identity.db / master.db mit demselben Schlüssel-Lookup wie open_db().
+
+    Übergangszeit: eine noch unverschlüsselte Datei (Kopf 'SQLite format 3')
+    öffnet mit einer Warnung im Klartext-Modus. Ist die Datei dagegen
+    verschlüsselt und kein Schlüssel konfiguriert (oder der Schlüssel falsch),
+    wird ein klarer Fehler ausgelöst — es wird nicht versucht, sie im Klartext
+    zu lesen. Im Gegensatz zu _open_encrypted() werden keine Audit- oder
+    Pseudonymisierungs-Trigger installiert: diese Datenbanken halten die
+    Klartext-Zuordnungen selbst, ein audit_log in ihnen würde sie nur duplizieren.
+    """
+    from health_config import load  # lokaler Import verhindert Zirkel
+    key: str | None = _load_db_key(load())
+    path = Path(db_path)
+    if key:
+        if path.exists() and _file_is_plain_sqlite(path):
+            import warnings
+            warnings.warn(
+                f"{path} ist noch unverschlüsselt — Übergangszeit: sie wird im "
+                f"Klartext geöffnet. Bitte migrieren mit "
+                f"python3 scripts/migrations/encrypt_identity_master_db.py",
+                stacklevel=3,
+            )
+            conn = sqlite3.connect(str(path))
+        else:
+            try:
+                import sqlcipher3
+            except ImportError as exc:
+                raise RuntimeError(
+                    "db_key ist gesetzt, aber sqlcipher3 ist nicht installiert.\n"
+                    "Bitte: pip install sqlcipher3"
+                ) from exc
+            conn = sqlcipher3.connect(str(path))
+            escaped = key.replace("'", "''")
+            conn.execute(f"PRAGMA key='{escaped}'")
+            try:
+                conn.execute("SELECT count(*) FROM sqlite_master").fetchone()
+            except Exception as exc:
+                conn.close()
+                raise RuntimeError(
+                    f"{store_name} ({path}) ist verschlüsselt, lässt sich aber nicht "
+                    f"mit dem konfigurierten Schlüssel öffnen (falscher Schlüssel?). "
+                    f"Schlüssel-Lookup: KYORO_DB_KEY, System-Keyring, {_KEY_FILE}, "
+                    f"health_config.json[db_key]."
+                ) from exc
+    else:
+        if path.exists() and not _file_is_plain_sqlite(path):
+            raise RuntimeError(
+                f"{store_name} ({path}) ist verschlüsselt, aber es ist kein Schlüssel "
+                f"konfiguriert — Lookup-Reihenfolge: KYORO_DB_KEY, System-Keyring, "
+                f"{_KEY_FILE}, health_config.json[db_key]. Ohne Schlüssel kein Zugriff."
+            )
+        conn = sqlite3.connect(str(path))
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=5000")
+    return conn
+
+
+def open_identity_db(path: "str | Path | None" = None) -> sqlite3.Connection:
+    """Öffnet identity.db — Pseudonym-Zuordnungen, verschlüsselt via SQLCipher wenn db_key konfiguriert ist.
+
+    Einzige Stelle, die identity.db öffnet (OpenSpec identity-store-encryption);
+    während der Übergangszeit öffnet eine noch unverschlüsselte Datei mit einer
+    Warnung im Klartext-Modus. Standardpfad: KYORO_CONFIG_DIR/identity.db.
+    """
+    from health_config import KYORO_CONFIG_DIR  # lokaler Import verhindert Zirkel
+    db_path = Path(path) if path is not None else KYORO_CONFIG_DIR / "identity.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return _open_encrypted_store(str(db_path), "identity.db")
+
+
+def open_master_db(path: "str | Path | None" = None) -> sqlite3.Connection:
+    """Öffnet master.db — Patientenregister im Praxisbetrieb, verschlüsselt via SQLCipher wenn db_key konfiguriert ist.
+
+    Einzige Stelle, die master.db öffnet (OpenSpec identity-store-encryption).
+    Standardpfad: KYORO_MASTER_DIR/master.db — folgt nie KYORO_ACTIVE_PATIENT_DIR.
+    """
+    from health_config import KYORO_MASTER_DIR  # lokaler Import verhindert Zirkel
+    db_path = Path(path) if path is not None else KYORO_MASTER_DIR / "master.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return _open_encrypted_store(str(db_path), "master.db")
 
 
 def open_db(path: "str | Path | None" = None) -> sqlite3.Connection:

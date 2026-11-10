@@ -64,14 +64,57 @@ from health_config import KYORO_CONFIG_DIR
 import re
 import sqlite3
 import hashlib
+import atexit
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
 from health_config import KYORO_CONFIG_DIR
-from modules.db import DB_ERRORS, DB_OPERATIONAL_ERRORS
+from modules.db import DB_ERRORS, DB_OPERATIONAL_ERRORS, open_identity_db
 
 # Identity database path (separate from health.db for security)
 _IDENTITY_DB = KYORO_CONFIG_DIR / "identity.db"
+
+# One lazily opened identity.db connection per thread, reused by the
+# identity-store helpers below and closed at process exit (atexit). Opening an
+# encrypted identity.db costs ~70 ms (key derivation), so callers that invoke
+# these helpers per record in an import loop must not re-open it every time.
+# Reopened when _IDENTITY_DB changes (tests redirect the path).
+_identity_conn_local = threading.local()
+_identity_open_connections: list = []
+_identity_open_connections_lock = threading.Lock()
+
+
+def _identity_conn():
+    """This thread's cached identity.db connection (via the central opener)."""
+    state = getattr(_identity_conn_local, "state", None)
+    if state is not None and state[1] == _IDENTITY_DB:
+        return state[0]
+    if state is not None:
+        try:
+            state[0].close()
+        except Exception:
+            pass
+    _IDENTITY_DB.parent.mkdir(parents=True, exist_ok=True)
+    conn = open_identity_db(_IDENTITY_DB)
+    _identity_conn_local.state = (conn, _IDENTITY_DB)
+    with _identity_open_connections_lock:
+        _identity_open_connections.append(conn)
+    return conn
+
+
+def _close_identity_connections() -> None:
+    with _identity_open_connections_lock:
+        conns = list(_identity_open_connections)
+        _identity_open_connections.clear()
+    for conn in conns:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+atexit.register(_close_identity_connections)
 
 # ── GPS precision ─────────────────────────────────────────────────────────────
 
@@ -109,9 +152,8 @@ def pseudonymize_device_serial(serial_real: str, device_id: str) -> str:
     # Create deterministic pseudonym from serial
     pseudo_id = f"SN-{hashlib.sha256(serial_real.encode()).hexdigest()[:8].upper()}"
     
-    # Store in identity.db
-    _IDENTITY_DB.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(_IDENTITY_DB)
+    # Store in identity.db (per-thread connection, see _identity_conn)
+    con = _identity_conn()
     con.execute(
         """
         INSERT OR IGNORE INTO device_serial_map 
@@ -121,9 +163,8 @@ def pseudonymize_device_serial(serial_real: str, device_id: str) -> str:
         (pseudo_id, device_id, serial_real, datetime.now(timezone.utc).isoformat())
     )
     con.commit()
-    con.close()
     _IDENTITY_DB.chmod(0o600)
-    
+
     return pseudo_id
 
 
@@ -131,13 +172,12 @@ def get_device_pseudo(serial_real: str) -> str | None:
     """Retrieve existing pseudonym for a device serial, or None if not found."""
     if not _IDENTITY_DB.exists():
         return None
-        
-    con = sqlite3.connect(_IDENTITY_DB)
+
+    con = _identity_conn()
     result = con.execute(
         "SELECT pseudo_id FROM device_serial_map WHERE serial_real = ?",
         (serial_real,)
     ).fetchone()
-    con.close()
     return result[0] if result else None
 
 
@@ -145,12 +185,11 @@ def get_all_device_mappings() -> dict[str, str]:
     """Return dict mapping real serials to pseudonyms."""
     if not _IDENTITY_DB.exists():
         return {}
-        
-    con = sqlite3.connect(_IDENTITY_DB)
+
+    con = _identity_conn()
     mappings = con.execute(
         "SELECT serial_real, pseudo_id FROM device_serial_map"
     ).fetchall()
-    con.close()
     return {real: pseudo for real, pseudo in mappings}
 
 
@@ -299,27 +338,23 @@ def pseudonymize_provider(name: str, kind: str = "Praxis") -> str:
         return name
     pseudo = f"{kind}-{hashlib.sha256(f'{kind}|{cleaned.casefold()}'.encode()).hexdigest()[:8].upper()}"
 
-    _IDENTITY_DB.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(_IDENTITY_DB)
-    try:
-        con.execute(
-            """
-            CREATE TABLE IF NOT EXISTS provider_pseudonym_map (
-                pseudo_id  TEXT PRIMARY KEY,
-                kind       TEXT NOT NULL,
-                name_real  TEXT NOT NULL,
-                created_at TEXT
-            )
-            """
+    con = _identity_conn()
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS provider_pseudonym_map (
+            pseudo_id  TEXT PRIMARY KEY,
+            kind       TEXT NOT NULL,
+            name_real  TEXT NOT NULL,
+            created_at TEXT
         )
-        con.execute(
-            "INSERT OR IGNORE INTO provider_pseudonym_map (pseudo_id, kind, name_real, created_at) "
-            "VALUES (?, ?, ?, ?)",
-            (pseudo, kind, cleaned, datetime.now(timezone.utc).isoformat()),
-        )
-        con.commit()
-    finally:
-        con.close()
+        """
+    )
+    con.execute(
+        "INSERT OR IGNORE INTO provider_pseudonym_map (pseudo_id, kind, name_real, created_at) "
+        "VALUES (?, ?, ?, ?)",
+        (pseudo, kind, cleaned, datetime.now(timezone.utc).isoformat()),
+    )
+    con.commit()
     _IDENTITY_DB.chmod(0o600)
     return pseudo
 

@@ -15,7 +15,7 @@ Bietet Datenbankfunktionen, essentiell für die Datenpersistenz
 
 ## Methode
 
-Verwaltet den Datenbank-Schlüssel-Lookup in Prioritätsreihenfolge: 1) Umgebungsvariable KYORO_DB_KEY, 2) System-Keyring, 3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"]. Unterstützt sowohl SQLite als auch SQLCipher. Jede geöffnete Verbindung bekommt automatisch DB-interne Chain-of-Custody-Trigger (audit_log-Tabelle, UPDATE/DELETE auf jeder Tabelle) — greift unabhängig vom aufrufenden Code, auch bei Zugriff über sqlite3-CLI oder Datasette.
+Verwaltet den Datenbank-Schlüssel-Lookup in Prioritätsreihenfolge: 1) Umgebungsvariable KYORO_DB_KEY, 2) System-Keyring (höchstens einmal pro Prozess, mit Zeitlimit in einem Worker-Thread, damit ein gesperrter Keyring nicht blockiert), 3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"]. Unterstützt sowohl SQLite als auch SQLCipher. open_db()/open_medicine_db()/open_location_db()/open_medicine_imaging_db() öffnen die Gesundheits-DBs und installieren automatisch DB-interne Chain-of-Custody-Trigger (audit_log-Tabelle, UPDATE/DELETE auf jeder Tabelle) — greift unabhängig vom aufrufenden Code, auch bei Zugriff über sqlite3-CLI oder Datasette. open_identity_db()/open_master_db() öffnen identity.db und master.db mit demselben Schlüssel-Lookup (während der Übergangszeit öffnet eine noch unverschlüsselte Datei mit Warnung im Klartext; verschlüsselt ohne Schlüssel: klarer Fehler) — ohne Audit-Trigger, weil diese Datenbanken die Klartext-Zuordnungen selbst halten.
 
 ## Datenfluss
 

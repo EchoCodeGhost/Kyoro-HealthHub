@@ -65,12 +65,19 @@ identity_resolver.py — Zentrales Identifier-Pseudonym-Resolver-Modul
 @writes      ~/.config/kyoro/identity.db (neue Einträge in device_id_map, person_map, provider_map, sourcefile_map)
 @limits.de   Nur lokale Auflösung; keine Netzwerkzugriffe. Pseudonyme sind
              deterministisch aber nicht kryptografisch sicher — für Datenschutz,
-             nicht für Sicherheit ausgelegt.
+             nicht für Sicherheit ausgelegt. Jeder Resolver hält eine lazy
+             geöffnete identity.db-Verbindung pro Thread (Close bei Prozessende
+             via atexit), damit pro Datensatz aufgerufene resolve()/reverse()
+             nicht bei jedem Aufruf die SQLCipher-Schlüsselableitung (~70 ms)
+             zahlen.
 
 @relevance.de  Bietet Identitätsauflösungsfunktionen, essentiell für die Datenintegration
 @relevance.en  Provides identity resolution functions, essential for data integration
 @limits.en   Local-only resolution; no network access. Pseudonyms are deterministic
              but not cryptographically secure — designed for privacy, not security.
+             Each resolver keeps one lazily opened identity.db connection per thread
+             (closed at process exit via atexit), so per-record resolve()/reverse()
+             calls don't pay the SQLCipher key derivation (~70 ms) on every call.
 @usage
     from modules.identity_resolver import resolve_device, resolve_person, resolve_provider, resolve_sourcefile, reverse_resolve, resolve_display_name
     dev_pseudo = resolve_device("polar_v3")  # -> "DEV-8abb425f"
@@ -84,6 +91,8 @@ identity_resolver.py — Zentrales Identifier-Pseudonym-Resolver-Modul
 import sqlite3
 import hashlib
 import secrets
+import atexit
+import threading
 from pathlib import Path
 from typing import Optional, Dict, Any
 import json
@@ -92,6 +101,43 @@ import os
 # Constants
 IDENTITY_DB_PATH = Path("~/.config/kyoro/identity.db").expanduser()
 REGISTRY_PATH = Path("~/.config/kyoro/registry.json").expanduser()
+
+
+def _connect_identity_db():
+    """Öffnet identity.db über den zentralen Öffner in modules.db (SQLCipher
+    mit dem db_key-Lookup, Übergangszeit mit Warnung im Klartext). Lokaler
+    Import: modules.db importiert health_config, und health_config lädt dieses
+    Modul lazy für OWN_PERSON_ID — ein Top-Level-Import wäre ein Zirkel."""
+    from modules.db import open_identity_db
+    return open_identity_db(IDENTITY_DB_PATH)
+
+
+# Geöffnete Verbindungen aller Resolver, geschlossen bei Prozessende (atexit).
+# Öffnen einer verschlüsselten identity.db kostet ~70 ms (Schlüsselableitung),
+# deshalb hält jeder Resolver eine lazy aufgebaute Verbindung pro Thread statt
+# pro Aufruf neu zu öffnen. `with conn:` committet nur — es schließt eine
+# sqlite3-Verbindung NICHT, daher das explizite atexit-Close.
+_open_connections: list = []
+_open_connections_lock = threading.Lock()
+
+
+def _register_open_connection(conn) -> None:
+    with _open_connections_lock:
+        _open_connections.append(conn)
+
+
+def _close_all_open_connections() -> None:
+    with _open_connections_lock:
+        conns = list(_open_connections)
+        _open_connections.clear()
+    for conn in conns:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+atexit.register(_close_all_open_connections)
 
 # Pseudonym prefixes
 PREFIX_DEVICE = "DEV-"
@@ -104,16 +150,39 @@ class IdentityResolver:
     
     def __init__(self):
         """Initialize the identity resolver."""
+        self._thread_local = threading.local()
         self._ensure_identity_db()
         self._ensure_registry()
         self._cache: Dict[str, Dict[str, str]] = {}
         self._salt: str = self._load_or_create_salt()
 
+    def _conn(self):
+        """Die lazy aufgebaute identity.db-Verbindung dieses Threads, von allen
+        Methoden wiederverwendet. Wird neu geöffnet, wenn IDENTITY_DB_PATH sich
+        geändert hat (Tests leiten den Pfad um); geschlossen wird bei
+        Prozessende über atexit — `with conn:` committet nur, es schließt nicht.
+
+        Eine Verbindung pro Thread statt pro Aufruf: jedes Öffnen einer
+        verschlüsselten identity.db kostet ~70 ms (Schlüsselableitung), und
+        resolve()/reverse() laufen pro importiertem Datensatz."""
+        state = getattr(self._thread_local, "state", None)
+        if state is not None and state[1] == IDENTITY_DB_PATH:
+            return state[0]
+        if state is not None:
+            try:
+                state[0].close()
+            except Exception:
+                pass
+        conn = _connect_identity_db()
+        self._thread_local.state = (conn, IDENTITY_DB_PATH)
+        _register_open_connection(conn)
+        return conn
+
     def _ensure_identity_db(self) -> None:
         """Ensure identity.db exists with required tables."""
         os.makedirs(IDENTITY_DB_PATH.parent, exist_ok=True)
 
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
+        with self._conn() as conn:
             cursor = conn.cursor()
 
             # device_serial_map — Spaltennamen MUESSEN zu utils/anonymize.py,
@@ -238,7 +307,7 @@ class IdentityResolver:
         (INSERT OR IGNORE dedup relies on it), so the salt is generated once
         and persisted — never derived from guessable input.
         """
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
+        with self._conn() as conn:
             cursor = conn.cursor()
             row = cursor.execute("SELECT salt_hex FROM pseudonym_salt WHERE id = 1").fetchone()
             if row:
@@ -288,7 +357,7 @@ class IdentityResolver:
         gets hashed into its own DEV-XXXXXXXX pseudonym, silently splitting
         one device's data across multiple IDs (see device_serial_map).
         """
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
+        with self._conn() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT device_id FROM device_serial_map WHERE pseudo_id = ? OR serial_real = ?",
@@ -320,7 +389,7 @@ class IdentityResolver:
         pseudo_id = self._generate_pseudonym(kind, real_value)
         
         # Check if already in database
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
+        with self._conn() as conn:
             cursor = conn.cursor()
             
             if kind == "device":
@@ -395,7 +464,7 @@ class IdentityResolver:
         if reverse_cache_key in self._cache:
             return self._cache.get(reverse_cache_key)
         
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
+        with self._conn() as conn:
             cursor = conn.cursor()
             
             # Determine kind from prefix
@@ -511,36 +580,23 @@ class IdentityResolver:
         """
         mappings = {}
         
-        with sqlite3.connect(IDENTITY_DB_PATH) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            if kind is None or kind == "device":
-                cursor.execute("SELECT pseudo_id, device_id_real FROM device_id_map")
-                mappings['device'] = {row['device_id_real']: row['pseudo_id'] for row in cursor.fetchall()}
-            
-            if kind is None or kind == "person":
-                cursor.execute("SELECT pseudo_id, person_real FROM person_map")
-                mappings['person'] = {row['person_real']: row['pseudo_id'] for row in cursor.fetchall()}
+        # Plain tuples, no sqlite3.Row: Row only accepts sqlite3 cursors and
+        # fails on the sqlcipher3 connection of an encrypted identity.db.
+        queries = {
+            "device": "SELECT device_id_real, pseudo_id FROM device_id_map",
+            "person": "SELECT person_real, pseudo_id FROM person_map",
+            "provider": "SELECT provider_real, pseudo_id FROM provider_map",
+            "sourcefile": "SELECT sourcefile_real, pseudo_id FROM sourcefile_map",
+            "serial": "SELECT serial_real, pseudo_id FROM device_serial_map",
+            # account_pseudo_map hat die Spalte account_pseudo, nicht
+            # pseudo_id wie die anderen *_map-Tabellen -- siehe reverse().
+            "account": "SELECT account_real, account_pseudo FROM account_pseudo_map",
+        }
+        with self._conn() as conn:
+            for name, sql in queries.items():
+                if kind is None or kind == name:
+                    mappings[name] = dict(conn.execute(sql).fetchall())
 
-            if kind is None or kind == "provider":
-                cursor.execute("SELECT pseudo_id, provider_real FROM provider_map")
-                mappings['provider'] = {row['provider_real']: row['pseudo_id'] for row in cursor.fetchall()}
-
-            if kind is None or kind == "sourcefile":
-                cursor.execute("SELECT pseudo_id, sourcefile_real FROM sourcefile_map")
-                mappings['sourcefile'] = {row['sourcefile_real']: row['pseudo_id'] for row in cursor.fetchall()}
-
-            if kind is None or kind == "serial":
-                cursor.execute("SELECT pseudo_id, serial_real FROM device_serial_map")
-                mappings['serial'] = {row['serial_real']: row['pseudo_id'] for row in cursor.fetchall()}
-            
-            if kind is None or kind == "account":
-                # account_pseudo_map hat die Spalte account_pseudo, nicht
-                # pseudo_id wie die anderen *_map-Tabellen -- siehe reverse().
-                cursor.execute("SELECT account_pseudo, account_real FROM account_pseudo_map")
-                mappings['account'] = {row['account_real']: row['account_pseudo'] for row in cursor.fetchall()}
-        
         return mappings
 
 # Global instance

@@ -42,6 +42,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from health_config import KYORO_CONFIG_DIR
+from modules.db import open_identity_db
 
 # KYORO_CONFIG_DIR follows KYORO_ACTIVE_PATIENT_DIR when set (per-instance
 # onboarding) and falls back to the real operator home otherwise — must NOT
@@ -87,7 +88,7 @@ CREATE TABLE IF NOT EXISTS provider_pseudonym_map (
 
 def create_or_upgrade(db_path: pathlib.Path = _IDENTITY_DB) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(db_path)
+    con = open_identity_db(db_path)
     for stmt in _DDL.strip().split(";"):
         stmt = stmt.strip()
         if stmt:
@@ -101,7 +102,7 @@ def show(db_path: pathlib.Path = _IDENTITY_DB) -> None:
     if not db_path.exists():
         print(f"Not found: {db_path}")
         return
-    con = sqlite3.connect(db_path)
+    con = open_identity_db(db_path)
     print("=== device_serial_map ===")
     for row in con.execute("SELECT pseudo_id, device_id, serial_real FROM device_serial_map ORDER BY device_id"):
         print(f"  {row[0]}  {row[1]}  ({row[2]})")

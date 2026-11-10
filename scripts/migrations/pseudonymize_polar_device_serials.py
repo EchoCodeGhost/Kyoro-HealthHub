@@ -72,7 +72,6 @@ pseudonymize_polar_device_serials.py — ppi_raw.device: Rohseriennummer → dev
     python3 scripts/migrations/pseudonymize_polar_device_serials.py --dry-run
 """
 import argparse
-import sqlite3
 import sys
 from pathlib import Path
 
@@ -80,7 +79,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import KYORO_CONFIG_DIR
 from modules.base import resolve_person
 from modules.base import log_import
-from modules.db import open_db
+from modules.db import open_db, open_identity_db
 
 
 def _load_polar_serial_map() -> list[dict]:
@@ -90,7 +89,7 @@ def _load_polar_serial_map() -> list[dict]:
     identity_db = KYORO_CONFIG_DIR / "identity.db"
     if not identity_db.exists():
         return []
-    con = sqlite3.connect(identity_db)
+    con = open_identity_db(identity_db)
     rows = con.execute(
         "SELECT serial_real, device_id FROM device_serial_map WHERE device_id LIKE 'polar_%'"
     ).fetchall()

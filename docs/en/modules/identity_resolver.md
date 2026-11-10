@@ -24,7 +24,7 @@ Deterministic SHA-256-based pseudonym generation with prefixes: - DEV-XXXXXXXX f
 
 ## Limitations
 
-Local-only resolution; no network access. Pseudonyms are deterministic but not cryptographically secure — designed for privacy, not security.
+Local-only resolution; no network access. Pseudonyms are deterministic but not cryptographically secure — designed for privacy, not security. Each resolver keeps one lazily opened identity.db connection per thread (closed at process exit via atexit), so per-record resolve()/reverse() calls don't pay the SQLCipher key derivation (~70 ms) on every call.
 
 ## Usage
 

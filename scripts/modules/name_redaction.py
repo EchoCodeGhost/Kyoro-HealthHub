@@ -55,6 +55,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import threading
 from pathlib import Path
 
 from modules.address_redaction import Span, _merge
@@ -113,6 +114,24 @@ def _identity_db_path() -> Path:
     return Path(anonymize._IDENTITY_DB)
 
 
+_identity_local = threading.local()
+
+
+def _identity_conn(db: Path):
+    """This thread's identity.db connection for ``db``, opened once: an
+    encrypted open costs ~70 ms, and load_known_names() runs on every
+    redaction call. Reopened when the path changes (tests redirect it)."""
+    state = getattr(_identity_local, "state", None)
+    if state is not None and state[0] == db:
+        return state[1]
+    from modules.db import open_identity_db
+    con = open_identity_db(db)
+    if state is not None:
+        state[1].close()
+    _identity_local.state = (db, con)
+    return con
+
+
 def load_known_names() -> list[str]:
     """Namen aus health_config.json (privacy_check.patient_names) und identity.db (person_name_map)."""
     names: list[str] = []
@@ -124,13 +143,10 @@ def load_known_names() -> list[str]:
     try:
         db = _identity_db_path()
         if db.exists():
-            con = sqlite3.connect(db)
-            try:
-                for row in con.execute("SELECT name_real, alias1, alias2, alias3 FROM person_name_map"):
-                    names += [r for r in row if r]
-            finally:
-                con.close()
-    except (sqlite3.DatabaseError, ImportError, OSError):
+            con = _identity_conn(db)
+            for row in con.execute("SELECT name_real, alias1, alias2, alias3 FROM person_name_map"):
+                names += [r for r in row if r]
+    except (sqlite3.DatabaseError, RuntimeError, ImportError, OSError):
         pass
     return [n for n in names if n and n.strip()]
 

@@ -184,3 +184,115 @@ def test_sweep_inside_another_repos_hook_stays_in_config_repo(tmp_path, monkeypa
     config_log = _git(config_dir, "log", "--oneline").stdout
     assert "auto: sweep" in config_log
     assert "health_config.json" in _git(config_dir, "ls-files").stdout
+
+
+# ── Ausschlüsse für Datenbanken + Größenlimit (identity-store-encryption) ──
+
+
+def test_ensure_git_repo_writes_db_exclusions(tmp_path):
+    ensure_git_repo(tmp_path)
+    lines = (tmp_path / ".git" / "info" / "exclude").read_text(encoding="utf-8").splitlines()
+    for pattern in ("*.db", "*.db.*", "*-wal", "*-shm", "*.sqlite"):
+        assert pattern in lines
+
+
+def test_ensure_git_repo_exclusions_are_idempotent_and_self_healing(tmp_path):
+    ensure_git_repo(tmp_path)
+    ensure_git_repo(tmp_path)  # second call must not duplicate patterns
+    lines = (tmp_path / ".git" / "info" / "exclude").read_text(encoding="utf-8").splitlines()
+    assert lines.count("*.db") == 1
+    assert lines.count("*.db.*") == 1
+
+    # A repo that predates the exclusions (created by hand, no exclude file)
+    # gets them on the next ensure_git_repo() call.
+    (tmp_path / ".git" / "info" / "exclude").unlink()
+    ensure_git_repo(tmp_path)
+    lines = (tmp_path / ".git" / "info" / "exclude").read_text(encoding="utf-8").splitlines()
+    assert "*.db" in lines
+
+
+def test_database_files_in_config_dir_are_not_staged(tmp_path):
+    """A database backup dropped into the config folder must never be staged
+    by the git add -A sweep — not the db itself, not copies, not WAL/SHM."""
+    (tmp_path / "identity.db").write_bytes(b"SQLite format 3\x00" + b"x" * 64)
+    (tmp_path / "health.db.before_x").write_bytes(b"SQLite format 3\x00" + b"y" * 64)
+    (tmp_path / "health.db-wal").write_bytes(b"z" * 32)
+    (tmp_path / "health.db-shm").write_bytes(b"z" * 32)
+    (tmp_path / "extra.sqlite").write_bytes(b"SQLite format 3\x00" + b"w" * 32)
+    (tmp_path / "health_config.json").write_text("{}", encoding="utf-8")
+
+    commit_config_dir(tmp_path, "auto: sweep")
+
+    staged = _git(tmp_path, "ls-files").stdout.split()
+    assert "health_config.json" in staged  # normal JSON change is still committed
+    for name in ("identity.db", "health.db.before_x", "health.db-wal",
+                 "health.db-shm", "extra.sqlite"):
+        assert name not in staged
+
+
+def test_large_file_is_skipped_and_only_named_in_log(tmp_path, capsys):
+    (tmp_path / "big_backup.json").write_bytes(b"0" * (5 * 1024 * 1024 + 1))
+    (tmp_path / "small.json").write_text("{}", encoding="utf-8")
+
+    commit_config_dir(tmp_path, "auto: sweep")
+
+    staged = _git(tmp_path, "ls-files").stdout.split()
+    assert "small.json" in staged
+    assert "big_backup.json" not in staged
+    err = capsys.readouterr().err
+    assert "big_backup.json" in err  # named ...
+    assert "0" * 100 not in err      # ... but never its contents
+
+
+def test_file_exactly_at_size_limit_is_still_committed(tmp_path):
+    target = tmp_path / "at_limit.json"
+    target.write_bytes(b"0" * (5 * 1024 * 1024))
+    commit_config_dir(tmp_path, "auto: sweep")
+    assert "at_limit.json" in _git(tmp_path, "ls-files").stdout.split()
+
+
+def test_oversized_file_is_never_passed_to_git_add(tmp_path, monkeypatch, capsys):
+    """Oversized files must be excluded BEFORE staging: `git status
+    --porcelain -z` does not hash untracked files, and no `git add` call may
+    ever contain the oversized path."""
+    import modules.config_backup as cb
+
+    (tmp_path / "small.json").write_text("{}", encoding="utf-8")
+    big = tmp_path / "huge.bin"
+    with open(big, "wb") as fh:
+        fh.truncate(6 * 1024 * 1024)  # sparse file: size counts, content is never read
+
+    real_git = cb._git
+    git_calls = []
+
+    def recording_git(config_dir, *args, **kwargs):
+        git_calls.append(args)
+        return real_git(config_dir, *args, **kwargs)
+
+    monkeypatch.setattr(cb, "_git", recording_git)
+
+    commit_config_dir(tmp_path, "auto: sweep")
+
+    add_calls = [c for c in git_calls if c and c[0] == "add"]
+    assert add_calls, "expected at least one git add call"
+    for c in add_calls:
+        assert "huge.bin" not in c  # never handed to git add, so never hashed
+    staged = _git(tmp_path, "ls-files").stdout.split()
+    assert "small.json" in staged
+    assert "huge.bin" not in staged
+    err = capsys.readouterr().err
+    assert "huge.bin" in err  # named in the log ...
+
+
+def test_deleted_file_is_still_committed_as_deletion(tmp_path):
+    """Selective staging via git status must keep staging deletions."""
+    (tmp_path / "gone.json").write_text("{}", encoding="utf-8")
+    commit_config_dir(tmp_path, "initial")
+    assert "gone.json" in _git(tmp_path, "ls-files").stdout.split()
+
+    (tmp_path / "gone.json").unlink()
+    commit_config_dir(tmp_path, "auto: sweep")
+
+    assert "gone.json" not in _git(tmp_path, "ls-files").stdout.split()
+    log = _git(tmp_path, "log", "--oneline", "--", "gone.json").stdout
+    assert "auto: sweep" in log  # the deletion is its own commit

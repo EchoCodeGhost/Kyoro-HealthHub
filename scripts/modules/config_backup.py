@@ -39,7 +39,12 @@ config_backup.py — Backup and chain-of-custody commit for local config files
              die vor dieser Funktion angelegt wurden) und sind bewusst
              fehlertolerant (fangen `CalledProcessError`/`FileNotFoundError`
              ab) — ein Git-Problem darf nie einen echten klinischen
-             Schreibvorgang blockieren.
+             Schreibvorgang blockieren. Datenbanken, ihre Kopien, WAL/SHM- und
+             *.sqlite-Dateien landen über `.git/info/exclude` nie im Archiv
+             (ensure_git_repo() trägt die Ausschlüsse idempotent ein);
+             `commit_config_dir()` schließt Dateien über 5 MB schon VOR dem
+             Staging aus (ermittelt über `git status --porcelain -z`, das
+             ungetrackte Dateien nicht hasht) und loggt nur ihre Namen, nie Inhalte.
 @method.en   Copies the file (if present) to _backups/<name>.bak.<ISO timestamp>
              (a subdirectory, so the config directory itself doesn't fill up
              with backup files) before it gets overwritten. No-op if the file
@@ -57,7 +62,12 @@ config_backup.py — Backup and chain-of-custody commit for local config files
              themselves (self-healing for instances created before this
              function existed) and are deliberately fault-tolerant (catch
              `CalledProcessError`/`FileNotFoundError`) — a git hiccup must
-             never block an actual clinical write.
+             never block an actual clinical write. Databases, their copies,
+             WAL/SHM and *.sqlite files never land in the archive
+             (`.git/info/exclude`, written idempotently by ensure_git_repo());
+             commit_config_dir() excludes files above 5 MB BEFORE staging
+             (paths come from `git status --porcelain -z`, which does not hash
+             untracked files) and logs only their names, never contents.
 @reads       Die zu sichernde Datei (falls vorhanden); .git-Verzeichnis-Status
 @writes      _backups/<datei>.bak.<timestamp>; .git-Repo + Commits im selben Verzeichnis
 @limits.de   Kein automatisches Aufräumen historischer Backups — wächst mit
@@ -88,8 +98,37 @@ config_backup.py — Backup and chain-of-custody commit for local config files
 import os
 import shutil
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Datenbanken, deren Kopien, WAL/SHM-Sidecars und SQLite-Dateien gehören nie
+# in das Config-Archiv (siehe OpenSpec identity-store-encryption): Sie landen in
+# .git/info/exclude, damit `git add -A` sie nicht staged.
+_DB_EXCLUDE_PATTERNS = ("*.db", "*.db.*", "*-wal", "*-shm", "*.sqlite")
+
+# Dateien über diesem Limit werden von commit_config_dir() übersprungen und nur
+# mit Namen geloggt (nie Inhalte) — ein versehentlich abgelegtes 30-GB-DB-Backup
+# darf den Config-Commit nicht aufblähen.
+_SIZE_LIMIT_BYTES = 5 * 1024 * 1024
+
+
+def _write_exclude_patterns(config_dir: Path) -> None:
+    """Fehlende Datenbank-Ausschlüsse in .git/info/exclude eintragen (idempotent).
+    Best-effort: ein Fehler darf den eigentlichen Schreibvorgang nie blockieren."""
+    exclude = config_dir / ".git" / "info" / "exclude"
+    try:
+        existing = exclude.read_text(encoding="utf-8").splitlines() if exclude.exists() else []
+        missing = [p for p in _DB_EXCLUDE_PATTERNS if p not in existing]
+        if not missing:
+            return
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        with open(exclude, "a", encoding="utf-8") as fh:
+            if existing and existing[-1].strip():
+                fh.write("\n")
+            fh.write("\n".join(missing) + "\n")
+    except OSError:
+        pass
 
 
 def _git(config_dir: Path, *args: str, **kwargs) -> subprocess.CompletedProcess:
@@ -122,36 +161,135 @@ def backup_before_write(path: Path) -> None:
 
 def ensure_git_repo(config_dir: Path) -> None:
     """Idempotently initialise `config_dir` as a local-only git repo (no
-    remote is ever configured). No-op if it already is one. Best-effort —
-    a git failure here must never block the caller's actual data write.
+    remote is ever configured) and make sure the database exclusions are in
+    .git/info/exclude — also for repos that predate this feature (self-healing
+    on every call, not just on init). Best-effort — a git failure here must
+    never block the caller's actual data write.
 
     Sets a fixed local (repo-scoped, not global) commit identity — this repo
     exists purely as a local change log for one config directory, not
     something a human signs commits in by hand, and a machine with no
     global user.name/user.email configured (e.g. a fresh CI runner) would
     otherwise make every commit silently fail."""
-    if (config_dir / ".git").exists():
-        return
+    if not (config_dir / ".git").exists():
+        try:
+            _git(config_dir, "init", "-q", check=True, capture_output=True)
+            _git(config_dir, "branch", "-q", "-m", "main", capture_output=True)
+            _git(config_dir, "config", "user.name", "Kyoro Config", capture_output=True)
+            _git(config_dir, "config", "user.email", "kyoro-config@localhost",
+                 capture_output=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return
+    _write_exclude_patterns(config_dir)
+
+
+def _changed_paths(config_dir: Path) -> "list[str] | None":
+    """All changed and new paths vs HEAD, via `git status --porcelain -z
+    --untracked-files=all`. Unlike `git add -A`, git status does NOT read and
+    hash untracked files — a huge stray file in the config dir is only stat'ed,
+    never read. Returns None if git itself failed (caller falls back to the
+    plain `git add -A` sweep). With -z, paths are NUL-separated and unquoted;
+    rename/copy entries carry the original path as a second NUL-separated field."""
     try:
-        _git(config_dir, "init", "-q", check=True, capture_output=True)
-        _git(config_dir, "branch", "-q", "-m", "main", capture_output=True)
-        _git(config_dir, "config", "user.name", "Kyoro Config", capture_output=True)
-        _git(config_dir, "config", "user.email", "kyoro-config@localhost",
-             capture_output=True)
+        out = _git(config_dir, "status", "--porcelain", "-z", "--untracked-files=all",
+                   capture_output=True, text=True).stdout
+    except (subprocess.CalledProcessError, FileNotFoundError, UnicodeDecodeError):
+        return None
+    paths: list[str] = []
+    items = out.split("\0")
+    i = 0
+    while i < len(items):
+        entry = items[i]
+        i += 1
+        if len(entry) < 4:
+            continue
+        status, name = entry[:2], entry[3:]
+        paths.append(name)
+        if status[0] in "RC":  # rename/copy: next field is the original path
+            i += 1
+    return paths
+
+
+def _stage_dir_skipping_oversized(config_dir: Path) -> "list[str] | None":
+    """Stage every changed/new path except files above _SIZE_LIMIT_BYTES, so
+    git add never reads/hashes an oversized file at all. Returns the skipped
+    names (only names are ever logged, never contents); deleted files have no
+    file on disk and are always staged as deletions. Returns None if
+    `git status` failed — the caller then falls back to the plain sweep."""
+    changed = _changed_paths(config_dir)
+    if changed is None:
+        return None
+    skipped: list[str] = []
+    keep: list[str] = []
+    for name in changed:
+        try:
+            path = config_dir / name
+            if path.is_file() and path.stat().st_size > _SIZE_LIMIT_BYTES:
+                skipped.append(name)
+                continue
+        except OSError:
+            pass
+        keep.append(name)
+    if keep:
+        _git(config_dir, "add", "-A", "--", *keep, capture_output=True)
+    return skipped
+
+
+def _unstage_oversized(config_dir: Path) -> list[str]:
+    """Unstage files above _SIZE_LIMIT_BYTES and return their names (only the
+    names are ever logged, never contents). The .git/info/exclude patterns
+    already keep untracked databases out; this catches files that were staged
+    anyway (e.g. tracked before the exclusions existed, or a large non-DB file)."""
+    skipped: list[str] = []
+    try:
+        out = _git(config_dir, "diff", "--cached", "--name-only",
+                   capture_output=True, text=True).stdout
+        for name in out.splitlines():
+            path = config_dir / name
+            try:
+                if path.is_file() and path.stat().st_size > _SIZE_LIMIT_BYTES:
+                    _git(config_dir, "reset", "-q", "--", name, capture_output=True)
+                    skipped.append(name)
+            except OSError:
+                pass
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
+    return skipped
 
 
-def _stage_and_commit(config_dir: Path, add_args: list[str], message: str) -> None:
+def _stage_and_commit(config_dir: Path, add_args: list[str], message: str,
+                      skip_large: bool = False) -> None:
     """Shared implementation for commit_config_change()/commit_config_dir():
     stage `add_args` (git add arguments) and commit with `message` if
     anything actually changed. Calls ensure_git_repo() itself. Best-effort —
-    a git failure here must never block the caller's actual data write."""
+    a git failure here must never block the caller's actual data write.
+
+    With skip_large=True (the commit_config_dir() sweep), oversized files are
+    excluded BEFORE staging: the changed paths come from `git status
+    --porcelain -z --untracked-files=all`, which does not read/hash untracked
+    files, and only the remaining paths are passed to `git add -A -- <paths>`.
+    _unstage_oversized() still runs afterwards as a second safety net."""
     ensure_git_repo(config_dir)
     if not (config_dir / ".git").exists():
         return
     try:
-        _git(config_dir, "add", *add_args, capture_output=True)
+        skipped: list[str] = []
+        if skip_large:
+            selective = _stage_dir_skipping_oversized(config_dir)
+            if selective is None:
+                # git status failed — fall back to the plain sweep
+                _git(config_dir, "add", *add_args, capture_output=True)
+                skipped = _unstage_oversized(config_dir)
+            else:
+                skipped = selective + _unstage_oversized(config_dir)
+            if skipped:
+                print(
+                    f"[config_backup] Dateien über {_SIZE_LIMIT_BYTES // (1024 * 1024)} MB "
+                    f"übersprungen (nur Namen): {', '.join(sorted(skipped))}",
+                    file=sys.stderr,
+                )
+        else:
+            _git(config_dir, "add", *add_args, capture_output=True)
         staged = _git(config_dir, "diff", "--cached", "--quiet")
         if staged.returncode == 0:
             return
@@ -174,5 +312,14 @@ def commit_config_dir(config_dir: Path, message: str) -> None:
     time/exit-time sweep so a change gets captured regardless of which code
     path wrote it, or whether that path calls commit_config_change() at
     all (a direct file edit, a different tool, a future script that never
-    heard of this module). No-op if there's nothing to commit."""
-    _stage_and_commit(config_dir, ["-A"], message)
+    heard of this module). No-op if there's nothing to commit.
+
+    Databases, their copies, WAL/SHM files and *.sqlite files are never
+    staged (.git/info/exclude, written idempotently by ensure_git_repo()).
+    Files above the size limit are excluded BEFORE staging: the changed
+    paths are taken from `git status --porcelain -z --untracked-files=all`
+    (which does not read/hash untracked files, so a huge stray file is never
+    hashed at all) and only the remaining paths are passed to
+    `git add -A -- <paths>`. Only the skipped names are ever logged, never
+    contents. _unstage_oversized() remains as a second safety net."""
+    _stage_and_commit(config_dir, ["-A"], message, skip_large=True)
