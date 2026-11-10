@@ -54,8 +54,9 @@ privacy review. The hub reads it through `import_symptomtrack_export.py`
   `source: kyoro_ios`; the importer stores them under that source so they
   never collide with PWA rows of the same day, and several entries per day
   resolve to the highest value.
-- Symptom catalogue: the PWA defines 37 modules with 256 symptoms
-  (`pwa/backend/symptom_schema.py`), five preselected. The app adopts the
+- Symptom catalogue: 37 modules with 256 symptoms, five preselected,
+  released by Michel on 2026-11-10 and kept in `config/symptom_catalog.json`
+  as the single list for PWA, app and hub. The app adopts the
   module model instead of a fixed quick-pick list; setup selects modules.
   Symptom labels stay identical to the PWA, because they are the `symptom`
   value in health.db.

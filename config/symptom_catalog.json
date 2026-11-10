@@ -1,0 +1,1653 @@
+{
+  "_comment": "Symptom catalogue shared by Kyoro SymptomTrack (PWA), the Kyoro iPhone app and the hub. 'label' is stored verbatim as symptoms.symptom in health.db, so never rename a label without a migration. Types: binary (0/1), scale (0-10, high = worse), scale_inverted (0-10, high = better), text. A module with requires_crisis_notice must show the crisis notice (112 and crisis lines) for as long as it is active, independent of any value. SPDX-License-Identifier: GPL-3.0-or-later",
+  "version": 1,
+  "default_modules": [
+    "basis_ressourcen",
+    "basis_erschoepfung",
+    "basis_schmerz",
+    "basis_psyche",
+    "basis_verdauung"
+  ],
+  "categories": {
+    "ressourcen": {
+      "label": "Ressourcen & Allgemeinzustand"
+    },
+    "erschoepfung": {
+      "label": "Erschöpfung & Neurologie"
+    },
+    "sensorisch": {
+      "label": "Sensorik & Reizverarbeitung"
+    },
+    "schmerz": {
+      "label": "Schmerz"
+    },
+    "psyche": {
+      "label": "Psyche & Stimmung"
+    },
+    "bauchraum": {
+      "label": "Verdauung & Magen-Darm"
+    },
+    "auge": {
+      "label": "Auge & Sehvermögen"
+    },
+    "erkaeltung": {
+      "label": "Erkältung & Infekte"
+    },
+    "behandlung": {
+      "label": "Behandlungen & Therapien"
+    },
+    "sonstiges": {
+      "label": "Sonstiges & Ereignisse"
+    },
+    "migraene": {
+      "label": "Migräne"
+    },
+    "psychose": {
+      "label": "Psychose / Schizophrenie"
+    },
+    "neurodegeneration": {
+      "label": "Neurodegeneration"
+    },
+    "rheuma": {
+      "label": "Rheumatologie"
+    },
+    "fibromyalgie": {
+      "label": "Fibromyalgie / Zentrales Schmerzsyndrom"
+    },
+    "lipoedem": {
+      "label": "Lipödem"
+    },
+    "hormonell": {
+      "label": "Hormonell"
+    },
+    "kreislauf": {
+      "label": "Herz / Kreislauf"
+    },
+    "haut": {
+      "label": "Haut"
+    },
+    "borreliose": {
+      "label": "Borreliose / Persistierende Borreliose"
+    }
+  },
+  "modules": {
+    "basis_ressourcen": {
+      "label": "Ressourcen & Allgemeinzustand",
+      "description": "Tägliches Fundament: Energie, Schlaf, Stimmung und allgemeines Wohlbefinden.",
+      "category": "ressourcen",
+      "default": true,
+      "symptoms": [
+        {
+          "id": "energie_morgens",
+          "label": "Energie am Morgen",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "energie_abends",
+          "label": "Energie am Abend",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "stimmung",
+          "label": "Stimmung",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "sicherheitsgefuehl",
+          "label": "Gefühl innerer Sicherheit",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "schlafqualitaet",
+          "label": "Schlafqualität",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "schlafdauer",
+          "label": "Schlafdauer (Stunden)",
+          "type": "text"
+        },
+        {
+          "id": "aktivitaetsniveau",
+          "label": "Aktivität heute (0=Bettruhe, 10=normaler Tag)",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "gesamtzustand",
+          "label": "Gesamtzustand heute",
+          "type": "scale_inverted"
+        }
+      ]
+    },
+    "basis_erschoepfung": {
+      "label": "Erschöpfung & Neurologie",
+      "description": "Erschöpfung, Energieeinbrüche nach Belastung, Herzrasen, Kribbeln und ähnliche körperlich-neurologische Beschwerden.",
+      "category": "erschoepfung",
+      "default": true,
+      "symptoms": [
+        {
+          "id": "erschoepfung_fatigue",
+          "label": "Erschöpfung / Kraftlosigkeit",
+          "type": "scale"
+        },
+        {
+          "id": "malaise",
+          "label": "Allgemeines Krankheitsgefühl (wie Grippe)",
+          "type": "scale"
+        },
+        {
+          "id": "tagesschlafrigkeit",
+          "label": "Tagesschläfrigkeit",
+          "type": "scale"
+        },
+        {
+          "id": "einschlafschwierigkeiten",
+          "label": "Einschlafschwierigkeiten",
+          "type": "scale"
+        },
+        {
+          "id": "pem_erschoepfung",
+          "label": "Verschlechterung nach Anstrengung (PEM)",
+          "type": "scale"
+        },
+        {
+          "id": "pem_crash_tag",
+          "label": "Crash-Tag (totaler Einbruch nach Belastung)",
+          "type": "binary"
+        },
+        {
+          "id": "konzentrationsstoerungen",
+          "label": "Konzentrationsprobleme",
+          "type": "scale"
+        },
+        {
+          "id": "wortfindungsstoerungen",
+          "label": "Wortfindungsprobleme",
+          "type": "scale"
+        },
+        {
+          "id": "schwindel",
+          "label": "Schwindel",
+          "type": "scale"
+        },
+        {
+          "id": "orthostatische_intoleranz",
+          "label": "Schwindel / Schwäche beim Aufstehen",
+          "type": "scale"
+        },
+        {
+          "id": "herzrasen",
+          "label": "Herzrasen",
+          "type": "scale"
+        },
+        {
+          "id": "palpitationen",
+          "label": "Herzstolpern (spürbare unregelmäßige Schläge)",
+          "type": "binary"
+        },
+        {
+          "id": "afib_verdacht",
+          "label": "Unregelmäßiger Herzrhythmus (EKG auffällig)",
+          "type": "binary"
+        },
+        {
+          "id": "atemnot_physiologisch",
+          "label": "Kurzatmigkeit / körperliche Atemnot",
+          "type": "scale"
+        },
+        {
+          "id": "aufwachen_atemnot",
+          "label": "Aufwachen mit Atemnot",
+          "type": "binary"
+        },
+        {
+          "id": "kribbeln_taubheit",
+          "label": "Kribbeln oder Taubheitsgefühl",
+          "type": "scale"
+        },
+        {
+          "id": "tinnitus",
+          "label": "Tinnitus (Ohrgeräusche)",
+          "type": "scale"
+        },
+        {
+          "id": "lymphknotenschwellung",
+          "label": "Geschwollene Lymphknoten",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_schmerz": {
+      "label": "Schmerz",
+      "description": "Körperschmerzen nach Lokalisation — Kopf, Gelenke, Muskeln, Bauch, Brust.",
+      "category": "schmerz",
+      "default": true,
+      "symptoms": [
+        {
+          "id": "kopfschmerzen",
+          "label": "Kopfschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "koerperschmerz",
+          "label": "Ganzkörperschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "gelenkschmerzen",
+          "label": "Gelenkschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "gelenksteife",
+          "label": "Steife Gelenke",
+          "type": "scale"
+        },
+        {
+          "id": "muskelschmerzen",
+          "label": "Muskelschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "nackensteifigkeit",
+          "label": "Steifer Nacken",
+          "type": "scale"
+        },
+        {
+          "id": "wandernde_schmerzen",
+          "label": "Wandernde Schmerzen (an verschiedenen Stellen)",
+          "type": "scale"
+        },
+        {
+          "id": "bauchschmerzen",
+          "label": "Bauchschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "zahnschmerzen",
+          "label": "Zahnschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "brustenge",
+          "label": "Brustenge / Brustschmerz",
+          "type": "scale"
+        }
+      ]
+    },
+    "basis_psyche": {
+      "label": "Psyche & Stimmung",
+      "description": "Innere Anspannung, Flashbacks, Dissoziationen und psychische Belastungen des Alltags.",
+      "category": "psyche",
+      "default": true,
+      "symptoms": [
+        {
+          "id": "hypervigilianz",
+          "label": "Innere Anspannung / Überwachsamkeit",
+          "type": "scale"
+        },
+        {
+          "id": "flashbacks",
+          "label": "Flashbacks / aufdrängende Erinnerungen",
+          "type": "scale"
+        },
+        {
+          "id": "koerperliche_flashbacks",
+          "label": "Körperliche Flashbacks (Körpererinnerungen)",
+          "type": "scale"
+        },
+        {
+          "id": "dissoziationen",
+          "label": "Dissoziationen (Gefühl der Unwirklichkeit)",
+          "type": "scale"
+        },
+        {
+          "id": "gefuehlstaubheit",
+          "label": "Gefühlstaubheit / emotionale Taubheit",
+          "type": "scale"
+        },
+        {
+          "id": "emotionale_dysregulation",
+          "label": "Gefühlsüberflutung / emotionale Überwältigung",
+          "type": "scale"
+        },
+        {
+          "id": "scham_schuld",
+          "label": "Überwältigende Scham- oder Schuldgefühle",
+          "type": "scale"
+        },
+        {
+          "id": "negative_selbstwahrnehmung",
+          "label": "Negative Selbstwahrnehmung",
+          "type": "scale"
+        },
+        {
+          "id": "albtraeume",
+          "label": "Albträume",
+          "type": "binary"
+        },
+        {
+          "id": "atemnot_panik",
+          "label": "Atemnot durch Angst / Panik",
+          "type": "scale"
+        },
+        {
+          "id": "notfallmedikament",
+          "label": "Notfallmedikament (Psyche) genommen",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_verdauung": {
+      "label": "Verdauung & Magen-Darm",
+      "description": "Übelkeit, Verdauungsprobleme, Appetit und Beschwerden im Bauchraum.",
+      "category": "bauchraum",
+      "default": true,
+      "symptoms": [
+        {
+          "id": "uebelkeit",
+          "label": "Übelkeit",
+          "type": "scale"
+        },
+        {
+          "id": "erbrechen",
+          "label": "Erbrechen",
+          "type": "binary"
+        },
+        {
+          "id": "postprandiale_erschoepfung",
+          "label": "Erschöpfung nach dem Essen",
+          "type": "binary"
+        },
+        {
+          "id": "sodbrennen",
+          "label": "Sodbrennen",
+          "type": "scale"
+        },
+        {
+          "id": "blaehungen",
+          "label": "Blähungen",
+          "type": "scale"
+        },
+        {
+          "id": "verstopfung",
+          "label": "Verstopfung",
+          "type": "scale"
+        },
+        {
+          "id": "durchfall",
+          "label": "Durchfall",
+          "type": "binary"
+        },
+        {
+          "id": "appetitverlust",
+          "label": "Veränderter Appetit (weniger oder mehr)",
+          "type": "scale"
+        },
+        {
+          "id": "essattacken",
+          "label": "Essattacken / Heißhunger",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_sensorisch": {
+      "label": "Sensorik & Reizverarbeitung",
+      "description": "Reizüberflutung, Geräusch- und Lichtempfindlichkeit, Masking — besonders relevant bei Autismus.",
+      "category": "sensorisch",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "sensorischer_overload",
+          "label": "Reizüberflutung",
+          "type": "scale"
+        },
+        {
+          "id": "geraeuschempfindlichkeit",
+          "label": "Geräuschempfindlichkeit",
+          "type": "scale"
+        },
+        {
+          "id": "lichtempfindlichkeit",
+          "label": "Lichtempfindlichkeit",
+          "type": "scale"
+        },
+        {
+          "id": "masking_aufwand",
+          "label": "Anstrengung durch Anpassung an soziale Normen (Masking)",
+          "type": "scale"
+        },
+        {
+          "id": "sprachliche_erschoepfung",
+          "label": "Erschöpfung durch Sprechen",
+          "type": "scale"
+        },
+        {
+          "id": "mutismus",
+          "label": "Vorübergehender Sprachverlust (Mutismus)",
+          "type": "binary"
+        },
+        {
+          "id": "shutdown",
+          "label": "Rückzug / Shutdown (autistisch)",
+          "type": "binary"
+        },
+        {
+          "id": "meltdown",
+          "label": "Überwältigungsreaktion / Meltdown (autistisch)",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_auge": {
+      "label": "Auge & Sehvermögen",
+      "description": "Trockene Augen, Sehstörungen, Augenschmerzen und verwendete Augenmedikamente.",
+      "category": "auge",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "trockenes_auge",
+          "label": "Trockene Augen",
+          "type": "scale"
+        },
+        {
+          "id": "sehstoerungen",
+          "label": "Sehstörungen",
+          "type": "scale"
+        },
+        {
+          "id": "augenschmerzen",
+          "label": "Augenschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "augentropfen",
+          "label": "Augentropfen oder -spray verwendet",
+          "type": "binary"
+        },
+        {
+          "id": "augensalbe",
+          "label": "Augensalbe verwendet",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_erkaeltung": {
+      "label": "Erkältung & Infekte",
+      "description": "Erkältungssymptome, Infektzeichen, Allergiereaktionen und Körpertemperatur.",
+      "category": "erkaeltung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "verstopfte_nase",
+          "label": "Verstopfte Nase",
+          "type": "scale"
+        },
+        {
+          "id": "schnupfen",
+          "label": "Schnupfen",
+          "type": "scale"
+        },
+        {
+          "id": "trockene_nasenschleimhaut",
+          "label": "Trockene Nasenschleimhaut",
+          "type": "scale"
+        },
+        {
+          "id": "halsschmerzen",
+          "label": "Halsschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "husten",
+          "label": "Husten",
+          "type": "scale"
+        },
+        {
+          "id": "keuchen",
+          "label": "Pfeifende Atemgeräusche / Keuchen",
+          "type": "binary"
+        },
+        {
+          "id": "schuettelfrost",
+          "label": "Schüttelfrost",
+          "type": "binary"
+        },
+        {
+          "id": "geruchsverlust",
+          "label": "Geruchsverlust",
+          "type": "binary"
+        },
+        {
+          "id": "geschmacksverlust",
+          "label": "Geschmacksverlust",
+          "type": "binary"
+        },
+        {
+          "id": "allergische_reaktion",
+          "label": "Allergische Reaktion / Heuschnupfen",
+          "type": "scale"
+        },
+        {
+          "id": "koerpertemperatur",
+          "label": "Körpertemperatur (°C)",
+          "type": "text"
+        }
+      ]
+    },
+    "basis_behandlung": {
+      "label": "Behandlungen & Therapien",
+      "description": "Verwendete Hilfsmittel, Medikamente und Therapiemaßnahmen des Tages.",
+      "category": "behandlung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "tens",
+          "label": "TENS-Gerät verwendet",
+          "type": "binary"
+        },
+        {
+          "id": "tens_waerme",
+          "label": "TENS mit Wärme verwendet",
+          "type": "binary"
+        },
+        {
+          "id": "physiotherapie",
+          "label": "Physiotherapie",
+          "type": "binary"
+        },
+        {
+          "id": "flow_neuroscience",
+          "label": "Flow Neuroscience",
+          "type": "binary"
+        },
+        {
+          "id": "novafon",
+          "label": "Novafon",
+          "type": "binary"
+        },
+        {
+          "id": "massagepistole",
+          "label": "Massagepistole",
+          "type": "binary"
+        },
+        {
+          "id": "faszienrolle",
+          "label": "Faszienrolle",
+          "type": "binary"
+        },
+        {
+          "id": "nasendusche_standard",
+          "label": "Nasendusche (Standard, 2,5 g Salz)",
+          "type": "binary"
+        },
+        {
+          "id": "nasendusche_abschwellend",
+          "label": "Nasendusche (abschwellend, 2,95 g Salz)",
+          "type": "binary"
+        },
+        {
+          "id": "inhalation_geraet",
+          "label": "Inhalation mit Inhalationsgerät",
+          "type": "binary"
+        },
+        {
+          "id": "inhalation_ohne_geraet",
+          "label": "Inhalation ohne Gerät",
+          "type": "binary"
+        },
+        {
+          "id": "inhalation_isoton",
+          "label": "Inhalationslösung (isoton, Dauergebrauch)",
+          "type": "binary"
+        },
+        {
+          "id": "inhalation_hyperton4",
+          "label": "Inhalationslösung (hyperton 4 %)",
+          "type": "binary"
+        },
+        {
+          "id": "inhalation_hyperton8",
+          "label": "Inhalationslösung (hyperton 8 %)",
+          "type": "binary"
+        },
+        {
+          "id": "meersalz_nasenspray",
+          "label": "Meersalz-Nasenspray",
+          "type": "binary"
+        },
+        {
+          "id": "nasensalbe",
+          "label": "Nasensalbe",
+          "type": "binary"
+        },
+        {
+          "id": "abschwellendes_nasenspray",
+          "label": "Abschwellendes Nasenspray",
+          "type": "binary"
+        },
+        {
+          "id": "erkaeltungsbad",
+          "label": "Erkältungsbad",
+          "type": "binary"
+        },
+        {
+          "id": "erkaeltungsmittel",
+          "label": "Erkältungsmittel",
+          "type": "binary"
+        },
+        {
+          "id": "schmerzmedikament",
+          "label": "Schmerzmedikament (z. B. Ibuprofen / Paracetamol)",
+          "type": "binary"
+        },
+        {
+          "id": "antihistaminikum",
+          "label": "Antihistaminikum (Allergiemittel)",
+          "type": "binary"
+        }
+      ]
+    },
+    "basis_sonstiges": {
+      "label": "Sonstiges & Ereignisse",
+      "description": "Allgemeine Körpersymptome, besondere Ereignisse und freie Notizen.",
+      "category": "sonstiges",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "nachtschweis",
+          "label": "Nachtschweiß",
+          "type": "binary"
+        },
+        {
+          "id": "hautausschlag",
+          "label": "Hautausschlag",
+          "type": "binary"
+        },
+        {
+          "id": "trockene_haut",
+          "label": "Trockene Haut",
+          "type": "binary"
+        },
+        {
+          "id": "trockener_mund",
+          "label": "Trockener Mund",
+          "type": "binary"
+        },
+        {
+          "id": "waermeregulation",
+          "label": "Probleme mit Temperaturregulation",
+          "type": "scale"
+        },
+        {
+          "id": "ohnmacht",
+          "label": "Ohnmacht oder starke Benommenheit",
+          "type": "binary"
+        },
+        {
+          "id": "menstruation",
+          "label": "Menstruation",
+          "type": "binary"
+        },
+        {
+          "id": "arztbesuch",
+          "label": "Arztbesuch",
+          "type": "binary"
+        },
+        {
+          "id": "operation",
+          "label": "Operation",
+          "type": "binary"
+        },
+        {
+          "id": "notizen",
+          "label": "Notizen",
+          "type": "text"
+        }
+      ]
+    },
+    "basis_migraene": {
+      "label": "Migräne",
+      "description": "Live-Erfassung von Migräne-Episoden mit Schweregrad, Aura und Akutmedikament.",
+      "category": "migraene",
+      "default": false,
+      "episode": "migraine",
+      "symptoms": [
+        {
+          "id": "migraene_schweregrad",
+          "label": "Schweregrad",
+          "type": "scale"
+        },
+        {
+          "id": "migraene_aura",
+          "label": "Aura (Sehstörungen / Kribbeln vor der Migräne)",
+          "type": "binary"
+        },
+        {
+          "id": "migraene_akutmittel",
+          "label": "Akutmittel genommen",
+          "type": "binary"
+        },
+        {
+          "id": "migraene_uebelkeit",
+          "label": "Übelkeit bei der Migräne",
+          "type": "scale"
+        },
+        {
+          "id": "migraene_licht",
+          "label": "Lichtempfindlichkeit",
+          "type": "scale"
+        },
+        {
+          "id": "migraene_laerm",
+          "label": "Lärmempfindlichkeit",
+          "type": "scale"
+        }
+      ]
+    },
+    "depression": {
+      "label": "Depression",
+      "description": "Depressive Episoden, Antriebslosigkeit, Stimmungstiefs, Interessenverlust.",
+      "category": "psyche",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "antriebslosigkeit",
+          "label": "Antriebslosigkeit / keine Freude mehr",
+          "type": "scale"
+        },
+        {
+          "id": "interessenverlust",
+          "label": "Interessenverlust",
+          "type": "scale"
+        },
+        {
+          "id": "morgentief",
+          "label": "Morgentief (morgens am schlimmsten)",
+          "type": "binary"
+        },
+        {
+          "id": "sozialer_rueckzug",
+          "label": "Sozialer Rückzug",
+          "type": "scale"
+        },
+        {
+          "id": "hoffnungslosigkeit",
+          "label": "Hoffnungslosigkeit",
+          "type": "scale"
+        },
+        {
+          "id": "selbstwertgefuehl",
+          "label": "Selbstwertgefühl",
+          "type": "scale_inverted"
+        },
+        {
+          "id": "weinen",
+          "label": "Weinen / Weinkrämpfe",
+          "type": "binary"
+        }
+      ]
+    },
+    "angststoerung": {
+      "label": "Angststörung",
+      "description": "Panikattacken, soziale Angst, generalisierte Angst und Vermeidungsverhalten.",
+      "category": "psyche",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "panikattacke",
+          "label": "Panikattacke",
+          "type": "binary"
+        },
+        {
+          "id": "soziale_angst",
+          "label": "Soziale Angst",
+          "type": "scale"
+        },
+        {
+          "id": "generalisierte_angst",
+          "label": "Anhaltende Sorgen / Grübeln",
+          "type": "scale"
+        },
+        {
+          "id": "vermeidungsverhalten",
+          "label": "Dinge vermeiden aus Angst",
+          "type": "scale"
+        },
+        {
+          "id": "koerperbezogene_angst",
+          "label": "Angst vor körperlichen Symptomen / Gesundheitsangst",
+          "type": "scale"
+        }
+      ]
+    },
+    "borderline": {
+      "label": "Borderline-PS",
+      "description": "Emotionale Instabilität, innere Leere, Impulskontrollprobleme.",
+      "category": "psyche",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "innere_leere",
+          "label": "Innere Leere",
+          "type": "scale"
+        },
+        {
+          "id": "impulskontrolle_verlust",
+          "label": "Schwierigkeiten Impulse zu kontrollieren",
+          "type": "scale"
+        },
+        {
+          "id": "verlustangst",
+          "label": "Trennungsangst / Verlustangst",
+          "type": "scale"
+        },
+        {
+          "id": "selbstverletzung",
+          "label": "Selbstverletzendes Verhalten",
+          "type": "binary"
+        },
+        {
+          "id": "identitaetsdiffusion",
+          "label": "Unsicheres Gefühl wer man ist (Identitätsprobleme)",
+          "type": "scale"
+        }
+      ]
+    },
+    "suizidalitaet": {
+      "label": "Suizidalität",
+      "description": "Suizidale Gedanken, Impulse, Pläne — Krisenmodul. Aktiviere es nur im Behandlungskontext.",
+      "category": "psyche",
+      "default": false,
+      "requires_crisis_notice": true,
+      "symptoms": [
+        {
+          "id": "suizidale_gedanken",
+          "label": "Passive Suizidgedanken (Wunsch nicht mehr da zu sein)",
+          "type": "scale"
+        },
+        {
+          "id": "suizidplan",
+          "label": "Konkreter Suizidplan vorhanden",
+          "type": "binary"
+        },
+        {
+          "id": "suizidimpulse",
+          "label": "Aktive Suizidimpulse",
+          "type": "binary"
+        },
+        {
+          "id": "parasuizidal",
+          "label": "Selbstgefährdendes Verhalten",
+          "type": "binary"
+        }
+      ]
+    },
+    "schizophrenie": {
+      "label": "Schizophrenie / Psychose",
+      "description": "Halluzinationen, Wahngedanken, desorganisiertes Denken, Minussymptome.",
+      "category": "psychose",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "halluzinationen_auditiv",
+          "label": "Stimmen hören (akustische Halluzinationen)",
+          "type": "scale"
+        },
+        {
+          "id": "halluzinationen_visuell",
+          "label": "Dinge sehen die nicht da sind",
+          "type": "scale"
+        },
+        {
+          "id": "wahngedanken",
+          "label": "Wahngedanken (unrealistische Überzeugungen)",
+          "type": "scale"
+        },
+        {
+          "id": "desorganisiertes_denken",
+          "label": "Unorganisiertes / sprunghaftes Denken",
+          "type": "scale"
+        },
+        {
+          "id": "affektverflachung",
+          "label": "Abgeflachte Gefühle / kaum emotionale Reaktionen",
+          "type": "scale"
+        },
+        {
+          "id": "negativsymptome",
+          "label": "Antriebsmangel / sozialer Rückzug (Minussymptome)",
+          "type": "scale"
+        }
+      ]
+    },
+    "adhs": {
+      "label": "ADHS",
+      "description": "Aufmerksamkeit, Hyperaktivität, Impulsivität, Zeitblindheit.",
+      "category": "erschoepfung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "hyperaktivitaet",
+          "label": "Hyperaktivität / innere Unruhe",
+          "type": "scale"
+        },
+        {
+          "id": "impulsivitaet",
+          "label": "Impulsivität",
+          "type": "scale"
+        },
+        {
+          "id": "hyperfokus",
+          "label": "Hyperfokus (nicht loslassen können)",
+          "type": "binary"
+        },
+        {
+          "id": "zeitblindheit",
+          "label": "Zeitblindheit / schlechtes Zeitgefühl",
+          "type": "scale"
+        },
+        {
+          "id": "vergesslichkeit",
+          "label": "Vergesslichkeit",
+          "type": "scale"
+        },
+        {
+          "id": "aufgaben_vermeidung",
+          "label": "Aufgaben vermeiden / aufschieben",
+          "type": "scale"
+        }
+      ]
+    },
+    "audhd": {
+      "label": "AuDHD (Autismus + ADHS)",
+      "description": "Ablehnungsempfindlichkeit (RSD), Demand Avoidance, Exekutivfunktion — über Autismus/ADHS-Basis hinaus.",
+      "category": "sensorisch",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "rsd",
+          "label": "Extreme Empfindlichkeit bei Ablehnung (RSD)",
+          "type": "scale"
+        },
+        {
+          "id": "demand_avoidance",
+          "label": "Widerstand gegen Anforderungen (Demand Avoidance)",
+          "type": "scale"
+        },
+        {
+          "id": "executive_dysfunction",
+          "label": "Probleme mit Planen / Starten / Umschalten",
+          "type": "scale"
+        },
+        {
+          "id": "monotropismus",
+          "label": "Schwierigkeit beim Wechseln von Themen (Tunnelblick)",
+          "type": "scale"
+        }
+      ]
+    },
+    "parkinson": {
+      "label": "Parkinson",
+      "description": "Zittern, Muskelsteifheit, verlangsamte Bewegungen, Gangprobleme.",
+      "category": "neurodegeneration",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "tremor",
+          "label": "Zittern (Tremor)",
+          "type": "scale"
+        },
+        {
+          "id": "rigor",
+          "label": "Muskelsteifheit (Rigor)",
+          "type": "scale"
+        },
+        {
+          "id": "bradykinese",
+          "label": "Verlangsamte Bewegungen",
+          "type": "scale"
+        },
+        {
+          "id": "gangstoeung",
+          "label": "Gleichgewichtsprobleme / Gangunsicherheit",
+          "type": "scale"
+        },
+        {
+          "id": "mikrographie",
+          "label": "Sehr kleine Handschrift / Schreibschwierigkeiten",
+          "type": "binary"
+        },
+        {
+          "id": "hypomimie",
+          "label": "Verminderter Gesichtsausdruck (Maskengesicht)",
+          "type": "binary"
+        }
+      ]
+    },
+    "alzheimer": {
+      "label": "Alzheimer / Demenz",
+      "description": "Kurzzeitgedächtnissprobleme, Orientierungslosigkeit, Verhaltensveränderung.",
+      "category": "neurodegeneration",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "kurzzeitgedaechtnis_verlust",
+          "label": "Kurzzeitgedächtnisprobleme",
+          "type": "scale"
+        },
+        {
+          "id": "orientierungslosigkeit",
+          "label": "Orientierungslosigkeit (Zeit oder Ort)",
+          "type": "scale"
+        },
+        {
+          "id": "wiederholungen_demenz",
+          "label": "Sätze oder Fragen wiederholen",
+          "type": "binary"
+        },
+        {
+          "id": "apathie_demenz",
+          "label": "Apathie / Verhaltensveränderung",
+          "type": "scale"
+        }
+      ]
+    },
+    "vestibulaer_schwindel": {
+      "label": "Schwindel (vestibulär)",
+      "description": "Dreh- und Schwankschwindel, Lagerungsschwindel (BPPV), vestibuläre Migräne.",
+      "category": "erschoepfung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "schwindel_dreh",
+          "label": "Drehschwindel",
+          "type": "scale"
+        },
+        {
+          "id": "schwindel_lagerung",
+          "label": "Schwindel beim Umlagern / Hinlegen (BPPV)",
+          "type": "binary"
+        },
+        {
+          "id": "schwindel_schwank",
+          "label": "Schwankgefühl / unsicherer Gang",
+          "type": "scale"
+        },
+        {
+          "id": "schwindel_kopfbewegung",
+          "label": "Schwindel bei Kopfbewegungen",
+          "type": "binary"
+        },
+        {
+          "id": "schwindel_uebelkeit",
+          "label": "Übelkeit oder Erbrechen durch Schwindel",
+          "type": "scale"
+        },
+        {
+          "id": "schwindel_nystagmus",
+          "label": "Unkontrolliertes Augenzittern (Nystagmus)",
+          "type": "binary"
+        }
+      ]
+    },
+    "ruecken": {
+      "label": "Rücken & Wirbelsäule",
+      "description": "Lendenwirbelsäule (LWS), Brustwirbelsäule (BWS), Ischias, Bandscheibe.",
+      "category": "schmerz",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "rueckenschmerz_lws",
+          "label": "Rückenschmerzen (Lendenbereich / LWS)",
+          "type": "scale"
+        },
+        {
+          "id": "rueckenschmerz_bws",
+          "label": "Rückenschmerzen (Brustbereich / BWS)",
+          "type": "scale"
+        },
+        {
+          "id": "ischias",
+          "label": "Ischias-Schmerzen (ausstrahlend ins Bein)",
+          "type": "scale"
+        },
+        {
+          "id": "bandscheibenprobleme",
+          "label": "Bandscheibenbeschwerden",
+          "type": "scale"
+        }
+      ]
+    },
+    "neuralgie": {
+      "label": "Neuralgie / Neuropathie",
+      "description": "Brennender oder elektrisierender Nervenschmerz, Berührungsempfindlichkeit.",
+      "category": "schmerz",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "brennender_schmerz",
+          "label": "Brennender / neuropathischer Schmerz",
+          "type": "scale"
+        },
+        {
+          "id": "allodynie",
+          "label": "Schmerz bei normaler Berührung",
+          "type": "scale"
+        },
+        {
+          "id": "elektrisierender_schmerz",
+          "label": "Einschießender / elektrisierender Schmerz",
+          "type": "binary"
+        },
+        {
+          "id": "hyperpathie",
+          "label": "Übermäßig starke Schmerzreaktion",
+          "type": "scale"
+        }
+      ]
+    },
+    "rheuma": {
+      "label": "Rheuma / Arthrose / Arthritis",
+      "description": "Geschwollene und entzündete Gelenke, Morgensteifigkeit, Rheuma-Schübe.",
+      "category": "rheuma",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "gelenkschwellung",
+          "label": "Geschwollene Gelenke",
+          "type": "scale"
+        },
+        {
+          "id": "gelenkroetung",
+          "label": "Entzündete Gelenke (gerötet / warm)",
+          "type": "binary"
+        },
+        {
+          "id": "rheuma_flare",
+          "label": "Rheuma-Schub",
+          "type": "binary"
+        },
+        {
+          "id": "morgensteifigkeit_dauer",
+          "label": "Morgensteifigkeit Dauer (Minuten)",
+          "type": "text"
+        },
+        {
+          "id": "krankheitsschub",
+          "label": "Krankheitsschub",
+          "type": "binary"
+        }
+      ]
+    },
+    "fibromyalgie": {
+      "label": "Fibromyalgie",
+      "description": "Druckempfindliche Körperstellen, Gedankennebel, nicht-erholsamer Schlaf, diffuser Ganzkörperschmerz.",
+      "category": "fibromyalgie",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "fibro_druckschmerz",
+          "label": "Druckempfindliche Körperstellen",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_ganzkoerperschmerz",
+          "label": "Diffuser Schmerz am ganzen Körper",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_fog",
+          "label": "Gedankennebel / kognitive Erschöpfung (Fibro-Fog)",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_schlaf",
+          "label": "Nicht-erholsamer Schlaf",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_morgensteife",
+          "label": "Morgensteifigkeit",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_allodynie",
+          "label": "Schmerz bei Berührung",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_temperatur",
+          "label": "Überempfindlichkeit gegenüber Temperatur",
+          "type": "scale"
+        },
+        {
+          "id": "fibro_flare",
+          "label": "Fibromyalgie-Schub",
+          "type": "binary"
+        }
+      ]
+    },
+    "chronisches_schmerzsyndrom": {
+      "label": "Chronisches Schmerzsyndrom",
+      "description": "Übersteigerte Schmerzwahrnehmung, Ausbreitung auf neue Körperstellen, stressbedingte Verstärkung.",
+      "category": "fibromyalgie",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "csps_zentralsensibilisierung",
+          "label": "Übersteigerte Schmerzwahrnehmung",
+          "type": "scale"
+        },
+        {
+          "id": "csps_ausbreitung",
+          "label": "Schmerz breitet sich auf neue Körperstellen aus",
+          "type": "scale"
+        },
+        {
+          "id": "csps_flare",
+          "label": "Schmerzschub",
+          "type": "binary"
+        },
+        {
+          "id": "csps_schlaf_schmerz",
+          "label": "Schmerzen verhindern Schlaf",
+          "type": "scale"
+        },
+        {
+          "id": "csps_stressverstaerkung",
+          "label": "Schmerzen werden durch Stress schlimmer",
+          "type": "scale"
+        }
+      ]
+    },
+    "kardiologie": {
+      "label": "Kardiologie",
+      "description": "Geschwollene Beine, Belastungsatemnot — ergänzend zu Herzrasen und AFib im Basis-Modul.",
+      "category": "erschoepfung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "beinoedem",
+          "label": "Geschwollene Beine / Knöchel",
+          "type": "scale"
+        },
+        {
+          "id": "belastungsdyspnoe",
+          "label": "Atemnot bei Belastung",
+          "type": "scale"
+        },
+        {
+          "id": "ermuedung_belastung",
+          "label": "Schnelle Erschöpfung bei Anstrengung",
+          "type": "scale"
+        }
+      ]
+    },
+    "asthma_copd": {
+      "label": "Asthma / COPD",
+      "description": "Auswurf, Peak-Flow-Messung, Notfall-Spray.",
+      "category": "erkaeltung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "auswurf",
+          "label": "Auswurf beim Husten",
+          "type": "scale"
+        },
+        {
+          "id": "peak_flow",
+          "label": "Peak-Flow-Wert (l/min)",
+          "type": "text"
+        },
+        {
+          "id": "notfall_inhalator",
+          "label": "Notfall-Spray (Reliever) verwendet",
+          "type": "binary"
+        }
+      ]
+    },
+    "lipoedem": {
+      "label": "Lipödem",
+      "description": "Druckschmerz in Beinen und Hüften, Schweregefühl, Lipödem-Schübe.",
+      "category": "lipoedem",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "druckschmerz_beine",
+          "label": "Druckschmerz in Beinen / Hüften",
+          "type": "scale"
+        },
+        {
+          "id": "schwere_beine",
+          "label": "Schwere- oder Spannungsgefühl in den Beinen",
+          "type": "scale"
+        },
+        {
+          "id": "lipoedem_flare",
+          "label": "Lipödem-Schub",
+          "type": "binary"
+        },
+        {
+          "id": "lymphoedem_schwellung",
+          "label": "Lymphödem-Schwellung",
+          "type": "scale"
+        }
+      ]
+    },
+    "diabetes": {
+      "label": "Diabetes / Metabolisch",
+      "description": "Häufiges Wasserlassen, extremer Durst, Unterzuckerung, Überzuckerung.",
+      "category": "bauchraum",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "polyurie",
+          "label": "Sehr häufiges Wasserlassen",
+          "type": "scale"
+        },
+        {
+          "id": "polydipsie",
+          "label": "Extremer Durst",
+          "type": "scale"
+        },
+        {
+          "id": "hypoglykamie_symptome",
+          "label": "Unterzuckerung (Zittern, Schwitzen, Schwäche)",
+          "type": "binary"
+        },
+        {
+          "id": "hyperglykamie_symptome",
+          "label": "Überzuckerung (Kopfschmerz, Sehstörung)",
+          "type": "binary"
+        },
+        {
+          "id": "wundheilung_verzoegert",
+          "label": "Wunden heilen schlecht",
+          "type": "binary"
+        }
+      ]
+    },
+    "hormonell": {
+      "label": "Hormonelle Symptome",
+      "description": "Hitzewallungen, Regelschmerzen, PMS, Schilddrüse, Haarausfall.",
+      "category": "hormonell",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "hitzewallungen",
+          "label": "Hitzewallungen",
+          "type": "scale"
+        },
+        {
+          "id": "zyklusschmerzen",
+          "label": "Regelschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "pms_symptome",
+          "label": "PMS-Symptome (vor der Periode)",
+          "type": "scale"
+        },
+        {
+          "id": "schilddruese_symptome",
+          "label": "Schilddrüsensymptome (Kälte-/Wärmeempfindlichkeit)",
+          "type": "scale"
+        },
+        {
+          "id": "haarausfall",
+          "label": "Haarausfall",
+          "type": "binary"
+        },
+        {
+          "id": "oedeme_hormonal",
+          "label": "Hormonell bedingte Wassereinlagerungen",
+          "type": "binary"
+        }
+      ]
+    },
+    "herz_kreislauf": {
+      "label": "Herz-Kreislauf-Beschwerden",
+      "description": "Blutdruckschwankungen, schlechte Durchblutung, Raynaud-Syndrom, POTS.",
+      "category": "kreislauf",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "kreislauf_blutdruckschwankungen",
+          "label": "Blutdruckschwankungen",
+          "type": "scale"
+        },
+        {
+          "id": "kreislauf_hypotonie",
+          "label": "Niedriger Blutdruck / Schwächegefühl",
+          "type": "binary"
+        },
+        {
+          "id": "kreislauf_hypertonie_symptome",
+          "label": "Hoher Blutdruck (Kopfdruck, Sehstörung)",
+          "type": "binary"
+        },
+        {
+          "id": "kreislauf_durchblutung",
+          "label": "Schlechte Durchblutung (Hände/Füße)",
+          "type": "scale"
+        },
+        {
+          "id": "kreislauf_kaelteextremitaeten",
+          "label": "Kalte Hände oder Füße",
+          "type": "scale"
+        },
+        {
+          "id": "kreislauf_raynaud",
+          "label": "Farbwechsel der Finger bei Kälte (Raynaud)",
+          "type": "binary"
+        },
+        {
+          "id": "kreislauf_pots",
+          "label": "Herzrasen beim Aufstehen / Stehen (POTS)",
+          "type": "scale"
+        }
+      ]
+    },
+    "long_covid": {
+      "label": "Long-/Post-COVID",
+      "description": "Geruchsverzerrung, Long-COVID-Schübe, Belastungsintoleranz, POTS-artige Symptome nach COVID.",
+      "category": "erschoepfung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "lc_parosmie",
+          "label": "Geruchsverzerrung (Dinge riechen anders)",
+          "type": "scale"
+        },
+        {
+          "id": "lc_geschmacksverzerrung",
+          "label": "Geschmacksverzerrung (Dinge schmecken anders)",
+          "type": "scale"
+        },
+        {
+          "id": "lc_flare",
+          "label": "Long-COVID-Schub",
+          "type": "binary"
+        },
+        {
+          "id": "lc_belastungsintoleranz",
+          "label": "Starke Verschlechterung nach Belastung (Long COVID)",
+          "type": "scale"
+        },
+        {
+          "id": "lc_pots_artig",
+          "label": "Herzrasen beim Aufstehen nach COVID",
+          "type": "scale"
+        },
+        {
+          "id": "lc_brustenge",
+          "label": "Engegefühl in der Brust (Long COVID)",
+          "type": "scale"
+        }
+      ]
+    },
+    "hautbeschwerden": {
+      "label": "Hautbeschwerden",
+      "description": "Schuppenflechte, Rosacea, Nesselsucht (Urtikaria), Ekzem — chronische Hauterkrankungen.",
+      "category": "haut",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "haut_juckreiz",
+          "label": "Juckreiz",
+          "type": "scale"
+        },
+        {
+          "id": "haut_roetung",
+          "label": "Hautrötung",
+          "type": "scale"
+        },
+        {
+          "id": "haut_schuppung",
+          "label": "Schuppende oder abschälende Haut",
+          "type": "scale"
+        },
+        {
+          "id": "haut_plaques",
+          "label": "Psoriasis-Plaques (Ausdehnung)",
+          "type": "scale"
+        },
+        {
+          "id": "haut_rosacea_flush",
+          "label": "Gesichtsröte / Flush (Rosacea)",
+          "type": "scale"
+        },
+        {
+          "id": "haut_quaddeln",
+          "label": "Quaddeln (Nesselsucht)",
+          "type": "binary"
+        },
+        {
+          "id": "haut_brennen",
+          "label": "Brennende Haut",
+          "type": "scale"
+        },
+        {
+          "id": "haut_naegel",
+          "label": "Nagelveränderungen (Psoriasis)",
+          "type": "binary"
+        },
+        {
+          "id": "haut_flare",
+          "label": "Haut-Schub",
+          "type": "binary"
+        }
+      ]
+    },
+    "allergie_erweitert": {
+      "label": "Allergie (erweitert)",
+      "description": "Nesselsucht, Angioödem, Anaphylaxie, allergische Augenentzündung.",
+      "category": "erkaeltung",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "urtikaria",
+          "label": "Quaddeln (Nesselsucht)",
+          "type": "binary"
+        },
+        {
+          "id": "angiooedem",
+          "label": "Starke Schwellung (Gesicht/Hals/Lippen)",
+          "type": "binary"
+        },
+        {
+          "id": "anaphylaxie",
+          "label": "Anaphylaktische Reaktion (schwere Allergie)",
+          "type": "binary"
+        },
+        {
+          "id": "konjunktivitis_allergisch",
+          "label": "Allergische Augenentzündung",
+          "type": "scale"
+        }
+      ]
+    },
+    "borreliose": {
+      "label": "Borreliose (Lyme)",
+      "description": "Wanderröte, wandernde Gelenkschmerzen, Gesichtslähmung, Neuroborreliose — frühe / aktive Phase.",
+      "category": "borreliose",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "borr_wanderroete",
+          "label": "Wanderröte (roter Ring um Zeckenstich)",
+          "type": "binary"
+        },
+        {
+          "id": "borr_grippe_symptome",
+          "label": "Grippeähnliche Symptome (Fieber, Gliederschmerzen)",
+          "type": "scale"
+        },
+        {
+          "id": "borr_gelenk_migrierend",
+          "label": "Wandernde Gelenkschmerzen",
+          "type": "scale"
+        },
+        {
+          "id": "borr_neuroborreliose",
+          "label": "Neurologische Symptome (Taubheit, Kribbeln)",
+          "type": "scale"
+        },
+        {
+          "id": "borr_fazialisparese",
+          "label": "Gesichtslähmung (Fazialisparese)",
+          "type": "binary"
+        },
+        {
+          "id": "borr_kardial",
+          "label": "Herzprobleme durch Borreliose",
+          "type": "binary"
+        },
+        {
+          "id": "borr_meningismus",
+          "label": "Nackensteifigkeit / Lichtscheu (Hirnhaut-Reizzeichen)",
+          "type": "binary"
+        }
+      ]
+    },
+    "persistierende_borreliose": {
+      "label": "Persistierende Borreliose (PTLDS)",
+      "description": "Anhaltende Erschöpfung, kognitive Probleme und Gelenkschmerzen nach Borreliose-Behandlung.",
+      "category": "borreliose",
+      "default": false,
+      "symptoms": [
+        {
+          "id": "ptlds_fatigue",
+          "label": "Anhaltende Erschöpfung nach Borreliose-Behandlung",
+          "type": "scale"
+        },
+        {
+          "id": "ptlds_kognition",
+          "label": "Kognitive Probleme nach Borreliose (Brain Fog)",
+          "type": "scale"
+        },
+        {
+          "id": "ptlds_gelenkschmerz",
+          "label": "Anhaltende Gelenkschmerzen (Borreliose)",
+          "type": "scale"
+        },
+        {
+          "id": "ptlds_schlaf",
+          "label": "Schlafstörungen",
+          "type": "scale"
+        },
+        {
+          "id": "ptlds_herxheimer",
+          "label": "Vorübergehende Verschlechterung bei Antibiotika-Beginn",
+          "type": "binary"
+        },
+        {
+          "id": "ptlds_schub",
+          "label": "Wiederkehrender Symptomschub",
+          "type": "binary"
+        }
+      ]
+    }
+  }
+}

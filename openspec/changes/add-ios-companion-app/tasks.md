@@ -61,11 +61,13 @@
 
 - [x] 4d.1 Importer keeps iPhone entries under source kyoro_ios, highest value per day
 - [x] 4d.2 Read the KiSTe code (private repo history) and record what the app adopts
-- [ ] 4d.3 Module-based symptom catalogue with the PWA labels; module choice in setup
+- [x] 4d.3a Symptom catalogue released by Michel, now config/symptom_catalog.json (37 modules, 256 symptoms, test)
+- [ ] 4d.3b App loads the catalogue from the bundle; module choice in setup replaces the 8 fixed quick picks
+- [ ] 4d.3c PWA backend reads config/symptom_catalog.json instead of its own copy
 - [ ] 4d.4 Entry types binary, scale, inverted scale, text with type-specific anchors
 - [ ] 4d.5 Body map, backdated time, photo and batch save in Capture
 - [ ] 4d.6 Migraine and AFib episodes in the app, and an importer path for them
-- [ ] 4d.7 Crisis banner while the suicidality module is active
+- [ ] 4d.7 Crisis notice (112 and crisis lines) shown unconditionally while a module with requires_crisis_notice is active
 - [ ] 4d.8 Include kyoro_ios rows in compute_histamine_triggers.py
 
 ## 5. Release gate
