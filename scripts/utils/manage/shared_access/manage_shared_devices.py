@@ -46,14 +46,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from health_config import KYORO_MASTER_DIR
-import sqlite3
+from modules.db import open_master_db
 
 _MASTER_DB = KYORO_MASTER_DIR / "master.db"
 
 
 def _ensure_master_db() -> None:
     _MASTER_DB.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     con.execute("""
         CREATE TABLE IF NOT EXISTS practice_devices (
             device_id_hint TEXT PRIMARY KEY,
@@ -70,7 +70,7 @@ def _ensure_master_db() -> None:
 
 def cmd_add(args):
     _ensure_master_db()
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     # UPSERT statt INSERT OR REPLACE (Projekt-Konvention, siehe
     # openspec/specs/db-schema-conventions/spec.md) — erlaubt erneutes
     # `add` mit demselben device_id_hint zum Aktualisieren, ohne die
@@ -93,7 +93,7 @@ def cmd_add(args):
 
 def cmd_list(args):
     _ensure_master_db()
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     rows = con.execute(
         "SELECT device_id_hint, brand, model, sensor_type, notes FROM practice_devices ORDER BY device_id_hint"
     ).fetchall()
@@ -107,7 +107,7 @@ def cmd_list(args):
 
 def cmd_remove(args):
     _ensure_master_db()
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     cursor = con.execute(
         "DELETE FROM practice_devices WHERE device_id_hint=?",
         (args.device_id_hint,),

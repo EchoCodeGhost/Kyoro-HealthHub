@@ -3,3 +3,7 @@
 #   pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ruff
+# SQLCipher binding for the encryption tests (tests that need it use
+# pytest.importorskip("sqlcipher3")); lets CI exercise the encrypted
+# identity.db/master.db paths, not just the plaintext fallback.
+sqlcipher3-binary==0.6.0

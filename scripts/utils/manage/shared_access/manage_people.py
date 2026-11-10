@@ -55,7 +55,6 @@ manage_people.py — Personenregistratur für gemeinsam genutzte Kyoro-Instanzen
 import argparse
 import hashlib
 import json
-import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -64,6 +63,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from health_config import KYORO_MASTER_DIR
 from modules.config_backup import ensure_git_repo, commit_config_change
+from modules.db import open_master_db
 from utils.create_master_schema import create_or_upgrade as _ensure_master_schema
 
 _MASTER_DB = KYORO_MASTER_DIR / "master.db"
@@ -81,12 +81,11 @@ def _pseudo(person_number: str, group_id: str = "") -> str:
 
 
 def _load_shared_devices() -> list[dict]:
-    import sqlite3
     master_db = KYORO_MASTER_DIR / "master.db"
     if not master_db.exists():
         return []
     try:
-        con = sqlite3.connect(master_db)
+        con = open_master_db(master_db)
         rows = con.execute(
             "SELECT device_id_hint, brand, model, serial, sensor_type, notes FROM practice_devices"
         ).fetchall()
@@ -148,7 +147,7 @@ def cmd_add(args):
     # in the manage_*.py personal-history scripts for how it gets used.
     ensure_git_repo(instance_config_dir)
 
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     con.execute(
         "INSERT OR IGNORE INTO patient_number_map "
         "(patient_pseudo, patient_number, practice_id, instance_dir, created_at) "
@@ -183,7 +182,7 @@ def cmd_add(args):
 
 
 def cmd_list(args):
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     rows = con.execute(
         "SELECT patient_pseudo, practice_id, instance_dir, active, created_at "
         "FROM patient_number_map ORDER BY created_at"
@@ -195,7 +194,7 @@ def cmd_list(args):
 
 
 def cmd_activate(args):
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     row = con.execute(
         "SELECT instance_dir FROM patient_number_map WHERE patient_pseudo=?",
         (args.pseudo,),
@@ -209,7 +208,7 @@ def cmd_activate(args):
 
 
 def cmd_deactivate(args):
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     con.execute(
         "UPDATE patient_number_map SET active=0 WHERE patient_pseudo=?",
         (args.pseudo,),

@@ -24,7 +24,7 @@ Deterministische SHA-256-basierte Pseudonym-Generierung mit Präfixen: - DEV-XXX
 
 ## Grenzen
 
-Nur lokale Auflösung; keine Netzwerkzugriffe. Pseudonyme sind deterministisch aber nicht kryptografisch sicher — für Datenschutz, nicht für Sicherheit ausgelegt.
+Nur lokale Auflösung; keine Netzwerkzugriffe. Pseudonyme sind deterministisch aber nicht kryptografisch sicher — für Datenschutz, nicht für Sicherheit ausgelegt. Jeder Resolver hält eine lazy geöffnete identity.db-Verbindung pro Thread (Close bei Prozessende via atexit), damit pro Datensatz aufgerufene resolve()/reverse() nicht bei jedem Aufruf die SQLCipher-Schlüsselableitung (~70 ms) zahlen.
 
 ## Aufruf
 

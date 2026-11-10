@@ -15,7 +15,7 @@ Provides database functions, essential for data persistence
 
 ## Method
 
-Manages database key lookup in priority order: 1) Environment variable KYORO_DB_KEY, 2) System keyring, 3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"]. Supports both SQLite and SQLCipher. Every opened connection automatically gets DB-internal chain-of-custody triggers (audit_log table, UPDATE/DELETE on every table) — fires regardless of the calling code, even access via the sqlite3 CLI or Datasette.
+Manages database key lookup in priority order: 1) Environment variable KYORO_DB_KEY, 2) System keyring (asked at most once per process, with a timeout in a worker thread, so a locked keyring cannot block), 3) ~/.config/kyoro/db.key, 4) health_config.json["db_key"]. Supports both SQLite and SQLCipher. open_db()/open_medicine_db()/open_location_db()/open_medicine_imaging_db() open the health databases and automatically install DB-internal chain-of-custody triggers (audit_log table, UPDATE/DELETE on every table) — fires regardless of the calling code, even access via the sqlite3 CLI or Datasette. open_identity_db()/open_master_db() open identity.db and master.db with the same key lookup (during the transition an unencrypted file still opens with a warning in plaintext; encrypted without a key: clear error) — without audit triggers, because these databases hold the cleartext mappings themselves.
 
 ## Data flow
 

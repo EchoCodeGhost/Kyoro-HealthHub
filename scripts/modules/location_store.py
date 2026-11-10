@@ -229,6 +229,10 @@ def _is_in_zone(lat: float, lon: float, centre_lat: float, centre_lon: float, ra
 
 _ZONE_INSIDE_MODES = ("hide", "coarsen")
 _no_salt_warned = False
+# Salt pro identity.db-Pfad: er ändert sich nach dem Anlegen nie, und ein
+# Öffnen der verschlüsselten identity.db kostet ~70 ms — location_token()
+# läuft pro Koordinate. Ein fehlender Salt wird nicht gemerkt.
+_salt_cache: dict[Path, str] = {}
 
 
 def _shifted_centre(lat: float, lon: float, radius_m: float) -> tuple[float, float]:
@@ -478,22 +482,27 @@ def _get_pseudonym_salt() -> str:
     Returns:
         Salt als Hex-String, oder "" falls identity.db/Salt fehlt
     """
-    import sqlite3
     import health_config
+    from modules.db import open_identity_db
     path = Path(health_config.KYORO_CONFIG_DIR) / "identity.db"
+    if path in _salt_cache:
+        return _salt_cache[path]
     if not path.exists():
         return ""
     try:
-        conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        conn = open_identity_db(path)
         try:
             row = conn.execute(
                 "SELECT salt_hex FROM pseudonym_salt WHERE id = 1"
             ).fetchone()
         finally:
             conn.close()
-    except sqlite3.Error:
+    except Exception:
         return ""
-    return row[0] if row and row[0] else ""
+    if not (row and row[0]):
+        return ""
+    _salt_cache[path] = row[0]
+    return row[0]
 
 
 def location_token(lat: float, lon: float, precision: int) -> str | None:

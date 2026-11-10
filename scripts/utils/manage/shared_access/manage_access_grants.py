@@ -52,6 +52,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from health_config import KYORO_MASTER_DIR
+from modules.db import open_master_db
 from utils.create_master_schema import create_or_upgrade as _ensure_master_schema
 
 _MASTER_DB = KYORO_MASTER_DIR / "master.db"
@@ -62,8 +63,7 @@ _ensure_master_schema()
 
 def _check_person_exists(person_pseudo: str) -> bool:
     """Prüft, ob die angegebene Person in der Personen-Zuordnung existiert."""
-    import sqlite3
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
     row = con.execute(
         "SELECT 1 FROM patient_number_map WHERE patient_pseudo=?",
         (person_pseudo,),
@@ -79,8 +79,7 @@ def cmd_grant(args):
                 f"Error: Person {args.person} not found in registry"), file=sys.stderr)
         sys.exit(1)
 
-    import sqlite3
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
 
     # Prüfen, ob bereits eine AKTIVE Freigabe für diesen Scope existiert
     # (widerrufene Zeilen bleiben für die Audit-Historie bestehen, siehe
@@ -111,8 +110,7 @@ def cmd_grant(args):
 
 def cmd_list(args):
     """Listet alle Freigaben, optional gefiltert nach Person."""
-    import sqlite3
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
 
     if args.person:
         rows = con.execute(
@@ -145,8 +143,7 @@ def cmd_list(args):
 
 def cmd_revoke(args):
     """Widerruft eine bestehende Freigabe."""
-    import sqlite3
-    con = sqlite3.connect(_MASTER_DB)
+    con = open_master_db(_MASTER_DB)
 
     # Prüfen, ob die Freigabe existiert und noch aktiv ist
     row = con.execute(

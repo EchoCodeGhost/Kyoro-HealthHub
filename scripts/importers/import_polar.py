@@ -97,7 +97,7 @@ from zoneinfo import ZoneInfo
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).parent.parent))
 from health_config import Config as _Cfg, OWN_PERSON_ID
-from modules.db import open_db
+from modules.db import open_db, open_identity_db
 from modules.i18n import t, add_lang_arg, apply_lang_from_args
 from modules.base import log_import, resolve_timezone
 _cfg = _Cfg()
@@ -195,7 +195,7 @@ def _extend_with_raw_hex_serials(serial_map: dict[str, str]) -> None:
     identity_db_path = KYORO_CONFIG_DIR / "identity.db"
     if not identity_db_path.exists():
         return
-    conn = sqlite3.connect(identity_db_path)
+    conn = open_identity_db(identity_db_path)
     try:
         for pseudo_id, _device_id, serial_real, _created in conn.execute(
             "SELECT pseudo_id, device_id, serial_real, created_at FROM device_serial_map"
