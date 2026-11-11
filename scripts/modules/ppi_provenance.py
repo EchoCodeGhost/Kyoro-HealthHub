@@ -107,12 +107,12 @@ ppi_provenance.py — effektiver Messmodus fuer ppi_raw-Beat-zu-Beat-Intervalle
     grade_for(mode, "hrv")
 
     # Einzelnes Fenster per DB-Abfrage:
-    mode = window_mode(conn, person, "2026-05-02T10:47:09", "2026-05-02T10:47:39",
-                        device_id="DEV-9bb72659")
+    mode = window_mode(conn, person, "2030-01-01T10:00:00", "2030-01-01T10:00:30",
+                        device_id="DEV-xxxxxxxx")
 
     # Fenster-Menge (alle Tage eines Zeitraums, ein Query statt N):
-    ecg_days = day_modes(conn, person, "2026-01-01", "2026-12-31")
-    if "2026-05-02" in ecg_days:
+    ecg_days = day_modes(conn, person, "2030-01-01", "2030-12-31")
+    if "2030-01-01" in ecg_days:
         ...  # dieser Tag ist mehrheitlich EKG-abgeleitet
 """
 
@@ -161,7 +161,7 @@ def window_mode(conn, person: str, ts_start: str, ts_end: str,
     selbst — fuer Aufrufer ohne bereits geladene Beats.
 
     `ts_start`/`ts_end` im selben String-Format wie ppi_raw.datetime (naives
-    UTC-ISO ohne Zeitzonen-Suffix, z.B. "2026-05-02T10:47:09") — kein eigener
+    UTC-ISO ohne Zeitzonen-Suffix, z.B. "2030-01-01T10:00:00") — kein eigener
     Zeitzonen-Umbau, s. Moduldocstring @method zum Format-Unterschied zu
     ecg_sessions.datetime. Halboffenes Intervall [ts_start, ts_end).
     """
