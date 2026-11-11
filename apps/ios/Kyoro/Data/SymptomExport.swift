@@ -14,7 +14,7 @@ struct SymptomExportFile: Encodable {
         let timestamp: String
         let symptom: String
         let kategorie: String
-        let wert_num: Int
+        let wert_num: Int?
         let wert_text: String?
         let note: String?
         let source: String
@@ -40,10 +40,10 @@ enum SymptomExport {
                 .init(
                     id: entry.id.uuidString,
                     timestamp: iso.string(from: entry.timestamp),
-                    symptom: entry.hubKey,
+                    symptom: entry.label,
                     kategorie: entry.category,
-                    wert_num: entry.severity,
-                    wert_text: nil,
+                    wert_num: entry.value,
+                    wert_text: entry.text,
                     note: entry.note,
                     source: source
                 )

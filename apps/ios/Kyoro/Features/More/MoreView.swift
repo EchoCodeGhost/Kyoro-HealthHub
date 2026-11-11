@@ -22,6 +22,10 @@ struct MoreView: View {
                     Text("Die Datei in den Ordner imports/_inbox auf deinem Rechner legen und dort process_inbox.py --import ausführen. Die Kopplung per QR-Code folgt mit der Hub-Bridge.")
                 }
 
+                Section("Erfassen") {
+                    NavigationLink("Module auswählen") { ModuleSettingsView() }
+                }
+
                 Section("Apple Health") {
                     Button("Freigaben anfragen", systemImage: "heart.text.square") {
                         Task { await requestHealth() }

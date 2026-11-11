@@ -15,7 +15,7 @@ the Python hub on your own computer. Plan and research:
 - Five tabs: Today, Capture, History, Doctor, More
 - Five-step onboarding (goals, Apple Health permissions with reasons, daily reminder)
 - Rule-based suggestions on Today, at most three, each with its reason
-- Symptom capture in two taps; interactive widget and Siri shortcut "Symptom erfassen"
+- Symptom capture in two taps from the shared catalogue (config/symptom_catalog.json); modules chosen in setup and under "Mehr"; yes/no, 0-10 and text entries with backdating; interactive widget with the four most used symptoms and Siri shortcut "Symptom erfassen"; crisis numbers shown while the Suizidalität module is active
 - Guided standing test (Schellong / NASA Lean Test) with checklist and timers
 - Export of entries as `symptomtrack_export_<date>.json`, which `scripts/process_inbox.py`
   recognises and imports

@@ -31,6 +31,9 @@ struct TodayView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: KyoroTheme.Space.l) {
+                    if SymptomCatalog.shared.needsCrisisNotice(active: setups.first?.activeModules ?? []) {
+                        CrisisNotice()
+                    }
                     ForEach(suggestions) { suggestion in
                         SuggestionCard(suggestion: suggestion) { perform(suggestion.action) }
                     }
@@ -55,9 +58,9 @@ struct TodayView: View {
             } else {
                 ForEach(todaysEntries) { entry in
                     HStack {
-                        Text(SymptomCatalog.definition(for: entry.hubKey)?.displayName ?? entry.hubKey)
+                        Text(entry.label)
                         Spacer()
-                        Text("Stärke \(entry.severity)").foregroundStyle(.secondary)
+                        Text(entry.valueDescription).foregroundStyle(.secondary)
                         Text(entry.timestamp, style: .time).foregroundStyle(.secondary)
                     }
                 }

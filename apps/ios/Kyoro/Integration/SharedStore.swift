@@ -8,14 +8,16 @@
 import Foundation
 
 struct QuickLog: Codable, Hashable, Sendable {
-    let hubKey: String
-    let severity: Int
+    /// Catalogue symptom id.
+    let symptomID: String
+    let value: Int
     let timestamp: Date
 }
 
 enum SharedStore {
     static let appGroup = "group.org.kyoro.app"
-    private static let pendingKey = "pendingQuickLogs"
+    private static let pendingKey = "pendingQuickLogs.v2"
+    private static let pinnedKey = "pinnedSymptomIDs"
 
     private static var defaults: UserDefaults? { UserDefaults(suiteName: appGroup) }
 
@@ -35,6 +37,12 @@ enum SharedStore {
         let logs = pending()
         save([])
         return logs
+    }
+
+    /// The four symptoms the widget offers: the user's most frequent scale symptoms.
+    static var pinnedSymptomIDs: [String] {
+        get { defaults?.stringArray(forKey: pinnedKey) ?? SymptomCatalog.defaultPinnedIDs }
+        set { defaults?.set(Array(newValue.prefix(4)), forKey: pinnedKey) }
     }
 
     private static func save(_ logs: [QuickLog]) {

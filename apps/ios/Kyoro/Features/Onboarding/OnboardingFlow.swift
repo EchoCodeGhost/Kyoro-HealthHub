@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Kyoro-HealthHub contributors
 //
-// Five steps, each with an immediate effect. Everything else is offered later as
+// Six steps, each with an immediate effect. Everything else is offered later as
 // a suggestion card when it becomes relevant.
 
 import SwiftData
@@ -11,6 +11,7 @@ struct OnboardingFlow: View {
     @Environment(\.modelContext) private var modelContext
     @State private var index = 0
     @State private var focus: Set<Focus> = []
+    @State private var modules: Set<String> = Set(SymptomCatalog.shared.defaultModules)
     @State private var healthGroups: Set<String> = Set(HealthKitService.groups.map(\.id))
     @State private var reminderEnabled = true
     @State private var reminderTime = Calendar.current.date(from: DateComponents(hour: 20)) ?? .now
@@ -26,6 +27,11 @@ struct OnboardingFlow: View {
             id: "focus",
             title: "Was ist dir gerade wichtig?",
             explanation: "Danach richten sich die Vorschläge auf „Heute“. Du kannst das jederzeit ändern."
+        ),
+        WizardStep(
+            id: "modules",
+            title: "Was möchtest du erfassen?",
+            explanation: "Die Grundlagen sind schon ausgewählt. Nimm dazu, was zu dir passt. Unter „Mehr“ kannst du das jederzeit ändern."
         ),
         WizardStep(
             id: "health",
@@ -59,6 +65,7 @@ struct OnboardingFlow: View {
                 switch step.id {
                 case "welcome": welcome
                 case "focus": focusPicker
+                case "modules": ModulePicker(selection: $modules)
                 case "health": healthPicker
                 case "hub": hubInfo
                 default: reminderPicker
@@ -134,6 +141,7 @@ struct OnboardingFlow: View {
     private func finish() {
         let setup = UserSetup()
         setup.focusAreas = focus.map(\.rawValue)
+        setup.activeModules = SymptomCatalog.shared.modules.map(\.id).filter(modules.contains)
         setup.healthKitRequested = !healthGroups.isEmpty
         setup.dailyReminderHour = reminderEnabled ? Calendar.current.component(.hour, from: reminderTime) : nil
         setup.completedOnboardingAt = .now

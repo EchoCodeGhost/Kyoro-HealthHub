@@ -28,9 +28,9 @@ struct HistoryView: View {
                         Section(day.day.formatted(date: .complete, time: .omitted)) {
                             ForEach(day.entries) { entry in
                                 HStack {
-                                    Text(SymptomCatalog.definition(for: entry.hubKey)?.displayName ?? entry.hubKey)
+                                    Text(entry.label)
                                     Spacer()
-                                    Text("Stärke \(entry.severity)").foregroundStyle(.secondary)
+                                    Text(entry.valueDescription).foregroundStyle(.secondary)
                                 }
                             }
                         }

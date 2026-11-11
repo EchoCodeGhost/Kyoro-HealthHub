@@ -1,5 +1,5 @@
 {
-  "_comment": "Symptom catalogue shared by Kyoro SymptomTrack (PWA), the Kyoro iPhone app and the hub. 'label' is stored verbatim as symptoms.symptom in health.db, so never rename a label without a migration. Types: binary (0/1), scale (0-10, high = worse), scale_inverted (0-10, high = better), text. A module with requires_crisis_notice must show the crisis notice (112 and crisis lines) for as long as it is active, independent of any value. SPDX-License-Identifier: GPL-3.0-or-later",
+  "_comment": "Symptom catalogue shared by Kyoro SymptomTrack (PWA), the Kyoro iPhone app and the hub. 'label' is stored verbatim as symptoms.symptom in health.db, so never rename a label without a migration. Types: binary (0/1), scale (0-10, high = worse), scale_inverted (0-10, high = better), text. Modules and categories are lists so every app shows them in the same order. A module with requires_crisis_notice must show the crisis notice (112 and crisis lines) for as long as it is active, independent of any value. SPDX-License-Identifier: GPL-3.0-or-later",
   "version": 1,
   "default_modules": [
     "basis_ressourcen",
@@ -8,70 +8,91 @@
     "basis_psyche",
     "basis_verdauung"
   ],
-  "categories": {
-    "ressourcen": {
+  "categories": [
+    {
+      "id": "ressourcen",
       "label": "Ressourcen & Allgemeinzustand"
     },
-    "erschoepfung": {
+    {
+      "id": "erschoepfung",
       "label": "Erschöpfung & Neurologie"
     },
-    "sensorisch": {
+    {
+      "id": "sensorisch",
       "label": "Sensorik & Reizverarbeitung"
     },
-    "schmerz": {
+    {
+      "id": "schmerz",
       "label": "Schmerz"
     },
-    "psyche": {
+    {
+      "id": "psyche",
       "label": "Psyche & Stimmung"
     },
-    "bauchraum": {
+    {
+      "id": "bauchraum",
       "label": "Verdauung & Magen-Darm"
     },
-    "auge": {
+    {
+      "id": "auge",
       "label": "Auge & Sehvermögen"
     },
-    "erkaeltung": {
+    {
+      "id": "erkaeltung",
       "label": "Erkältung & Infekte"
     },
-    "behandlung": {
+    {
+      "id": "behandlung",
       "label": "Behandlungen & Therapien"
     },
-    "sonstiges": {
+    {
+      "id": "sonstiges",
       "label": "Sonstiges & Ereignisse"
     },
-    "migraene": {
+    {
+      "id": "migraene",
       "label": "Migräne"
     },
-    "psychose": {
+    {
+      "id": "psychose",
       "label": "Psychose / Schizophrenie"
     },
-    "neurodegeneration": {
+    {
+      "id": "neurodegeneration",
       "label": "Neurodegeneration"
     },
-    "rheuma": {
+    {
+      "id": "rheuma",
       "label": "Rheumatologie"
     },
-    "fibromyalgie": {
+    {
+      "id": "fibromyalgie",
       "label": "Fibromyalgie / Zentrales Schmerzsyndrom"
     },
-    "lipoedem": {
+    {
+      "id": "lipoedem",
       "label": "Lipödem"
     },
-    "hormonell": {
+    {
+      "id": "hormonell",
       "label": "Hormonell"
     },
-    "kreislauf": {
+    {
+      "id": "kreislauf",
       "label": "Herz / Kreislauf"
     },
-    "haut": {
+    {
+      "id": "haut",
       "label": "Haut"
     },
-    "borreliose": {
+    {
+      "id": "borreliose",
       "label": "Borreliose / Persistierende Borreliose"
     }
-  },
-  "modules": {
-    "basis_ressourcen": {
+  ],
+  "modules": [
+    {
+      "id": "basis_ressourcen",
       "label": "Ressourcen & Allgemeinzustand",
       "description": "Tägliches Fundament: Energie, Schlaf, Stimmung und allgemeines Wohlbefinden.",
       "category": "ressourcen",
@@ -119,7 +140,8 @@
         }
       ]
     },
-    "basis_erschoepfung": {
+    {
+      "id": "basis_erschoepfung",
       "label": "Erschöpfung & Neurologie",
       "description": "Erschöpfung, Energieeinbrüche nach Belastung, Herzrasen, Kribbeln und ähnliche körperlich-neurologische Beschwerden.",
       "category": "erschoepfung",
@@ -217,7 +239,8 @@
         }
       ]
     },
-    "basis_schmerz": {
+    {
+      "id": "basis_schmerz",
       "label": "Schmerz",
       "description": "Körperschmerzen nach Lokalisation — Kopf, Gelenke, Muskeln, Bauch, Brust.",
       "category": "schmerz",
@@ -275,7 +298,8 @@
         }
       ]
     },
-    "basis_psyche": {
+    {
+      "id": "basis_psyche",
       "label": "Psyche & Stimmung",
       "description": "Innere Anspannung, Flashbacks, Dissoziationen und psychische Belastungen des Alltags.",
       "category": "psyche",
@@ -338,7 +362,8 @@
         }
       ]
     },
-    "basis_verdauung": {
+    {
+      "id": "basis_verdauung",
       "label": "Verdauung & Magen-Darm",
       "description": "Übelkeit, Verdauungsprobleme, Appetit und Beschwerden im Bauchraum.",
       "category": "bauchraum",
@@ -391,7 +416,8 @@
         }
       ]
     },
-    "basis_sensorisch": {
+    {
+      "id": "basis_sensorisch",
       "label": "Sensorik & Reizverarbeitung",
       "description": "Reizüberflutung, Geräusch- und Lichtempfindlichkeit, Masking — besonders relevant bei Autismus.",
       "category": "sensorisch",
@@ -439,7 +465,8 @@
         }
       ]
     },
-    "basis_auge": {
+    {
+      "id": "basis_auge",
       "label": "Auge & Sehvermögen",
       "description": "Trockene Augen, Sehstörungen, Augenschmerzen und verwendete Augenmedikamente.",
       "category": "auge",
@@ -472,7 +499,8 @@
         }
       ]
     },
-    "basis_erkaeltung": {
+    {
+      "id": "basis_erkaeltung",
       "label": "Erkältung & Infekte",
       "description": "Erkältungssymptome, Infektzeichen, Allergiereaktionen und Körpertemperatur.",
       "category": "erkaeltung",
@@ -535,7 +563,8 @@
         }
       ]
     },
-    "basis_behandlung": {
+    {
+      "id": "basis_behandlung",
       "label": "Behandlungen & Therapien",
       "description": "Verwendete Hilfsmittel, Medikamente und Therapiemaßnahmen des Tages.",
       "category": "behandlung",
@@ -648,7 +677,8 @@
         }
       ]
     },
-    "basis_sonstiges": {
+    {
+      "id": "basis_sonstiges",
       "label": "Sonstiges & Ereignisse",
       "description": "Allgemeine Körpersymptome, besondere Ereignisse und freie Notizen.",
       "category": "sonstiges",
@@ -706,7 +736,8 @@
         }
       ]
     },
-    "basis_migraene": {
+    {
+      "id": "basis_migraene",
       "label": "Migräne",
       "description": "Live-Erfassung von Migräne-Episoden mit Schweregrad, Aura und Akutmedikament.",
       "category": "migraene",
@@ -745,7 +776,8 @@
         }
       ]
     },
-    "depression": {
+    {
+      "id": "depression",
       "label": "Depression",
       "description": "Depressive Episoden, Antriebslosigkeit, Stimmungstiefs, Interessenverlust.",
       "category": "psyche",
@@ -788,7 +820,8 @@
         }
       ]
     },
-    "angststoerung": {
+    {
+      "id": "angststoerung",
       "label": "Angststörung",
       "description": "Panikattacken, soziale Angst, generalisierte Angst und Vermeidungsverhalten.",
       "category": "psyche",
@@ -821,7 +854,8 @@
         }
       ]
     },
-    "borderline": {
+    {
+      "id": "borderline",
       "label": "Borderline-PS",
       "description": "Emotionale Instabilität, innere Leere, Impulskontrollprobleme.",
       "category": "psyche",
@@ -854,7 +888,8 @@
         }
       ]
     },
-    "suizidalitaet": {
+    {
+      "id": "suizidalitaet",
       "label": "Suizidalität",
       "description": "Suizidale Gedanken, Impulse, Pläne — Krisenmodul. Aktiviere es nur im Behandlungskontext.",
       "category": "psyche",
@@ -883,7 +918,8 @@
         }
       ]
     },
-    "schizophrenie": {
+    {
+      "id": "schizophrenie",
       "label": "Schizophrenie / Psychose",
       "description": "Halluzinationen, Wahngedanken, desorganisiertes Denken, Minussymptome.",
       "category": "psychose",
@@ -921,7 +957,8 @@
         }
       ]
     },
-    "adhs": {
+    {
+      "id": "adhs",
       "label": "ADHS",
       "description": "Aufmerksamkeit, Hyperaktivität, Impulsivität, Zeitblindheit.",
       "category": "erschoepfung",
@@ -959,7 +996,8 @@
         }
       ]
     },
-    "audhd": {
+    {
+      "id": "audhd",
       "label": "AuDHD (Autismus + ADHS)",
       "description": "Ablehnungsempfindlichkeit (RSD), Demand Avoidance, Exekutivfunktion — über Autismus/ADHS-Basis hinaus.",
       "category": "sensorisch",
@@ -987,7 +1025,8 @@
         }
       ]
     },
-    "parkinson": {
+    {
+      "id": "parkinson",
       "label": "Parkinson",
       "description": "Zittern, Muskelsteifheit, verlangsamte Bewegungen, Gangprobleme.",
       "category": "neurodegeneration",
@@ -1025,7 +1064,8 @@
         }
       ]
     },
-    "alzheimer": {
+    {
+      "id": "alzheimer",
       "label": "Alzheimer / Demenz",
       "description": "Kurzzeitgedächtnissprobleme, Orientierungslosigkeit, Verhaltensveränderung.",
       "category": "neurodegeneration",
@@ -1053,7 +1093,8 @@
         }
       ]
     },
-    "vestibulaer_schwindel": {
+    {
+      "id": "vestibulaer_schwindel",
       "label": "Schwindel (vestibulär)",
       "description": "Dreh- und Schwankschwindel, Lagerungsschwindel (BPPV), vestibuläre Migräne.",
       "category": "erschoepfung",
@@ -1091,7 +1132,8 @@
         }
       ]
     },
-    "ruecken": {
+    {
+      "id": "ruecken",
       "label": "Rücken & Wirbelsäule",
       "description": "Lendenwirbelsäule (LWS), Brustwirbelsäule (BWS), Ischias, Bandscheibe.",
       "category": "schmerz",
@@ -1119,7 +1161,8 @@
         }
       ]
     },
-    "neuralgie": {
+    {
+      "id": "neuralgie",
       "label": "Neuralgie / Neuropathie",
       "description": "Brennender oder elektrisierender Nervenschmerz, Berührungsempfindlichkeit.",
       "category": "schmerz",
@@ -1147,7 +1190,8 @@
         }
       ]
     },
-    "rheuma": {
+    {
+      "id": "rheuma",
       "label": "Rheuma / Arthrose / Arthritis",
       "description": "Geschwollene und entzündete Gelenke, Morgensteifigkeit, Rheuma-Schübe.",
       "category": "rheuma",
@@ -1180,7 +1224,8 @@
         }
       ]
     },
-    "fibromyalgie": {
+    {
+      "id": "fibromyalgie",
       "label": "Fibromyalgie",
       "description": "Druckempfindliche Körperstellen, Gedankennebel, nicht-erholsamer Schlaf, diffuser Ganzkörperschmerz.",
       "category": "fibromyalgie",
@@ -1228,7 +1273,8 @@
         }
       ]
     },
-    "chronisches_schmerzsyndrom": {
+    {
+      "id": "chronisches_schmerzsyndrom",
       "label": "Chronisches Schmerzsyndrom",
       "description": "Übersteigerte Schmerzwahrnehmung, Ausbreitung auf neue Körperstellen, stressbedingte Verstärkung.",
       "category": "fibromyalgie",
@@ -1261,7 +1307,8 @@
         }
       ]
     },
-    "kardiologie": {
+    {
+      "id": "kardiologie",
       "label": "Kardiologie",
       "description": "Geschwollene Beine, Belastungsatemnot — ergänzend zu Herzrasen und AFib im Basis-Modul.",
       "category": "erschoepfung",
@@ -1284,7 +1331,8 @@
         }
       ]
     },
-    "asthma_copd": {
+    {
+      "id": "asthma_copd",
       "label": "Asthma / COPD",
       "description": "Auswurf, Peak-Flow-Messung, Notfall-Spray.",
       "category": "erkaeltung",
@@ -1307,7 +1355,8 @@
         }
       ]
     },
-    "lipoedem": {
+    {
+      "id": "lipoedem",
       "label": "Lipödem",
       "description": "Druckschmerz in Beinen und Hüften, Schweregefühl, Lipödem-Schübe.",
       "category": "lipoedem",
@@ -1335,7 +1384,8 @@
         }
       ]
     },
-    "diabetes": {
+    {
+      "id": "diabetes",
       "label": "Diabetes / Metabolisch",
       "description": "Häufiges Wasserlassen, extremer Durst, Unterzuckerung, Überzuckerung.",
       "category": "bauchraum",
@@ -1368,7 +1418,8 @@
         }
       ]
     },
-    "hormonell": {
+    {
+      "id": "hormonell",
       "label": "Hormonelle Symptome",
       "description": "Hitzewallungen, Regelschmerzen, PMS, Schilddrüse, Haarausfall.",
       "category": "hormonell",
@@ -1406,7 +1457,8 @@
         }
       ]
     },
-    "herz_kreislauf": {
+    {
+      "id": "herz_kreislauf",
       "label": "Herz-Kreislauf-Beschwerden",
       "description": "Blutdruckschwankungen, schlechte Durchblutung, Raynaud-Syndrom, POTS.",
       "category": "kreislauf",
@@ -1449,7 +1501,8 @@
         }
       ]
     },
-    "long_covid": {
+    {
+      "id": "long_covid",
       "label": "Long-/Post-COVID",
       "description": "Geruchsverzerrung, Long-COVID-Schübe, Belastungsintoleranz, POTS-artige Symptome nach COVID.",
       "category": "erschoepfung",
@@ -1487,7 +1540,8 @@
         }
       ]
     },
-    "hautbeschwerden": {
+    {
+      "id": "hautbeschwerden",
       "label": "Hautbeschwerden",
       "description": "Schuppenflechte, Rosacea, Nesselsucht (Urtikaria), Ekzem — chronische Hauterkrankungen.",
       "category": "haut",
@@ -1540,7 +1594,8 @@
         }
       ]
     },
-    "allergie_erweitert": {
+    {
+      "id": "allergie_erweitert",
       "label": "Allergie (erweitert)",
       "description": "Nesselsucht, Angioödem, Anaphylaxie, allergische Augenentzündung.",
       "category": "erkaeltung",
@@ -1568,7 +1623,8 @@
         }
       ]
     },
-    "borreliose": {
+    {
+      "id": "borreliose",
       "label": "Borreliose (Lyme)",
       "description": "Wanderröte, wandernde Gelenkschmerzen, Gesichtslähmung, Neuroborreliose — frühe / aktive Phase.",
       "category": "borreliose",
@@ -1611,7 +1667,8 @@
         }
       ]
     },
-    "persistierende_borreliose": {
+    {
+      "id": "persistierende_borreliose",
       "label": "Persistierende Borreliose (PTLDS)",
       "description": "Anhaltende Erschöpfung, kognitive Probleme und Gelenkschmerzen nach Borreliose-Behandlung.",
       "category": "borreliose",
@@ -1649,5 +1706,5 @@
         }
       ]
     }
-  }
+  ]
 }

@@ -33,9 +33,12 @@ struct KyoroApp: App {
     @MainActor
     private func importQuickLogs() {
         let context = container.mainContext
+        let catalog = SymptomCatalog.shared
         for log in SharedStore.drain() {
-            let category = SymptomCatalog.definition(for: log.hubKey)?.category ?? "other"
-            context.insert(SymptomEntry(hubKey: log.hubKey, category: category, severity: log.severity, timestamp: log.timestamp))
+            guard let symptom = catalog.symptom(id: log.symptomID),
+                  let module = catalog.module(containing: log.symptomID)
+            else { continue }
+            context.insert(SymptomEntry(symptom: symptom, category: module.category, value: log.value, timestamp: log.timestamp))
         }
         try? context.save()
     }

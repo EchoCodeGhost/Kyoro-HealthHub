@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Kyoro-HealthHub contributors
 //
-// Interactive widget: log one of four symptoms with medium severity in one tap.
-// The exact severity can be corrected in the app.
+// Interactive widget: log one of the four most used symptoms with a 5 in one tap.
+// The exact value can be corrected in the app. The app keeps the four ids in
+// SharedStore.pinnedSymptomIDs up to date.
 
 import AppIntents
 import SwiftUI
@@ -26,22 +27,27 @@ struct QuickSymptomProvider: TimelineProvider {
 }
 
 struct QuickSymptomWidgetView: View {
-    private let symptoms = Array(SymptomCatalog.quickPick.prefix(4))
-    private let defaultSeverity = 5
+    private let defaultValue = 5
+
+    private var symptoms: [CatalogSymptom] {
+        let catalog = SymptomCatalog.shared
+        let pinned = SharedStore.pinnedSymptomIDs.compactMap(catalog.symptom(id:))
+        let fallback = SymptomCatalog.defaultPinnedIDs.compactMap(catalog.symptom(id:))
+        return Array((pinned + fallback.filter { !pinned.contains($0) }).prefix(4))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: KyoroTheme.Space.s) {
             Text("Symptom erfassen")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
+            let items = symptoms
             Grid(horizontalSpacing: KyoroTheme.Space.s, verticalSpacing: KyoroTheme.Space.s) {
-                GridRow {
-                    button(symptoms[0])
-                    button(symptoms[1])
-                }
-                GridRow {
-                    button(symptoms[2])
-                    button(symptoms[3])
+                ForEach(Array(stride(from: 0, to: items.count, by: 2)), id: \.self) { row in
+                    GridRow {
+                        button(items[row])
+                        if row + 1 < items.count { button(items[row + 1]) }
+                    }
                 }
             }
         }
@@ -49,9 +55,9 @@ struct QuickSymptomWidgetView: View {
         .containerBackground(KyoroTheme.Palette.deepSea, for: .widget)
     }
 
-    private func button(_ symptom: SymptomDefinition) -> some View {
-        Button(intent: LogSymptomIntent(symptom: SymptomAppEntity(symptom), severity: defaultSeverity)) {
-            Label(symptom.displayName, systemImage: symptom.systemImage)
+    private func button(_ symptom: CatalogSymptom) -> some View {
+        Button(intent: LogSymptomIntent(symptom: SymptomAppEntity(symptom), value: defaultValue)) {
+            Text(symptom.label)
                 .font(.caption)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,7 +72,7 @@ struct QuickSymptomWidget: Widget {
             QuickSymptomWidgetView()
         }
         .configurationDisplayName("Symptom erfassen")
-        .description("Ein Tipp speichert das Symptom mit Stärke 5. In der App lässt sich die Stärke anpassen.")
+        .description("Deine vier häufigsten Symptome. Ein Tipp speichert eine 5, in der App lässt sich der Wert anpassen.")
         .supportedFamilies([.systemMedium])
     }
 }

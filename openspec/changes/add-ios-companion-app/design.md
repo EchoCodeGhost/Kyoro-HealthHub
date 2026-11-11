@@ -55,7 +55,7 @@ privacy review. The hub reads it through `import_symptomtrack_export.py`
   never collide with PWA rows of the same day, and several entries per day
   resolve to the highest value.
 - Symptom catalogue: 37 modules with 256 symptoms, five preselected,
-  released by Michel on 2026-11-10 and kept in `config/symptom_catalog.json`
+  released by Michel and kept in `config/symptom_catalog.json`
   as the single list for PWA, app and hub. The app adopts the
   module model instead of a fixed quick-pick list; setup selects modules.
   Symptom labels stay identical to the PWA, because they are the `symptom`

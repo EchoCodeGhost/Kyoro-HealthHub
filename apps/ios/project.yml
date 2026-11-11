@@ -26,6 +26,9 @@ targets:
     platform: iOS
     sources:
       - path: Kyoro
+      # Shared catalogue, same file as SymptomTrack and the hub use.
+      - path: ../../config/symptom_catalog.json
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.kyoro.app
@@ -68,6 +71,8 @@ targets:
       - path: Kyoro/Integration/SharedStore.swift
       - path: Kyoro/Integration/LogSymptomIntent.swift
       - path: Kyoro/Data/SymptomCatalog.swift
+      - path: ../../config/symptom_catalog.json
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.kyoro.app.widgets

@@ -2,7 +2,8 @@
 // Copyright (C) 2026 Kyoro-HealthHub contributors
 //
 // One intent serves Siri, Shortcuts, Spotlight and the interactive widget, so
-// "Symptom erfassen" behaves the same everywhere.
+// "Symptom erfassen" behaves the same everywhere. It offers the 0-10 symptoms
+// of the catalogue; yes/no and text entries need the app.
 
 import AppIntents
 
@@ -15,45 +16,60 @@ struct SymptomAppEntity: AppEntity {
 
     var displayRepresentation: DisplayRepresentation { DisplayRepresentation(title: "\(name)") }
 
-    init(_ definition: SymptomDefinition) {
-        id = definition.hubKey
-        name = definition.displayName
+    init(_ symptom: CatalogSymptom) {
+        id = symptom.id
+        name = symptom.label
     }
 }
 
-struct SymptomQuery: EntityQuery {
+struct SymptomQuery: EntityStringQuery {
+    private var catalog: SymptomCatalog { .shared }
+
+    private var scaleSymptoms: [CatalogSymptom] {
+        var seen = Set<String>()
+        return catalog.modules.flatMap(\.symptoms).filter {
+            ($0.type == .scale || $0.type == .scaleInverted) && seen.insert($0.id).inserted
+        }
+    }
+
     func entities(for identifiers: [String]) async throws -> [SymptomAppEntity] {
-        identifiers.compactMap(SymptomCatalog.definition(for:)).map(SymptomAppEntity.init)
+        identifiers.compactMap(catalog.symptom(id:)).map(SymptomAppEntity.init)
+    }
+
+    func entities(matching string: String) async throws -> [SymptomAppEntity] {
+        scaleSymptoms
+            .filter { $0.label.localizedStandardContains(string) }
+            .map(SymptomAppEntity.init)
     }
 
     func suggestedEntities() async throws -> [SymptomAppEntity] {
-        SymptomCatalog.quickPick.map(SymptomAppEntity.init)
+        SharedStore.pinnedSymptomIDs.compactMap(catalog.symptom(id:)).map(SymptomAppEntity.init)
     }
 }
 
 struct LogSymptomIntent: AppIntent {
     static let title: LocalizedStringResource = "Symptom erfassen"
-    static let description = IntentDescription("Erfasst ein Symptom mit Stärke, ohne die App zu öffnen.")
+    static let description = IntentDescription("Erfasst ein Symptom mit einem Wert von 0 bis 10, ohne die App zu öffnen.")
 
     @Parameter(title: "Symptom")
     var symptom: SymptomAppEntity
 
-    @Parameter(title: "Stärke", description: "0 = keine, 10 = stärkste vorstellbare", default: 5, inclusiveRange: (0, 10))
-    var severity: Int
+    @Parameter(title: "Wert", description: "0 bis 10", default: 5, inclusiveRange: (0, 10))
+    var value: Int
 
     init() {}
 
-    init(symptom: SymptomAppEntity, severity: Int) {
+    init(symptom: SymptomAppEntity, value: Int) {
         self.symptom = symptom
-        self.severity = severity
+        self.value = value
     }
 
     static var parameterSummary: some ParameterSummary {
-        Summary("\(\.$symptom) mit Stärke \(\.$severity) erfassen")
+        Summary("\(\.$symptom) mit \(\.$value) von 10 erfassen")
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        SharedStore.enqueue(QuickLog(hubKey: symptom.id, severity: severity, timestamp: .now))
-        return .result(dialog: "\(symptom.name) mit Stärke \(severity) gespeichert.")
+        SharedStore.enqueue(QuickLog(symptomID: symptom.id, value: value, timestamp: .now))
+        return .result(dialog: "\(symptom.name): \(value) von 10 gespeichert.")
     }
 }

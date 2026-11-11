@@ -16,7 +16,7 @@ weiter im Python-Hub auf dem eigenen Rechner läuft. Plan und Recherche:
 - Fünf Tabs: Heute, Erfassen, Verlauf, Arzt, Mehr
 - Onboarding in fünf Schritten (Ziele, Apple-Health-Freigaben mit Begründung, tägliche Erinnerung)
 - Regelbasierte Vorschläge auf „Heute“, höchstens drei, jeweils mit Grund
-- Symptom erfassen in zwei Tipps; interaktives Widget und Siri-Kurzbefehl „Symptom erfassen“
+- Symptom erfassen in zwei Tipps aus dem gemeinsamen Katalog (config/symptom_catalog.json); Module in der Einrichtung und unter „Mehr“ wählbar; Ja/Nein-, 0–10- und Texteinträge, auch nachträglich; interaktives Widget mit den vier häufigsten Symptomen und Siri-Kurzbefehl „Symptom erfassen“; Hilfenummern, solange das Modul Suizidalität aktiv ist
 - Geführter Stehtest (Schellong / NASA Lean Test) mit Checkliste und Timern
 - Export der Einträge als `symptomtrack_export_<Datum>.json`, den `scripts/process_inbox.py`
   erkennt und importiert

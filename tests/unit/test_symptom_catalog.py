@@ -9,19 +9,26 @@ TYPES = {"binary", "scale", "scale_inverted", "text"}
 
 
 def _symptoms():
-    for mid, mod in CATALOG["modules"].items():
+    for mod in CATALOG["modules"]:
         for s in mod["symptoms"]:
-            yield mid, s
+            yield mod["id"], s
 
 
 def test_default_modules_exist():
     assert CATALOG["default_modules"]
-    assert set(CATALOG["default_modules"]) <= set(CATALOG["modules"])
+    assert set(CATALOG["default_modules"]) <= {m["id"] for m in CATALOG["modules"]}
+
+
+def test_ids_are_unique():
+    for key in ("modules", "categories"):
+        ids = [x["id"] for x in CATALOG[key]]
+        assert len(ids) == len(set(ids)), key
 
 
 def test_every_module_has_a_known_category():
-    for mid, mod in CATALOG["modules"].items():
-        assert mod["category"] in CATALOG["categories"], mid
+    categories = {c["id"] for c in CATALOG["categories"]}
+    for mod in CATALOG["modules"]:
+        assert mod["category"] in categories, mod["id"]
 
 
 def test_symptom_types_are_known():
@@ -46,7 +53,7 @@ def test_shared_labels_share_the_type():
 
 
 def test_crisis_module_requires_notice():
-    crisis = [m for m in CATALOG["modules"].values()
+    crisis = [m for m in CATALOG["modules"]
               if any("suizid" in s["id"] for s in m["symptoms"])]
     assert crisis
     assert all(m.get("requires_crisis_notice") is True for m in crisis)
