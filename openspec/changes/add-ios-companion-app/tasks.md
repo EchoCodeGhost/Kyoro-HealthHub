@@ -73,6 +73,16 @@
 - [ ] 4d.10 Build the app on the Mac (the Swift of 4d.3b/4d.4/4d.7 has not been compiled yet)
 - [ ] 4d.11 Check the catalogue against the S1 guideline Long/Post-COVID (AWMF 020-027, check the current version first): add "Konzentration und Gedächtnis" to the basics and swallowing/voice problems; pacing help text in own words with the guideline as dated source. No criteria, scores or referral rules from it (MDR)
 
+## 4e. Diary gaps and Apple Watch
+
+- [ ] 4e.1 Edit and delete entries in History (today an entry can only be added)
+- [ ] 4e.2 Per-symptom view in History: one symptom over weeks, from local entries, without hub
+- [ ] 4e.3 Siri on the iPhone: verify "Symptom in Kyoro erfassen" on a device, including symptoms outside the four pinned ones
+- [ ] 4e.4 watchOS app target: list of pinned and recent symptoms, 0-10 with the Digital Crown, same LogSymptomIntent so Siri works on the watch
+- [ ] 4e.5 Watch to iPhone hand-over (WatchConnectivity transferUserInfo into the QuickLog queue), works while the phone is out of reach
+- [ ] 4e.6 Smart Stack widget and complication on the watch for one-tap logging
+- [ ] 4e.7 Update the mockup boards to the catalogue (module step, Capture list, entry sheet, crisis notice) and add watch boards
+
 ## 5. Release gate
 
 - [ ] 5.1 Privacy sweep of the app and the bridge
