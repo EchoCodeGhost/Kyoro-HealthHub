@@ -73,6 +73,8 @@ targets:
       - path: Kyoro/Data/SymptomCatalog.swift
       - path: ../../config/symptom_catalog.json
         buildPhase: resources
+      - path: Kyoro/PrivacyInfo.xcprivacy
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.kyoro.app.widgets

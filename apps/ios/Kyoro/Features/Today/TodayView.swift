@@ -57,12 +57,7 @@ struct TodayView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(todaysEntries) { entry in
-                    HStack {
-                        Text(entry.label)
-                        Spacer()
-                        Text(entry.valueDescription).foregroundStyle(.secondary)
-                        Text(entry.timestamp, style: .time).foregroundStyle(.secondary)
-                    }
+                    EntryRow(entry: entry)
                 }
             }
         }

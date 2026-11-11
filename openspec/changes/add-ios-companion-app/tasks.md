@@ -83,6 +83,34 @@
 - [ ] 4e.6 Smart Stack widget and complication on the watch for one-tap logging
 - [ ] 4e.7 Update the mockup boards to the catalogue (module step, Capture list, entry sheet, crisis notice) and add watch boards
 
+## 4f. Accessibility and low cognitive load (gap check)
+
+- [x] 4f.1 Wizard steps scroll, so the module step and the largest text sizes fit; step titles are headings
+- [x] 4f.2 Reduce Motion turns off wizard transitions
+- [x] 4f.3 Light primary darkened to 0x006B66 (5.7:1 on grouped backgrounds, 4.6:1 inside bordered buttons); widget labels white on the tinted fill
+- [x] 4f.4 Diary rows stack at accessibility sizes and read as one VoiceOver element; selectable rows read title, detail and state together; icon width scales with text
+- [x] 4f.5 Slider reads "n von 10" and its anchors; list rows say what opens
+- [x] 4f.6 Module step shows the 11 basic modules first (5 preselected), the other 26 behind one button
+- [x] 4f.7 Entry sheet ignores a stray swipe once something was entered; "Abbrechen" still closes
+- [ ] 4f.8 Charts: Audio Graphs (AXChartDescriptor) and a table view for every chart
+- [ ] 4f.9 Voice Control: the visible name of every control matches its spoken name; no icon-only buttons
+- [ ] 4f.10 Switch Control and Full Keyboard Access: focus order in the wizard and the entry sheet
+- [ ] 4f.11 Plain-language help for catalogue terms (for example Nystagmus, Fazialisparese, Demand Avoidance) as an optional catalogue field; labels stay unchanged because health.db stores them
+- [ ] 4f.12 Watch: Crown input adjustable for VoiceOver, large text on the watch, haptic confirmation
+- [ ] 4f.13 Siri alternatives: Type to Siri and the Shortcuts action work the same for people who cannot speak clearly
+- [ ] 4f.14 Lime only as a fill with deep-sea text (lime on white is 1.2:1)
+
+## 4g. Privacy, data and robustness (gap check)
+
+- [x] 4g.1 Privacy manifest (no tracking, no collected data, UserDefaults reasons CA92.1 and 1C8F.1) for app and widget
+- [ ] 4g.2 Extend the privacy manifest when the embedded Python lands (file timestamp and disk space APIs)
+- [ ] 4g.3 "Alle Daten löschen" under Mehr: SwiftData store, widget queue, Keychain key, backups the app knows of
+- [ ] 4g.4 Edits and deletions after an export reach the hub (export carries deleted ids, importer removes kyoro_ios rows)
+- [ ] 4g.5 Optional app lock with Face ID; widget and notifications never show values
+- [ ] 4g.6 Export error state: say what failed and offer a retry instead of hiding the export row
+- [ ] 4g.7 Wording check against the MDR rule: HealthKit reason "Rhythmusauffälligkeiten", the More text "keine Diagnosen", catalogue label "EKG auffällig" (stored in health.db, so decide with the PWA)
+- [ ] 4g.8 Merge this branch with the legal and standalone branch (both edit Onboarding, Today, History and tasks.md)
+
 ## 5. Release gate
 
 - [ ] 5.1 Privacy sweep of the app and the bridge

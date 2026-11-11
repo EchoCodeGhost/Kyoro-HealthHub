@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ModulePicker: View {
     @Binding var selection: Set<String>
+    /// Collapsed at first, so setup shows a handful of choices instead of all 37 at once.
+    @State private var showsSpecific = false
     private let catalog = SymptomCatalog.shared
 
     private var basic: [CatalogModule] { catalog.modules.filter { $0.id.hasPrefix("basis_") } }
@@ -17,13 +19,17 @@ struct ModulePicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: KyoroTheme.Space.l) {
             group("Grundlagen", basic)
-            group("Bei bestimmten Erkrankungen", specific)
+            if showsSpecific || specific.contains(where: { selection.contains($0.id) }) {
+                group("Bei bestimmten Erkrankungen", specific)
+            } else {
+                Button("Weitere Bereiche zeigen (\(specific.count))") { showsSpecific = true }
+            }
         }
     }
 
     private func group(_ title: String, _ modules: [CatalogModule]) -> some View {
         VStack(alignment: .leading, spacing: KyoroTheme.Space.s) {
-            Text(title).font(.headline)
+            Text(title).font(.headline).accessibilityAddTraits(.isHeader)
             ForEach(modules) { module in
                 SelectableRow(
                     title: module.label,

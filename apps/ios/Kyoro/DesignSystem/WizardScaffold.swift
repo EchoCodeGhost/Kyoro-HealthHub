@@ -24,6 +24,7 @@ struct WizardScaffold<StepContent: View>: View {
     var onClose: (() -> Void)?
     var onSkip: ((WizardStep) -> Void)?
     @ViewBuilder var content: (WizardStep) -> StepContent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var step: WizardStep { steps[currentIndex] }
     private var isLast: Bool { currentIndex == steps.count - 1 }
@@ -34,16 +35,23 @@ struct WizardScaffold<StepContent: View>: View {
                 .tint(KyoroTheme.Tint.primary)
                 .accessibilityLabel(Text("Schritt \(currentIndex + 1) von \(steps.count)"))
 
-            VStack(alignment: .leading, spacing: KyoroTheme.Space.s) {
-                Text(step.title)
-                    .font(.title2.bold())
-                Text(step.explanation)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+            // Scrolls so long steps (module choice) and the largest text sizes fit;
+            // the primary action below stays in reach.
+            ScrollView {
+                VStack(alignment: .leading, spacing: KyoroTheme.Space.l) {
+                    VStack(alignment: .leading, spacing: KyoroTheme.Space.s) {
+                        Text(step.title)
+                            .font(.title2.bold())
+                            .accessibilityAddTraits(.isHeader)
+                        Text(step.explanation)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    content(step)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-
-            content(step)
-                .frame(maxHeight: .infinity, alignment: .top)
+            .scrollBounceBehavior(.basedOnSize)
 
             VStack(spacing: KyoroTheme.Space.s) {
                 PrimaryActionButton(title: isLast ? "Fertig" : step.primaryTitle) {
@@ -63,7 +71,7 @@ struct WizardScaffold<StepContent: View>: View {
             if currentIndex > 0 {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Zurück", systemImage: "chevron.backward") {
-                        withAnimation { currentIndex -= 1 }
+                        withAnimation(reduceMotion ? nil : .default) { currentIndex -= 1 }
                     }
                 }
             }
@@ -73,7 +81,7 @@ struct WizardScaffold<StepContent: View>: View {
                 }
             }
         }
-        .animation(.default, value: currentIndex)
+        .animation(reduceMotion ? nil : .default, value: currentIndex)
     }
 
     private func advance() {

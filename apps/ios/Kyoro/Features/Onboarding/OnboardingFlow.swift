@@ -160,6 +160,7 @@ struct OnboardingFlow: View {
 }
 
 struct SelectableRow: View {
+    @ScaledMetric(relativeTo: .title3) private var iconWidth = KyoroTheme.Space.l
     let title: String
     let detail: String
     let systemImage: String
@@ -172,7 +173,8 @@ struct SelectableRow: View {
                 Image(systemName: systemImage)
                     .font(.title3)
                     .foregroundStyle(KyoroTheme.Tint.primary)
-                    .frame(width: KyoroTheme.Space.l)
+                    .frame(width: iconWidth)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: KyoroTheme.Space.xs) {
                     Text(title).font(.headline)
                     Text(detail).font(.subheadline).foregroundStyle(.secondary)
@@ -181,11 +183,13 @@ struct SelectableRow: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundStyle(isSelected ? KyoroTheme.Tint.primary : .secondary)
+                    .accessibilityHidden(true)
             }
             .padding(KyoroTheme.Space.m)
             .background(.background.secondary, in: .rect(cornerRadius: KyoroTheme.Radius.control))
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

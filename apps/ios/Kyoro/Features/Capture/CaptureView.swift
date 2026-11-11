@@ -90,8 +90,8 @@ struct CaptureView: View {
                 Spacer()
                 Text(symptom.type.shortHint).font(.footnote).foregroundStyle(.secondary)
             }
-            .frame(minHeight: KyoroTheme.Size.row - KyoroTheme.Space.m)
         }
+        .accessibilityHint(symptom.type.accessibilityHint)
     }
 
     /// Keeps the widget on the user's four most frequent 0-10 symptoms.
@@ -114,6 +114,9 @@ private struct EntrySheet: View {
 
     private var symptom: CatalogSymptom { pick.symptom }
 
+    /// A stray swipe must not throw away an entry; "Abbrechen" still closes.
+    private var hasInput: Bool { value != 5 || !text.isEmpty || !note.isEmpty }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -128,6 +131,7 @@ private struct EntrySheet: View {
                         }
                         .tint(KyoroTheme.Tint.capture)
                         .accessibilityValue("\(Int(value)) von 10")
+                        .accessibilityHint(symptom.type.anchors.map { "\($0.low), \($0.high)" } ?? "")
                         if let anchors = symptom.type.anchors {
                             HStack {
                                 Text(anchors.low)
@@ -161,6 +165,7 @@ private struct EntrySheet: View {
             }
             .navigationTitle(symptom.label)
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(hasInput)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }
@@ -195,6 +200,14 @@ private extension SymptomEntryType {
         case .scale, .scaleInverted: "0–10"
         case .binary: "ja"
         case .text: "Text"
+        }
+    }
+
+    var accessibilityHint: String {
+        switch self {
+        case .scale, .scaleInverted: "Öffnet die Eingabe von 0 bis 10."
+        case .binary: "Öffnet die Eingabe, ein Eintrag bedeutet: ist aufgetreten."
+        case .text: "Öffnet ein Textfeld."
         }
     }
 }

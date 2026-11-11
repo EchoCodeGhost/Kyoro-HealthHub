@@ -59,7 +59,9 @@ struct QuickSymptomWidgetView: View {
         Button(intent: LogSymptomIntent(symptom: SymptomAppEntity(symptom), value: defaultValue)) {
             Text(symptom.label)
                 .font(.caption)
-                .lineLimit(1)
+                .lineLimit(2)
+                // White on the tinted fill: magenta text on deep sea is only 4.2:1.
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .tint(KyoroTheme.Tint.capture)

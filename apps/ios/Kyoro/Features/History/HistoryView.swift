@@ -27,11 +27,7 @@ struct HistoryView: View {
                     List(days, id: \.day) { day in
                         Section(day.day.formatted(date: .complete, time: .omitted)) {
                             ForEach(day.entries) { entry in
-                                HStack {
-                                    Text(entry.label)
-                                    Spacer()
-                                    Text(entry.valueDescription).foregroundStyle(.secondary)
-                                }
+                                EntryRow(entry: entry)
                             }
                         }
                     }

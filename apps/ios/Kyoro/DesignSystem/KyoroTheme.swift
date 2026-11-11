@@ -26,10 +26,11 @@ enum KyoroTheme {
 
     /// Semantic colours. Views use these, not the palette directly.
     /// Light mode uses darker shades of the logo colours: teal and magenta on
-    /// white fail WCAG contrast for text (2.3:1 and 3.9:1).
+    /// white fail WCAG contrast for text (2.3:1 and 3.9:1). The light primary
+    /// also passes 4.5:1 on grouped backgrounds and inside bordered buttons.
     enum Tint {
-        static let primary = Color(light: 0x00807B, dark: 0x00BEB7)
-        /// Text and symbols on a `primary` fill (4.8:1 light, 7.2:1 dark).
+        static let primary = Color(light: 0x006B66, dark: 0x00BEB7)
+        /// Text and symbols on a `primary` fill (6.4:1 light, 7.2:1 dark).
         static let onPrimary = Color(light: 0xFFFFFF, dark: 0x0C1F35)
         /// Accents for capture (slider, icons). Not for text on dark backgrounds.
         static let capture = Color(light: 0xB3207A, dark: 0xE6339F)
